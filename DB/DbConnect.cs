@@ -1463,8 +1463,7 @@ namespace Bot_Application1.DB
                 {
                     returnJson["entities"] = rdr["ENTITIES_IDS"] as string;
                     returnJson["intents"][0]["intent"] = rdr["INTENT_ID"] as string;
-                    returnJson["test_driveWhere"] = rdr["CAR_COLOR"] as string;
-                    returnJson["car_area"] = rdr["CAR_AREA"] as string;
+                    returnJson["test_driveWhere"] = rdr["CAR_AREA"] as string;
                     returnJson["car_priceWhere"] = rdr["CAR_PRICEWHERE"] as string;
                     returnJson["car_option"] = rdr["car_option"] as string;
                 }

@@ -599,6 +599,7 @@ namespace Bot_Application1
                                 luis_intent = SelectTestDriveLuisResult[0].intent.ToString();
                                 entitiesStr = SelectTestDriveLuisResult[0].entity.ToString();
                                 testDriveWhereStr = SelectTestDriveLuisResult[0].entity_value.ToString();
+
                             }
                             else
                             {
@@ -680,235 +681,13 @@ namespace Bot_Application1
                                 }
                             }
 
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            // 시승 로직
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            if ((Luis["intents"][0]["intent"].ToString().Equals("Test drive") 
-                                || Luis["intents"][0]["intent"].ToString().Equals("Test drive car color") 
-                                || Luis["intents"][0]["intent"].ToString().Equals("Branch")) 
-                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation"))
-                            {
-                                List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(testDriveWhereStr);
-
-                                if (SelectTestDriveList.Count == 0)
-                                {
-                                    Activity reply_err = activity.CreateReply();
-                                    reply_err.Recipient = activity.From;
-                                    reply_err.Type = "message";
-                                    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                    await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                    response = Request.CreateResponse(HttpStatusCode.OK);
-                                    return response;
-                                }
-
-                                if (SelectTestDriveList[0].dlgGubun.Equals("1"))
-                                {
-                                    // dlgStr1 = AREANM, dlgStr2 = AREALIST , dlgStr3 = AREACNT
-                                    Debug.WriteLine("case 1");
-                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                    {
-                                        replyToConversation.Attachments.Add(
-                                        GetHeroCard_location(
-                                        SelectTestDriveList[td].dlgStr1 + " 시승센터",
-                                        "",
-                                        SelectTestDriveList[td].dlgStr2 + " 등 총 " + SelectTestDriveList[td].dlgStr3 + " 곳",
-                                        new CardAction(ActionTypes.ImBack, "정보보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 알려줘"))
-                                        );
-                                    }
-                                }
-                                else if (SelectTestDriveList[0].dlgGubun.Equals("2"))
-                                {
-                                    // dlgStr1 = XRCL_CTY_NM, dlgStr2 = TRIMCOLOR_CD , dlgStr3 = CNT
-                                    Debug.WriteLine("case 2");
-                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                    {
-                                        replyToConversation.Attachments.Add(
-                                        GetHeroCard_show(
-                                        "",
-                                        //CarColorListDialog[td].dlgXrclCtyNM,
-                                        SelectTestDriveList[td].dlgStr1,
-                                        SelectTestDriveList[td].dlgStr3 + "개 매장에 전시",
-                                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2 + ".jpg"),
-                                        //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
-                                        new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장을 알려줘"), "", "")
-                                        );
-                                    }
-                                }
-                                else if (SelectTestDriveList[0].dlgGubun.Equals("3"))
-                                {
-                                    Debug.WriteLine("case 3");
-                                    if(testDriveWhereStr.Contains("test drive can"))
-                                    {
-                                        for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                        {
-                                            replyToConversation.Attachments.Add(
-                                            GetHeroCard_info(
-                                            SelectTestDriveList[td].dlgStr4,
-                                            SelectTestDriveList[td].dlgStr7,
-                                            "",
-                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8 + ".jpg"), "", "")
-                                            );
-                                        }
-                                    }
-                                    else if(testDriveWhereStr.Contains("test drive center address"))
-                                        {
-                                        Activity reply_ment = activity.CreateReply();
-                                        reply_ment.Recipient = activity.From;
-                                        reply_ment.Type = "message";
-                                        reply_ment.Text = "주소는 ‘" + SelectTestDriveList[0].dlgStr2 + "'입니다.\n\n  맵으로 위치를 보시려면 아래 이미지를 선택해주세요.";
-                                        var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
-
-                                        for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                        {
-                                            //APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr5, SelectTestDriveList[td].dlgStr6);
-                                            replyToConversation.Attachments.Add(
-                                            UserGetHeroCard_location(
-                                            SelectTestDriveList[td].dlgStr1 + " 시승센터",
-                                            "TEL." + SelectTestDriveList[td].dlgStr3,
-                                            "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
-                                            //new CardImage(url: "http://www.smartsend.co.kr/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
-                                            new CardImage(url: "http://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
-                                            SelectTestDriveList[td].dlgStr4,
-                                            SelectTestDriveList[td].dlgStr5));
-                                        }
-                                    }
-                                    else
-                                    {
-
-                                    }
-                                    
-                                }
-                                else if (SelectTestDriveList[0].dlgGubun.Equals("4"))
-                                {
-                                    // dlgStr1 = CTR_NM, dlgStr2 = CTR_ADDR , dlgStr3 = CTR_PHONE, dlgStr4 = CAR_DTL_INFO, dlgStr5 = MAP_X_TN, dlgStr6 = MAP_Y_TN, dlgStr7 = XRCL_CTY_NM, dlgStr8 = TRIMCOLOR_CD
-                                    Debug.WriteLine("case 4");
-                                    
-                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                    {
-                                        replyToConversation.Attachments.Add(
-                                        GetHeroCard(
-                                        SelectTestDriveList[td].dlgStr1 + " 시승센터",
-                                        "TEL." + SelectTestDriveList[td].dlgStr3,
-                                        "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
-                                        new CardAction(ActionTypes.ImBack, "전화하기", value: SelectTestDriveList[td].dlgStr3),
-                                        new CardAction(ActionTypes.ImBack, "주소보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 주소를 알려줘"),
-                                        new CardAction(ActionTypes.ImBack, "시승 가능 차량 보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터에서 시승 가능한 차량을 보여줘"))
-                                        );
-                                    }
-                                }
-                                else if (SelectTestDriveList[0].dlgGubun.Equals("5"))
-                                {
-                                    Debug.WriteLine("case 5");
-                                    //dlgStr1 = BR_NM, dlgStr2 = BR_ADDR, dlgStr3 = BR_CCPC
-                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                    {
-
-                                        if (SelectTestDriveList[td].dlgStr2.Length > 40)
-                                        {
-                                            addressStr = SelectTestDriveList[td].dlgStr2.Substring(0, 37) + "...";
-                                        }
-                                        else
-                                        {
-                                            addressStr = SelectTestDriveList[td].dlgStr2;
-                                        }
-                                        replyToConversation.Attachments.Add(
-                                        GetHeroCard_location(
-                                        SelectTestDriveList[td].dlgStr1,
-                                        SelectTestDriveList[td].dlgStr3,
-                                        addressStr,
-                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 지점 보여줘"))
-                                        );
-                                    }
-                                }
-                                else if (SelectTestDriveList[0].dlgGubun.Equals("6"))
-                                {
-                                    //dlgStr1 = BR_DTL_ADDR1, dlgStr2 = XRCL_CTY_NM
-                                    Debug.WriteLine("case 6");
-                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                    {
-                                        replyToConversation.Attachments.Add(
-                                        GetHeroCard_area(
-                                        SelectTestDriveList[td].dlgStr1,
-                                        "",
-                                        SelectTestDriveList[td].dlgStr1 + " 지역, " + SelectTestDriveList[td].dlgStr2 + " 차량이 전시된 매장",
-                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + "에 " + SelectTestDriveList[td].dlgStr2 + " 컬러가 전시된 매장이에요"))
-                                        );
-                                    }
-                                }
-                                else
-                                {
-                                    //branch info                                 
-                                    Debug.WriteLine("case 7");
-                                    /*
-                                     * 이미지 없이 출력 테스트용
-                                    for (int td = 0; td < CarBranchInfo.Count; td++)
-                                    {
-                                        replyToConversation.Attachments.Add(
-                                        GetHeroCard_location(
-                                        SelectTestDriveList[td].dlgStr1,
-                                        SelectTestDriveList[td].dlgStr3,
-                                        SelectTestDriveList[td].dlgStr2,
-                                        new CardAction())
-                                        );
-                                    }
-                                    */
-                                    //데이터가 없을 때 예외 처리
-                                    if (SelectTestDriveList.Count == 0)
-                                    {
-                                        Activity reply_err = activity.CreateReply();
-                                        reply_err.Recipient = activity.From;
-                                        reply_err.Type = "message";
-                                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','' ]";
-                                        await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                        response = Request.CreateResponse(HttpStatusCode.OK);
-                                        return response;
-                                    }
-                                    else
-                                    {
-                                        // dlgStr1 = BR_NM, dlgStr2 = BR_ADDR , dlgStr3 = BR_CCPC, dlgStr4 = BR_XCOO, dlgStr5 = BR_YCOO
-                                        for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                        {
-                                            var urlImg = "https://openapi.naver.com/v1/map/staticmap.bin?clientId=OPCP0Yh0b2IC9r59XaTR&url=http://www.hyundai.com&crs=EPSG:4326&center=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + "&level=12&w=400&h=300&baselayer=default&markers=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5;
-                                            String fileName = "c:/inetpub/wwwroot/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png";
-
-                                            System.Net.WebClient client = new System.Net.WebClient();
-                                            client.DownloadFile(urlImg, fileName);
-
-                                            replyToConversation.Attachments.Add(
-                                            UserGetHeroCard_location(
-                                            SelectTestDriveList[td].dlgStr1,
-                                            "TEL." + SelectTestDriveList[td].dlgStr3,
-                                            SelectTestDriveList[td].dlgStr2,
-                                            new CardImage(url: "http://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
-                                            SelectTestDriveList[td].dlgStr4,
-                                            SelectTestDriveList[td].dlgStr5)
-                                            );
-                                        }
-
-                                        Activity reply_reset = activity.CreateReply();
-                                        reply_reset.Recipient = activity.From;
-                                        reply_reset.Type = "message";
-                                        reply_reset.Attachments = new List<Attachment>();
-                                        reply_reset.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
-                                        reply_reset.Attachments.Add(
-                                        GetHeroCard_reset(
-                                            new CardAction(ActionTypes.ImBack, "다음에하기", value: "다음에 와서 해볼게"),
-                                            new CardAction(ActionTypes.ImBack, "다른 컬러 차량으로 찾기", value: "컬러별 차량이 전시된 매장을 알려줘"))
-                                        );
-
-                                    }
-                                }
-
-                            }
+                            
 
 
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 견적 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            else if (Luis["intents"][0]["intent"].ToString().Equals("Quote"))
+                            if (Luis["intents"][0]["intent"].ToString().Equals("Quote"))
                             {
                                 Debug.WriteLine("INTENT ::[ " + (string)Luis["intents"][0]["intent"] + " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
 
@@ -1328,6 +1107,249 @@ namespace Bot_Application1
                                 }
                                 //luis_intent = (string)Luis["intents"][0]["intent"];
                             }
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // 시승 로직
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            else if((Luis["intents"][0]["intent"].ToString().Equals("Test drive")
+                                || Luis["intents"][0]["intent"].ToString().Equals("Test drive car color")
+                                || Luis["intents"][0]["intent"].ToString().Equals("Branch"))
+                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near"))
+                            {
+
+                                if (entitiesStr.Contains("current location"))
+                                {
+                                    //int position;
+                                    Geolocation.getRegion();
+                                    if (testDriveWhereStr.Contains("test drive center region"))
+                                    {
+                                        //position = testDriveWhereStr.IndexOf(",");
+                                        //testDriveWhereStr = testDriveWhereStr.Substring(position, (int)testDriveWhereStr.Length);
+                                        //testDriveWhereStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + testDriveWhereStr;
+                                        testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
+                                    }
+                                    else
+                                    {
+                                        testDriveWhereStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + testDriveWhereStr;
+                                    }
+                                }
+
+                                List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(testDriveWhereStr);
+
+                                if (SelectTestDriveList.Count == 0)
+                                {
+                                    Activity reply_err = activity.CreateReply();
+                                    reply_err.Recipient = activity.From;
+                                    reply_err.Type = "message";
+                                    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                    await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                    response = Request.CreateResponse(HttpStatusCode.OK);
+                                    return response;
+                                }
+
+                                if (SelectTestDriveList[0].dlgGubun.Equals("1"))
+                                {
+                                    // dlgStr1 = AREANM, dlgStr2 = AREALIST , dlgStr3 = AREACNT
+                                    Debug.WriteLine("case 1");
+                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                    {
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_location(
+                                        SelectTestDriveList[td].dlgStr1 + " 시승센터",
+                                        "",
+                                        SelectTestDriveList[td].dlgStr2 + " 등 총 " + SelectTestDriveList[td].dlgStr3 + " 곳",
+                                        new CardAction(ActionTypes.ImBack, "정보보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 알려줘"))
+                                        );
+                                    }
+                                }
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("2"))
+                                {
+                                    // dlgStr1 = XRCL_CTY_NM, dlgStr2 = TRIMCOLOR_CD , dlgStr3 = CNT
+                                    Debug.WriteLine("case 2");
+                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                    {
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_show(
+                                        "",
+                                        //CarColorListDialog[td].dlgXrclCtyNM,
+                                        SelectTestDriveList[td].dlgStr1,
+                                        SelectTestDriveList[td].dlgStr3 + "개 매장에 전시",
+                                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2 + ".jpg"),
+                                        //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
+                                        new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장을 알려줘"), "", "")
+                                        );
+                                    }
+                                }
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("3"))
+                                {
+                                    Debug.WriteLine("case 3");
+                                    
+                                    if (testDriveWhereStr.Contains("test drive center address"))
+                                    {
+                                        Activity reply_ment = activity.CreateReply();
+                                        reply_ment.Recipient = activity.From;
+                                        reply_ment.Type = "message";
+                                        reply_ment.Text = "주소는 ‘" + SelectTestDriveList[0].dlgStr2 + "'입니다.\n\n  맵으로 위치를 보시려면 아래 이미지를 선택해주세요.";
+                                        var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                        for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                        {
+                                            //APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr5, SelectTestDriveList[td].dlgStr6);
+                                            replyToConversation.Attachments.Add(
+                                            UserGetHeroCard_location(
+                                            SelectTestDriveList[td].dlgStr1 + " 시승센터",
+                                            "TEL." + SelectTestDriveList[td].dlgStr3,
+                                            "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
+                                            //new CardImage(url: "http://www.smartsend.co.kr/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
+                                            new CardImage(url: "http://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                            SelectTestDriveList[td].dlgStr4,
+                                            SelectTestDriveList[td].dlgStr5));
+                                        }
+                                    }
+                                    else if (testDriveWhereStr.Contains("test drive can") || testDriveWhereStr.Contains("test drive center"))
+                                    {
+                                        for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                        {
+                                            replyToConversation.Attachments.Add(
+                                            GetHeroCard_info(
+                                            SelectTestDriveList[td].dlgStr4,
+                                            SelectTestDriveList[td].dlgStr7,
+                                            "",
+                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8 + ".jpg"), "", "")
+                                            );
+                                        }
+                                    }
+                                    {
+
+                                    }
+
+                                }
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("4"))
+                                {
+                                    // dlgStr1 = CTR_NM, dlgStr2 = CTR_ADDR , dlgStr3 = CTR_PHONE, dlgStr4 = CAR_DTL_INFO, dlgStr5 = MAP_X_TN, dlgStr6 = MAP_Y_TN, dlgStr7 = XRCL_CTY_NM, dlgStr8 = TRIMCOLOR_CD
+                                    Debug.WriteLine("case 4");
+
+                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                    {
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard(
+                                        SelectTestDriveList[td].dlgStr1 + " 시승센터",
+                                        "TEL." + SelectTestDriveList[td].dlgStr3,
+                                        "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
+                                        new CardAction(ActionTypes.ImBack, "전화하기", value: SelectTestDriveList[td].dlgStr3),
+                                        new CardAction(ActionTypes.ImBack, "주소보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 주소를 알려줘"),
+                                        new CardAction(ActionTypes.ImBack, "시승 가능 차량 보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터에서 시승 가능한 차량을 보여줘"))
+                                        );
+                                    }
+                                }
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("5"))
+                                {
+                                    Debug.WriteLine("case 5");
+                                    //dlgStr1 = BR_NM, dlgStr2 = BR_ADDR, dlgStr3 = BR_CCPC
+                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                    {
+
+                                        if (SelectTestDriveList[td].dlgStr2.Length > 40)
+                                        {
+                                            addressStr = SelectTestDriveList[td].dlgStr2.Substring(0, 37) + "...";
+                                        }
+                                        else
+                                        {
+                                            addressStr = SelectTestDriveList[td].dlgStr2;
+                                        }
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_location(
+                                        SelectTestDriveList[td].dlgStr1,
+                                        SelectTestDriveList[td].dlgStr3,
+                                        addressStr,
+                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 지점 보여줘"))
+                                        );
+                                    }
+                                }
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("6"))
+                                {
+                                    //dlgStr1 = BR_DTL_ADDR1, dlgStr2 = XRCL_CTY_NM
+                                    Debug.WriteLine("case 6");
+                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                    {
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_area(
+                                        SelectTestDriveList[td].dlgStr1,
+                                        "",
+                                        SelectTestDriveList[td].dlgStr1 + " 지역, " + SelectTestDriveList[td].dlgStr2 + " 차량이 전시된 매장",
+                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + "에 " + SelectTestDriveList[td].dlgStr2 + " 컬러가 전시된 매장이에요"))
+                                        );
+                                    }
+                                }
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("7"))
+                                {
+                                    //branch info                                 
+                                    Debug.WriteLine("case 7");
+                                    /*
+                                     * 이미지 없이 출력 테스트용
+                                    for (int td = 0; td < CarBranchInfo.Count; td++)
+                                    {
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_location(
+                                        SelectTestDriveList[td].dlgStr1,
+                                        SelectTestDriveList[td].dlgStr3,
+                                        SelectTestDriveList[td].dlgStr2,
+                                        new CardAction())
+                                        );
+                                    }
+                                    */
+                                    //데이터가 없을 때 예외 처리
+                                    if (SelectTestDriveList.Count == 0)
+                                    {
+                                        Activity reply_err = activity.CreateReply();
+                                        reply_err.Recipient = activity.From;
+                                        reply_err.Type = "message";
+                                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','' ]";
+                                        await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                        response = Request.CreateResponse(HttpStatusCode.OK);
+                                        return response;
+                                    }
+                                    else
+                                    {
+                                        // dlgStr1 = BR_NM, dlgStr2 = BR_ADDR , dlgStr3 = BR_CCPC, dlgStr4 = BR_XCOO, dlgStr5 = BR_YCOO
+                                        for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                        {
+                                            var urlImg = "https://openapi.naver.com/v1/map/staticmap.bin?clientId=OPCP0Yh0b2IC9r59XaTR&url=http://www.hyundai.com&crs=EPSG:4326&center=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + "&level=12&w=400&h=300&baselayer=default&markers=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5;
+                                            String fileName = "c:/inetpub/wwwroot/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png";
+
+                                            System.Net.WebClient client = new System.Net.WebClient();
+                                            client.DownloadFile(urlImg, fileName);
+
+                                            replyToConversation.Attachments.Add(
+                                            UserGetHeroCard_location(
+                                            SelectTestDriveList[td].dlgStr1,
+                                            "TEL." + SelectTestDriveList[td].dlgStr3,
+                                            SelectTestDriveList[td].dlgStr2,
+                                            new CardImage(url: "http://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                            SelectTestDriveList[td].dlgStr4,
+                                            SelectTestDriveList[td].dlgStr5)
+                                            );
+                                        }
+
+                                        Activity reply_reset = activity.CreateReply();
+                                        reply_reset.Recipient = activity.From;
+                                        reply_reset.Type = "message";
+                                        reply_reset.Attachments = new List<Attachment>();
+                                        reply_reset.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+
+                                        reply_reset.Attachments.Add(
+                                        GetHeroCard_reset(
+                                            new CardAction(ActionTypes.ImBack, "다음에하기", value: "다음에 와서 해볼게"),
+                                            new CardAction(ActionTypes.ImBack, "다른 컬러 차량으로 찾기", value: "컬러별 차량이 전시된 매장을 알려줘"))
+                                        );
+
+                                    }
+                                }
+                                luis_intent = (string)Luis["intents"][0]["intent"];
+                                Luis["intents"][0]["intent"] = "";
+
+                            }
                             else
                             {
                                 Debug.WriteLine("(LuisDialogID[k].dlgId ====" + (LuisDialogID[k].dlgId));
@@ -1506,12 +1528,12 @@ namespace Bot_Application1
 
                         if (LuisDialogID.Count == 0)
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, colorStr, priceWhereStr, carOptionStr);
+                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, carOptionStr);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
                         }
                         else
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, colorStr, priceWhereStr, carOptionStr);
+                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, carOptionStr);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
                         }
 
@@ -1539,7 +1561,7 @@ namespace Bot_Application1
                     catch
                     {
 
-                        int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, colorStr, priceWhereStr, carOptionStr);
+                        int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, carOptionStr);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
                         Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
