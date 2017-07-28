@@ -607,7 +607,7 @@ namespace Bot_Application1
 
                                 Debug.WriteLine("CarQouteLuis INTENT : " + CarQouteLuisValue[0].intentValue);
                                 Debug.WriteLine("CarQouteLuis ENTITY : " + CarQouteLuisValue[0].entityValue);
-                                Debug.WriteLine("CarQouteLuis WHERE : " + CarQouteLuisValue[0].whereValue);
+                                //Debug.WriteLine("CarQouteLuis WHERE : " + CarQouteLuisValue[0].whereValue);
 
                                 luis_intent = CarQouteLuisValue[0].intentValue;
                                 entitiesStr = CarQouteLuisValue[0].entityValue;
@@ -684,433 +684,11 @@ namespace Bot_Application1
                             
 
 
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            // 견적 로직
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            if (Luis["intents"][0]["intent"].ToString().Equals("Quote"))
-                            {
-                                Debug.WriteLine("INTENT ::[ " + (string)Luis["intents"][0]["intent"] + " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
-
-                                if (entitiesStr != "")
-                                {
-
-                                    if ((entitiesStr.Contains("car color") && entitiesStr.Contains("exterior color")) || (entitiesStr.Contains("car color") && entitiesStr.Contains("interior color")) || entitiesStr.Equals("car color") || entitiesStr.Contains("car color"))
-                                    {
-
-                                        Debug.WriteLine("색상 질문");
-
-                                        List<CarTrimList> CarPriceList = db.SelectCarTrimList1(priceWhereStr);
-
-                                        //데이터가 없을 때 예외 처리
-                                        if (CarPriceList.Count == 0)
-                                        {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                            response = Request.CreateResponse(HttpStatusCode.OK);
-                                            return response;
-                                        }
-
-                                        if (entitiesStr.Equals("car color"))
-                                        {
-                                            Debug.WriteLine("전체 색상 질문");
-                                            List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
-                                            //데이터가 없을 때 예외 처리
-                                            if (CarExColorList.Count == 0)
-                                            {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                                response = Request.CreateResponse(HttpStatusCode.OK);
-                                                return response;
-                                            }
-
-
-                                            for (int td = 0; td < CarExColorList.Count; td++)
-                                            {
-
-                                                string trimNM = CarExColorList[td].trimColorNm;
-                                                trimNM = trimNM.Replace("가솔린 ", "");
-                                                trimNM = trimNM.Replace("디젤 ", "");
-                                                trimNM = trimNM.Replace("2WD ", "");
-                                                trimNM = trimNM.Replace("4WD ", "");
-
-                                                replyToConversation.Attachments.Add(
-                                                GetHeroCard_info(
-                                                trimNM,
-                                                "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
-                                                "",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
-                                                );
-                                            }
-                                        }
-                                        else if (entitiesStr.Equals("car color.exterior color"))
-                                        {
-                                            Debug.WriteLine("외장 전체 색상 질문");
-
-                                            List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
-                                            Debug.WriteLine("exteriorexteriorexteriorexterior");
-                                            //데이터가 없을 때 예외 처리
-                                            if (CarExColorList.Count == 0)
-                                            {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                                response = Request.CreateResponse(HttpStatusCode.OK);
-                                                return response;
-                                            }
-
-                                            for (int td = 0; td < CarExColorList.Count; td++)
-                                            {
-                                                Debug.WriteLine("exterior color : " + CarExColorList[td].trimColorCd);
-                                                string trimNM = CarExColorList[td].trimColorNm;
-                                                trimNM = trimNM.Replace("가솔린 ", "");
-                                                trimNM = trimNM.Replace("디젤 ", "");
-                                                trimNM = trimNM.Replace("2WD ", "");
-                                                trimNM = trimNM.Replace("4WD ", "");
-
-                                                replyToConversation.Attachments.Add(
-                                                GetHeroCard_info(
-                                                trimNM,
-                                                "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
-                                                "",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
-                                                );
-                                            }
-
-                                        }
-                                        else if (entitiesStr.Equals("car color.interior color"))
-                                        {
-                                            Debug.WriteLine("내장 전체 색상 질문");
-                                            List<CarInColorList> CarInColorList = db.SelectCarInColorAllList();
-                                            Debug.WriteLine("interiorinteriorinteriorinterior");
-                                            //데이터가 없을 때 예외 처리
-                                            if (CarInColorList.Count == 0)
-                                            {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                                response = Request.CreateResponse(HttpStatusCode.OK);
-                                                return response;
-                                            }
-
-                                            for (int td = 0; td < CarInColorList.Count; td++)
-                                            {
-
-                                                string trimNM = CarInColorList[td].internalColorNm;
-                                                trimNM = trimNM.Replace("가솔린 ", "");
-                                                trimNM = trimNM.Replace("디젤 ", "");
-                                                trimNM = trimNM.Replace("2WD ", "");
-                                                trimNM = trimNM.Replace("4WD ", "");
-
-                                                replyToConversation.Attachments.Add(
-                                                GetHeroCard_info(
-                                                trimNM,
-                                                "추가 금액 : " + string.Format("{0}", CarInColorList[td].inColorPrice.ToString("n0")) + "원",
-                                                "",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "", "")
-                                                );
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Debug.WriteLine("트림, 엔진, 드라이브 휠, 칼라 패키지, 튜익스 색상 질문");
-                                            string color = "";
-                                            for (int i = 0; i < CarPriceList.Count(); i++)
-                                            {
-
-                                                string trimNM = CarPriceList[i].carTrimNm;
-                                                trimNM = trimNM.Replace("코나 ", "");
-                                                trimNM = trimNM.Replace("1.6 ", "");
-                                                trimNM = trimNM.Replace("오토 ", "");
-                                                trimNM = trimNM.Replace("터보 ", "");
-                                                trimNM = trimNM.Replace("오토", "");
-
-                                                if (!CarPriceList[i].saleCD.Contains("X"))
-                                                {
-
-                                                    if (!CarPriceList[i].carTrimNm.Contains("투톤"))
-                                                    {
-
-                                                        if (entitiesStr.Contains("exterior") || entitiesStr.Contains("car color"))
-                                                        {
-
-                                                            color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
-                                                            replyToConversation.Attachments.Add(
-                                                            GetHeroCard_show(
-                                                                trimNM.Replace(" 1.6", ""),
-                                                                "",
-                                                                "",
-                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
-                                                                new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 트림 외장색상"), "", "")
-                                                            );
-                                                        }
-                                                        else if (entitiesStr.Contains("interior"))
-                                                        {
-
-                                                            color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
-                                                            replyToConversation.Attachments.Add(
-                                                            GetHeroCard_show(
-                                                                trimNM,
-                                                                "",
-                                                                "",
-                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
-                                                                new CardAction(ActionTypes.ImBack, "내장색상", value: trimNM.Replace(" 1.6", "") + " 트림 내장색상"), "", "")
-                                                            );
-                                                        }
-
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        luis_intent = (string)Luis["intents"][0]["intent"];
-                                    }
-                                    else if (!entitiesStr.Contains("car color") && entitiesStr.Contains("option"))
-                                    {
-                                        Debug.WriteLine("옵션 질문");
-                                        if (entitiesStr.Equals("option"))
-                                        {
-                                            Debug.WriteLine("전체 옵션");
-
-                                            List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
-
-                                            //데이터가 없을 때 예외 처리
-                                            if (carOptionList.Count == 0)
-                                            {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                                response = Request.CreateResponse(HttpStatusCode.OK);
-                                                return response;
-                                            }
-
-                                            for (int td = 0; td < carOptionList.Count; td++)
-                                            {
-
-                                                translateInfo = await getTranslate(carOptionList[td].optNm);
-
-                                                replyToConversation.Attachments.Add(
-                                                GetHeroCard_info(
-                                                carOptionList[td].optNm,
-                                                "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
-                                                "",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "", "")
-                                                );
-                                            }
-                                        }
-                                        else
-                                        {
-                                            List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
-
-                                            //데이터가 없을 때 예외 처리
-                                            if (carOptionList.Count == 0)
-                                            {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                                response = Request.CreateResponse(HttpStatusCode.OK);
-                                                return response;
-                                            }
-
-                                            for (int td = 0; td < carOptionList.Count; td++)
-                                            {
-
-                                                Translator translateInfo1 = await getTranslate(carOptionList[td].optNm);
-
-                                                //Debug.WriteLine("translateInfo. : " + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_"));
-                                                replyToConversation.Attachments.Add(
-                                                GetHeroCard_info(
-                                                carOptionList[td].optNm,
-                                                "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
-                                                "",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "", "")
-                                                );
-                                            }
-                                        }
-                                        luis_intent = (string)Luis["intents"][0]["intent"];
-                                    }
-                                    // 모델 질문(견적 보여줘)
-                                    else if (entitiesStr.Equals("price"))
-                                    {
-                                        Debug.WriteLine("견적 보여줘 질문");
-                                        string mainModelTitle = "";
-                                        List<CarModelList> CarModelList = db.SelectCarModelList();
-
-                                        //데이터가 없을 때 예외 처리
-                                        if (CarModelList.Count == 0)
-                                        {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                            response = Request.CreateResponse(HttpStatusCode.OK);
-                                            return response;
-                                        }
-
-                                        for (int td = 0; td < CarModelList.Count; td++)
-                                        {
-                                            mainModelTitle = CarModelList[td].carModelNm;
-                                            Debug.WriteLine("mainModelTitle : " + mainModelTitle);
-                                            if (mainModelTitle.Contains("TUIX"))
-                                            {
-                                                mainModelTitle = mainModelTitle + " 2WD";
-                                            }
-                                            Debug.WriteLine("mainModelTitle 2 : " + mainModelTitle);
-
-                                            replyToConversation.Attachments.Add(
-                                            GetHeroCard_show(
-                                            mainModelTitle,
-                                            "",
-                                            "",
-                                            new CardImage(url: PriceImageList.GetPriceImage(CarModelList[td].carModelNm)),
-                                            new CardAction(ActionTypes.ImBack, mainModelTitle + " 가격", value: CarModelList[td].carModelNm + " 가격"), "", "")
-                                            );
-                                        }
-                                        luis_intent = (string)Luis["intents"][0]["intent"];
-                                    }
-                                    // 트림,엔진, 드라이브 휠, 칼라패키지, 튜익스 가격 질문
-                                    else if (!entitiesStr.Contains("car color") && !entitiesStr.Contains("option"))
-                                    {
-                                        Debug.WriteLine("트림, 엔진, 드라이브 휠, 칼라 패키지, 튜익스 가격 질문");
-
-                                        string color = "";
-
-                                        List<CarTrimList> CarTrimList = db.SelectCarTrimList1(priceWhereStr);
-
-                                        //데이터가 없을 때 예외 처리
-                                        if (CarTrimList.Count == 0)
-                                        {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
-
-                                            response = Request.CreateResponse(HttpStatusCode.OK);
-                                            return response;
-                                        }
-
-
-                                        if (CarTrimList.Count > 1)
-                                        {
-                                            for (int td = 0; td < CarTrimList.Count; td++)
-                                            {
-
-                                                string trimNM = CarTrimList[td].carTrimNm;
-                                                trimNM = trimNM.Replace("코나 ", "");
-                                                trimNM = trimNM.Replace("1.6 ", "");
-                                                trimNM = trimNM.Replace("오토 ", "");
-                                                trimNM = trimNM.Replace("오토", "");
-                                                trimNM = trimNM.Replace("터보 ", "");
-
-                                                //Activity reply_ment = activity.CreateReply();
-                                                //reply_ment.Recipient = activity.From;
-                                                //reply_ment.Type = "message";
-                                                //reply_ment.Text = "코나 " + trimNM + "의 외장색상, 내장색상, 옵션을 보여 드릴게요,상세 견적은 견적 바로가기를 눌러주세요";
-                                                //var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
-
-
-                                                /*
-                                                 GetHeroCard_trim(
-                                                    trimNM,
-                                                    //orgMent,
-                                                    "",
-                                                    "",
-                                                    //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\trim\\" + color.Replace(" ", "") + ".jpg"),
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
-                                                    new CardAction(ActionTypes.ImBack, "외장색상", value: orgMent + " 외장색상 보여줄래"),
-                                                    new CardAction(ActionTypes.ImBack, "내장색상", value: orgMent + " 내장색상 보여줄래"),
-                                                    new CardAction(ActionTypes.ImBack, "옵션보기", value: orgMent + " 옵션 보여줄래"),
-                                                    new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?car code=RV104"))
-                                                 */
-
-
-                                                //if (!CarTrimList[td].saleCD.Contains("XX"))
-                                                //{
-                                                //    color = (string)(CarTrimList[td].tuix + CarTrimList[td].cartrim);
-                                                //    //Debug.WriteLine("AA : " + CarTrimList[td].tuix + CarTrimList[td].cartrim);
-                                                //    //Debug.WriteLine("color : " + color);
-                                                //    replyToConversation.Attachments.Add(
-                                                //    GetHeroCard_trim(
-                                                //    trimNM,
-                                                //    string.Format("{0}", CarTrimList[td].salePrice.ToString("n0")) + "원",
-                                                //    "",
-                                                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
-                                                //    new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM + " 외장색상"),
-                                                //    new CardAction(ActionTypes.ImBack, "내장색상", value: trimNM + " 내장색상"),
-                                                //    new CardAction(ActionTypes.ImBack, "옵션보기", value: trimNM + " 옵션보기"),
-                                                //    new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?car code=RV104"))
-                                                //    );
-                                                //}
-
-                                                if (!CarTrimList[td].saleCD.Contains("XX"))
-                                                {
-                                                    color = (string)(CarTrimList[td].tuix + CarTrimList[td].cartrim);
-                                                    //Debug.WriteLine("AA : " + CarTrimList[td].tuix + CarTrimList[td].cartrim);
-                                                    //Debug.WriteLine("color : " + color);
-                                                    replyToConversation.Attachments.Add(
-                                                    GetHeroCard_show(
-                                                    trimNM,
-                                                    string.Format("{0}", CarTrimList[td].salePrice.ToString("n0")) + "원",
-                                                    "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
-                                                    new CardAction(ActionTypes.ImBack, "트림 자세히 보기", value: trimNM + " 트림"), "", "")
-                                                    );
-                                                }
-
-                                            }
-                                        }
-                                        //else
-                                        //{
-                                        //    string trimNM = CarTrimList[0].carTrimNm;
-                                        //    trimNM = trimNM.Replace("코나 ", "");
-                                        //    trimNM = trimNM.Replace("1.6 ", "");
-                                        //    trimNM = trimNM.Replace("오토 ", "");
-                                        //    trimNM = trimNM.Replace("오토", "");
-                                        //    trimNM = trimNM.Replace("터보 ", "");
-
-                                        //    Activity reply_ment = activity.CreateReply();
-                                        //    reply_ment.Recipient = activity.From;
-                                        //    reply_ment.Type = "message";
-                                        //    reply_ment.Text = "코나 " + trimNM + "의 외장색상, 내장색상, 옵션을 보여 드릴게요,상세 견적은 견적 바로가기를 눌러주세요";
-                                        //    var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
-
-
-
-
-                                        //}
-
-
-
-                                        luis_intent = (string)Luis["intents"][0]["intent"];
-                                    }
-                                }
-                                //luis_intent = (string)Luis["intents"][0]["intent"];
-                            }
+                            
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 시승 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            else if((Luis["intents"][0]["intent"].ToString().Equals("Test drive")
+                            if((Luis["intents"][0]["intent"].ToString().Equals("Test drive")
                                 || Luis["intents"][0]["intent"].ToString().Equals("Test drive car color")
                                 || Luis["intents"][0]["intent"].ToString().Equals("Branch"))
                                 && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near"))
@@ -1350,6 +928,430 @@ namespace Bot_Application1
                                 luis_intent = (string)Luis["intents"][0]["intent"];
                                 Luis["intents"][0]["intent"] = "";
 
+                            }
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // 견적 로직
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            else if (Luis["intents"][0]["intent"].ToString().Equals("Quote"))
+                            {
+                                Debug.WriteLine("INTENT ::[ " + (string)Luis["intents"][0]["intent"] + " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
+
+                                if (entitiesStr != "")
+                                {
+
+                                    if ((entitiesStr.Contains("car color") && entitiesStr.Contains("exterior color")) || (entitiesStr.Contains("car color") && entitiesStr.Contains("interior color")) || entitiesStr.Equals("car color") || entitiesStr.Contains("car color"))
+                                    {
+
+                                        Debug.WriteLine("색상 질문");
+
+                                        List<CarTrimList> CarPriceList = db.SelectCarTrimList1(priceWhereStr);
+
+                                        //데이터가 없을 때 예외 처리
+                                        if (CarPriceList.Count == 0)
+                                        {
+                                            Activity reply_err = activity.CreateReply();
+                                            reply_err.Recipient = activity.From;
+                                            reply_err.Type = "message";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                            await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            response = Request.CreateResponse(HttpStatusCode.OK);
+                                            return response;
+                                        }
+
+                                        if (entitiesStr.Equals("car color"))
+                                        {
+                                            Debug.WriteLine("전체 색상 질문");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "전체 색상을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                            List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
+                                            //데이터가 없을 때 예외 처리
+                                            if (CarExColorList.Count == 0)
+                                            {
+                                                Activity reply_err = activity.CreateReply();
+                                                reply_err.Recipient = activity.From;
+                                                reply_err.Type = "message";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                response = Request.CreateResponse(HttpStatusCode.OK);
+                                                return response;
+                                            }
+
+
+                                            for (int td = 0; td < CarExColorList.Count; td++)
+                                            {
+
+                                                string trimNM = CarExColorList[td].trimColorNm;
+                                                trimNM = trimNM.Replace("가솔린 ", "");
+                                                trimNM = trimNM.Replace("디젤 ", "");
+                                                trimNM = trimNM.Replace("2WD ", "");
+                                                trimNM = trimNM.Replace("4WD ", "");
+
+                                                replyToConversation.Attachments.Add(
+                                                GetHeroCard_info(
+                                                trimNM,
+                                                "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
+                                                "",
+                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                );
+                                            }
+                                        }
+                                        else if (entitiesStr.Equals("car color.exterior color"))
+                                        {
+                                            Debug.WriteLine("외장 전체 색상 질문");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "전체 외장색상을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                            List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
+                                            Debug.WriteLine("exteriorexteriorexteriorexterior");
+                                            //데이터가 없을 때 예외 처리
+                                            if (CarExColorList.Count == 0)
+                                            {
+                                                Activity reply_err = activity.CreateReply();
+                                                reply_err.Recipient = activity.From;
+                                                reply_err.Type = "message";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                response = Request.CreateResponse(HttpStatusCode.OK);
+                                                return response;
+                                            }
+
+                                            for (int td = 0; td < CarExColorList.Count; td++)
+                                            {
+                                                Debug.WriteLine("exterior color : " + CarExColorList[td].trimColorCd);
+                                                string trimNM = CarExColorList[td].trimColorNm;
+                                                trimNM = trimNM.Replace("가솔린 ", "");
+                                                trimNM = trimNM.Replace("디젤 ", "");
+                                                trimNM = trimNM.Replace("2WD ", "");
+                                                trimNM = trimNM.Replace("4WD ", "");
+
+                                                replyToConversation.Attachments.Add(
+                                                GetHeroCard_info(
+                                                trimNM,
+                                                "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
+                                                "",
+                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                );
+                                            }
+
+                                        }
+                                        else if (entitiesStr.Equals("car color.interior color"))
+                                        {
+                                            Debug.WriteLine("내장 전체 색상 질문");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "전체 내장색상을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                            List<CarInColorList> CarInColorList = db.SelectCarInColorAllList();
+                                            Debug.WriteLine("interiorinteriorinteriorinterior");
+                                            //데이터가 없을 때 예외 처리
+                                            if (CarInColorList.Count == 0)
+                                            {
+                                                Activity reply_err = activity.CreateReply();
+                                                reply_err.Recipient = activity.From;
+                                                reply_err.Type = "message";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                response = Request.CreateResponse(HttpStatusCode.OK);
+                                                return response;
+                                            }
+
+                                            for (int td = 0; td < CarInColorList.Count; td++)
+                                            {
+
+                                                string trimNM = CarInColorList[td].internalColorNm;
+                                                trimNM = trimNM.Replace("가솔린 ", "");
+                                                trimNM = trimNM.Replace("디젤 ", "");
+                                                trimNM = trimNM.Replace("2WD ", "");
+                                                trimNM = trimNM.Replace("4WD ", "");
+
+                                                replyToConversation.Attachments.Add(
+                                                GetHeroCard_info(
+                                                trimNM,
+                                                "추가 금액 : " + string.Format("{0}", CarInColorList[td].inColorPrice.ToString("n0")) + "원",
+                                                "",
+                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "", "")
+                                                );
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("트림, 엔진, 드라이브 휠, 칼라 패키지, 튜익스 색상 질문");
+                                            string colorMent = activity.Text;
+                                            //colorMent = activity.Text.Replace("옵션", "");
+                                            colorMent = colorMent.Replace("가격", "");
+                                            colorMent = colorMent.Replace("exterior", "외장");
+                                            colorMent = colorMent.Replace("interior", "내장");
+                                            colorMent = colorMent.Replace("color", "색상");
+                                            //priceMent = activity.Text.Replace("price", "");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = colorMent + "을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                            string color = "";
+                                            for (int i = 0; i < CarPriceList.Count(); i++)
+                                            {
+
+                                                string trimNM = CarPriceList[i].carTrimNm;
+                                                trimNM = trimNM.Replace("코나 ", "");
+                                                trimNM = trimNM.Replace("1.6 ", "");
+                                                trimNM = trimNM.Replace("오토 ", "");
+                                                trimNM = trimNM.Replace("터보 ", "");
+                                                trimNM = trimNM.Replace("오토", "");
+
+                                                if (!CarPriceList[i].saleCD.Contains("X"))
+                                                {
+
+                                                    if (!CarPriceList[i].carTrimNm.Contains("투톤"))
+                                                    {
+
+                                                        if (entitiesStr.Contains("exterior") || entitiesStr.Contains("car color"))
+                                                        {
+
+                                                            color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
+                                                            replyToConversation.Attachments.Add(
+                                                            GetHeroCard_show(
+                                                                trimNM.Replace(" 1.6", ""),
+                                                                "",
+                                                                "",
+                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                                new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 트림 외장색상"), "", "")
+                                                            );
+                                                        }
+                                                        else if (entitiesStr.Contains("interior"))
+                                                        {
+
+                                                            color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
+                                                            replyToConversation.Attachments.Add(
+                                                            GetHeroCard_show(
+                                                                trimNM,
+                                                                "",
+                                                                "",
+                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                                new CardAction(ActionTypes.ImBack, "내장색상", value: trimNM.Replace(" 1.6", "") + " 트림 내장색상"), "", "")
+                                                            );
+                                                        }
+
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        luis_intent = (string)Luis["intents"][0]["intent"];
+                                    }
+                                    else if (!entitiesStr.Contains("car color") && entitiesStr.Contains("option"))
+                                    {
+                                        Debug.WriteLine("옵션 질문");
+                                        if (entitiesStr.Equals("option"))
+                                        {
+                                            Debug.WriteLine("전체 옵션");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "옵션을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                            List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
+
+                                            //데이터가 없을 때 예외 처리
+                                            if (carOptionList.Count == 0)
+                                            {
+                                                Activity reply_err = activity.CreateReply();
+                                                reply_err.Recipient = activity.From;
+                                                reply_err.Type = "message";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                response = Request.CreateResponse(HttpStatusCode.OK);
+                                                return response;
+                                            }
+
+                                            for (int td = 0; td < carOptionList.Count; td++)
+                                            {
+
+                                                translateInfo = await getTranslate(carOptionList[td].optNm);
+
+                                                replyToConversation.Attachments.Add(
+                                                GetHeroCard_info(
+                                                carOptionList[td].optNm,
+                                                "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
+                                                "",
+                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "", "")
+                                                );
+                                            }
+                                        }
+                                        else
+                                        {
+                                            List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
+                                            string optionMent = activity.Text;
+
+                                            optionMent = optionMent.Replace("옵션", "");
+                                            optionMent = optionMent.Replace("가격", "");
+                                            //priceMent = activity.Text.Replace("price", "");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = optionMent + "의 추가 옵션을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                            //데이터가 없을 때 예외 처리
+                                            if (carOptionList.Count == 0)
+                                            {
+                                                Activity reply_err = activity.CreateReply();
+                                                reply_err.Recipient = activity.From;
+                                                reply_err.Type = "message";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                response = Request.CreateResponse(HttpStatusCode.OK);
+                                                return response;
+                                            }
+
+                                            for (int td = 0; td < carOptionList.Count; td++)
+                                            {
+
+                                                Translator translateInfo1 = await getTranslate(carOptionList[td].optNm);
+
+                                                //Debug.WriteLine("translateInfo. : " + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_"));
+                                                replyToConversation.Attachments.Add(
+                                                GetHeroCard_info(
+                                                carOptionList[td].optNm,
+                                                "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
+                                                "",
+                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "", "")
+                                                );
+                                            }
+                                        }
+                                        luis_intent = (string)Luis["intents"][0]["intent"];
+                                    }
+                                    // 모델 질문(견적 보여줘)
+                                    else if (entitiesStr.Equals("price"))
+                                    {
+                                        Debug.WriteLine("견적 보여줘 질문");
+                                        string mainModelTitle = "";
+                                        List<CarModelList> CarModelList = db.SelectCarModelList();
+
+                                        //데이터가 없을 때 예외 처리
+                                        if (CarModelList.Count == 0)
+                                        {
+                                            Activity reply_err = activity.CreateReply();
+                                            reply_err.Recipient = activity.From;
+                                            reply_err.Type = "message";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                            await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            response = Request.CreateResponse(HttpStatusCode.OK);
+                                            return response;
+                                        }
+
+                                        for (int td = 0; td < CarModelList.Count; td++)
+                                        {
+                                            mainModelTitle = CarModelList[td].carModelNm;
+                                            Debug.WriteLine("mainModelTitle : " + mainModelTitle);
+                                            if (mainModelTitle.Contains("TUIX"))
+                                            {
+                                                mainModelTitle = mainModelTitle + " 2WD";
+                                            }
+                                            Debug.WriteLine("mainModelTitle 2 : " + mainModelTitle);
+
+                                            replyToConversation.Attachments.Add(
+                                            GetHeroCard_show(
+                                            mainModelTitle,
+                                            "",
+                                            "",
+                                            new CardImage(url: PriceImageList.GetPriceImage(CarModelList[td].carModelNm)),
+                                            new CardAction(ActionTypes.ImBack, mainModelTitle + " 가격", value: CarModelList[td].carModelNm + " 가격"), "", "")
+                                            );
+                                        }
+                                        luis_intent = (string)Luis["intents"][0]["intent"];
+                                    }
+                                    // 트림,엔진, 드라이브 휠, 칼라패키지, 튜익스 가격 질문
+                                    else if (!entitiesStr.Contains("car color") && !entitiesStr.Contains("option"))
+                                    {
+                                        Debug.WriteLine("트림, 엔진, 드라이브 휠, 칼라 패키지, 튜익스 가격 질문");
+
+                                        string color = "";
+                                        string priceMent = "";
+                                        Debug.WriteLine("가격 질문 멘트 : " + orgMent.Replace("가격", ""));
+
+                                        priceMent = activity.Text.Replace("가격", "");
+                                        //priceMent = activity.Text.Replace("price", "");
+
+                                        Activity reply_ment = activity.CreateReply();
+                                        reply_ment.Recipient = activity.From;
+                                        reply_ment.Type = "message";
+                                        reply_ment.Text = priceMent + " 가격을 보여드릴게요";
+                                        var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+
+                                        List<CarTrimList> CarTrimList = db.SelectCarTrimList1(priceWhereStr);
+
+                                        //데이터가 없을 때 예외 처리
+                                        if (CarTrimList.Count == 0)
+                                        {
+                                            Activity reply_err = activity.CreateReply();
+                                            reply_err.Recipient = activity.From;
+                                            reply_err.Type = "message";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                            await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            response = Request.CreateResponse(HttpStatusCode.OK);
+                                            return response;
+                                        }
+
+
+                                        if (CarTrimList.Count > 1)
+                                        {
+                                            for (int td = 0; td < CarTrimList.Count; td++)
+                                            {
+
+                                                string trimNM = CarTrimList[td].carTrimNm;
+                                                trimNM = trimNM.Replace("코나 ", "");
+                                                trimNM = trimNM.Replace("1.6 ", "");
+                                                trimNM = trimNM.Replace("오토 ", "");
+                                                trimNM = trimNM.Replace("오토", "");
+                                                trimNM = trimNM.Replace("터보 ", "");
+                                                
+                                                if (!CarTrimList[td].saleCD.Contains("XX"))
+                                                {
+                                                    color = (string)(CarTrimList[td].tuix + CarTrimList[td].cartrim);
+                                                    //Debug.WriteLine("AA : " + CarTrimList[td].tuix + CarTrimList[td].cartrim);
+                                                    //Debug.WriteLine("color : " + color);
+                                                    replyToConversation.Attachments.Add(
+                                                    GetHeroCard_show(
+                                                    trimNM,
+                                                    string.Format("{0}", CarTrimList[td].salePrice.ToString("n0")) + "원",
+                                                    "",
+                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                    new CardAction(ActionTypes.ImBack, "트림 자세히 보기", value: trimNM + " 트림"), "", "")
+                                                    );
+                                                }
+
+                                            }
+                                        }
+                                        luis_intent = (string)Luis["intents"][0]["intent"];
+                                    }
+                                }
+                                //luis_intent = (string)Luis["intents"][0]["intent"];
                             }
                             else
                             {

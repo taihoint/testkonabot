@@ -29,11 +29,11 @@ public class SorryMessageList
         {
          
             case  0:
-                sorryMsg = "쉽게 다시 한번 말씀해 주시면 안 될까요? 예를들어 코나의 특징이 알고 싶으시면 ''특징'' 이란 단어 입력만으로도 제가 이해할 수 있어요";
+                sorryMsg = "쉽게 다시 말씀해 주시면 안될까요? ";
                 break;
 
             case 1:
-                sorryMsg = "죄송해요, 무슨 말인지 이해하지 못했어요";
+                sorryMsg = "죄송해요. 무슨 말인지 잘 모르겠어요..";
                 break;
 
         }
