@@ -1014,7 +1014,7 @@ namespace Bot_Application1
 
                                             List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
                                             Debug.WriteLine("exteriorexteriorexteriorexterior");
-                                            //데이터가 없을 때 예외 처리
+                                            //데이터가 없을 때 예외 처리 
                                             if (CarExColorList.Count == 0)
                                             {
                                                 Activity reply_err = activity.CreateReply();
