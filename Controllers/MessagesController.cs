@@ -1158,7 +1158,7 @@ namespace Bot_Application1
                                         SelectTestDriveList[td].dlgStr1 + " 시승센터",
                                         "",
                                         SelectTestDriveList[td].dlgStr2 + " 등 총 " + SelectTestDriveList[td].dlgStr3 + " 곳",
-                                        new CardAction(ActionTypes.ImBack, "정보보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 알려줘"))
+                                        new CardAction(ActionTypes.ImBack, "정보보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 "))
                                         );
                                     }
                                 }
@@ -1176,7 +1176,7 @@ namespace Bot_Application1
                                         SelectTestDriveList[td].dlgStr3 + "개 매장에 전시",
                                         new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2 + ".jpg"),
                                         //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
-                                        new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장을 알려줘"), "", "")
+                                        new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장"), "", "")
                                         );
                                     }
                                 }
@@ -1238,7 +1238,7 @@ namespace Bot_Application1
                                         "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
                                         new CardAction(ActionTypes.ImBack, "전화하기", value: SelectTestDriveList[td].dlgStr3),
                                         new CardAction(ActionTypes.ImBack, "주소보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 주소를 알려줘"),
-                                        new CardAction(ActionTypes.ImBack, "시승 가능 차량 보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터에서 시승 가능한 차량을 보여줘"))
+                                        new CardAction(ActionTypes.ImBack, "시승 가능 차량 보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터에서 시승 가능한 차량"))
                                         );
                                     }
                                 }
@@ -1262,7 +1262,7 @@ namespace Bot_Application1
                                         SelectTestDriveList[td].dlgStr1,
                                         SelectTestDriveList[td].dlgStr3,
                                         addressStr,
-                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 지점 보여줘"))
+                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 지점 보기"))
                                         );
                                     }
                                 }
@@ -1313,6 +1313,7 @@ namespace Bot_Application1
                                     else
                                     {
                                         // dlgStr1 = BR_NM, dlgStr2 = BR_ADDR , dlgStr3 = BR_CCPC, dlgStr4 = BR_XCOO, dlgStr5 = BR_YCOO
+                                        /*
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
                                             var urlImg = "https://openapi.naver.com/v1/map/staticmap.bin?clientId=OPCP0Yh0b2IC9r59XaTR&url=http://www.hyundai.com&crs=EPSG:4326&center=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + "&level=12&w=400&h=300&baselayer=default&markers=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5;
@@ -1331,7 +1332,7 @@ namespace Bot_Application1
                                             SelectTestDriveList[td].dlgStr5)
                                             );
                                         }
-
+                                        */
                                         Activity reply_reset = activity.CreateReply();
                                         reply_reset.Recipient = activity.From;
                                         reply_reset.Type = "message";
