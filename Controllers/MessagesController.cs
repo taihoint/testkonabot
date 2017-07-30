@@ -855,7 +855,7 @@ namespace Bot_Application1
                                         SelectTestDriveList[td].dlgStr1,
                                         "",
                                         SelectTestDriveList[td].dlgStr1 + " 지역, " + SelectTestDriveList[td].dlgStr2 + " 차량이 전시된 매장",
-                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + "에 " + SelectTestDriveList[td].dlgStr2 + " 컬러가 전시된 매장이에요"))
+                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + "에 " + SelectTestDriveList[td].dlgStr2 + " 컬러가 전시된 매장"))
                                         );
                                     }
                                 }
@@ -891,7 +891,7 @@ namespace Bot_Application1
                                     else
                                     {
                                         // dlgStr1 = BR_NM, dlgStr2 = BR_ADDR , dlgStr3 = BR_CCPC, dlgStr4 = BR_XCOO, dlgStr5 = BR_YCOO
-                                        /*
+                                        
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
                                             var urlImg = "https://openapi.naver.com/v1/map/staticmap.bin?clientId=OPCP0Yh0b2IC9r59XaTR&url=http://www.hyundai.com&crs=EPSG:4326&center=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + "&level=12&w=400&h=300&baselayer=default&markers=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5;
@@ -899,6 +899,15 @@ namespace Bot_Application1
 
                                             System.Net.WebClient client = new System.Net.WebClient();
                                             client.DownloadFile(urlImg, fileName);
+
+                                            if (SelectTestDriveList[td].dlgStr2.Length > 40)
+                                            {
+                                                addressStr = SelectTestDriveList[td].dlgStr2.Substring(0, 37) + "...";
+                                            }
+                                            else
+                                            {
+                                                addressStr = SelectTestDriveList[td].dlgStr2;
+                                            }
 
                                             replyToConversation.Attachments.Add(
                                             UserGetHeroCard_location(
@@ -910,7 +919,7 @@ namespace Bot_Application1
                                             SelectTestDriveList[td].dlgStr5)
                                             );
                                         }
-                                        */
+                                        
                                         Activity reply_reset = activity.CreateReply();
                                         reply_reset.Recipient = activity.From;
                                         reply_reset.Type = "message";
@@ -919,9 +928,11 @@ namespace Bot_Application1
 
                                         reply_reset.Attachments.Add(
                                         GetHeroCard_reset(
-                                            new CardAction(ActionTypes.ImBack, "다음에하기", value: "다음에 와서 해볼게"),
-                                            new CardAction(ActionTypes.ImBack, "다른 컬러 차량으로 찾기", value: "컬러별 차량이 전시된 매장을 알려줘"))
+                                            new CardAction(ActionTypes.ImBack, "다음에 하기", value: "다음에 와서 해볼게"),
+                                            new CardAction(ActionTypes.ImBack, "다른 컬러 차량으로 찾기", value: "컬러별 차량이 전시된 매장"))
                                         );
+
+                                        await connector.Conversations.SendToConversationAsync(reply_reset);
 
                                     }
                                 }
