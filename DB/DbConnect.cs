@@ -1408,7 +1408,7 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
                 json = json.Replace("'", "''");
-                cmd.CommandText += "  select INTENT, ENTITY,ENTITY_VALUE  FROM FN_LUIS_RESULT    ";
+                cmd.CommandText += "  select INTENT, ENTITY,ENTITY_VALUE  FROM FN_LUIS_RESULT_JSL    ";
                 cmd.CommandText += "  ('" + json + "')                      ";
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);

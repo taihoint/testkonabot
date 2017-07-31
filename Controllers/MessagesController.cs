@@ -552,6 +552,7 @@ namespace Bot_Application1
                     string colorStr = (string)Luis["car_color"];
                     string carOptionStr = (string)Luis["car_option"];
                     string luis_intent = "";
+                    int matchCnt = 0;   //아래로 흘려보내기
                     //string priceWhereStr = "";
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -571,6 +572,7 @@ namespace Bot_Application1
                             Debug.WriteLine("score : " + (float)Luis["intents"][0]["score"]);
                             Debug.WriteLine("score : " + Luis["entities"].Count());
 
+
                             if ((string)Luis["intents"][0]["intent"] == "Quote")
                             {
                                 CarQouteLuisValue = db.SelectCarQouteLuisResult(Luis.ToString());
@@ -588,18 +590,40 @@ namespace Bot_Application1
 
                             }
                             else if ((string)Luis["intents"][0]["intent"] == "Test drive" || (string)Luis["intents"][0]["intent"] == "Branch" || (string)Luis["intents"][0]["intent"] == "Test drive car color")
-                            {
-                                List<TestDriveLuisResult> SelectTestDriveLuisResult = db.SelectTestDriveLuisResult(Luis.ToString());
+                            {                                
+                                //luis에서 intnet에서 entity 값 비교
+                                for (int i = 0; i < Luis["entities"].Count(); i++)
+                                {
+                                    if(Luis["entities"][i]["resolution"]["values"][0].ToString() == (string)Luis["intents"][0]["intent"])
+                                    {
+                                        matchCnt += 1;
+                                    }
+                                }
 
-                                Debug.WriteLine("SelectLuisTestDirve = " + SelectTestDriveLuisResult.Count);
-                                Debug.WriteLine("SelectTestDriveLuisResult[0].intent.ToString() = " + SelectTestDriveLuisResult[0].intent.ToString());
-                                Debug.WriteLine("SelectTestDriveLuisResult[0].entity.ToString() = " + SelectTestDriveLuisResult[0].entity.ToString());
-                                Debug.WriteLine("SelectTestDriveLuisResult[0].entity_value.ToString() = " + SelectTestDriveLuisResult[0].entity_value.ToString());
+                                if (matchCnt == 0)
+                                {
+                                    CarQouteLuisValue = db.SelectLuisResult(Luis.ToString());
 
-                                luis_intent = SelectTestDriveLuisResult[0].intent.ToString();
-                                entitiesStr = SelectTestDriveLuisResult[0].entity.ToString();
-                                testDriveWhereStr = SelectTestDriveLuisResult[0].entity_value.ToString();
+                                    Debug.WriteLine("CarQouteLuis INTENT : " + CarQouteLuisValue[0].intentValue);
+                                    Debug.WriteLine("CarQouteLuis ENTITY : " + CarQouteLuisValue[0].entityValue);
 
+                                    luis_intent = CarQouteLuisValue[0].intentValue;
+                                    entitiesStr = CarQouteLuisValue[0].entityValue;
+
+                                }
+                                else
+                                {
+                                    List<TestDriveLuisResult> SelectTestDriveLuisResult = db.SelectTestDriveLuisResult(Luis.ToString());
+
+                                    Debug.WriteLine("SelectLuisTestDirve = " + SelectTestDriveLuisResult.Count);
+                                    Debug.WriteLine("SelectTestDriveLuisResult[0].intent.ToString() = " + SelectTestDriveLuisResult[0].intent.ToString());
+                                    Debug.WriteLine("SelectTestDriveLuisResult[0].entity.ToString() = " + SelectTestDriveLuisResult[0].entity.ToString());
+                                    Debug.WriteLine("SelectTestDriveLuisResult[0].entity_value.ToString() = " + SelectTestDriveLuisResult[0].entity_value.ToString());
+
+                                    luis_intent = SelectTestDriveLuisResult[0].intent.ToString();
+                                    entitiesStr = SelectTestDriveLuisResult[0].entity.ToString();
+                                    testDriveWhereStr = SelectTestDriveLuisResult[0].entity_value.ToString();
+                                }
                             }
                             else
                             {
@@ -691,7 +715,7 @@ namespace Bot_Application1
                             if((Luis["intents"][0]["intent"].ToString().Equals("Test drive")
                                 || Luis["intents"][0]["intent"].ToString().Equals("Test drive car color")
                                 || Luis["intents"][0]["intent"].ToString().Equals("Branch"))
-                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near"))
+                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near") && matchCnt != 0)
                             {
 
                                 if (entitiesStr.Contains("current location"))
@@ -920,19 +944,7 @@ namespace Bot_Application1
                                             );
                                         }
                                         
-                                        Activity reply_reset = activity.CreateReply();
-                                        reply_reset.Recipient = activity.From;
-                                        reply_reset.Type = "message";
-                                        reply_reset.Attachments = new List<Attachment>();
-                                        reply_reset.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
-                                        reply_reset.Attachments.Add(
-                                        GetHeroCard_reset(
-                                            new CardAction(ActionTypes.ImBack, "다음에 하기", value: "다음에 와서 해볼게"),
-                                            new CardAction(ActionTypes.ImBack, "다른 컬러 차량으로 찾기", value: "컬러별 차량이 전시된 매장"))
-                                        );
-
-                                        await connector.Conversations.SendToConversationAsync(reply_reset);
+                                        //await connector.Conversations.SendToConversationAsync(reply_reset);
 
                                     }
                                 }
