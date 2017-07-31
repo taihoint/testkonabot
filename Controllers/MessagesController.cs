@@ -552,7 +552,6 @@ namespace Bot_Application1
                     string colorStr = (string)Luis["car_color"];
                     string carOptionStr = (string)Luis["car_option"];
                     string luis_intent = "";
-                    int matchCnt = 0;   //아래로 흘려보내기
                     //string priceWhereStr = "";
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -590,40 +589,18 @@ namespace Bot_Application1
 
                             }
                             else if ((string)Luis["intents"][0]["intent"] == "Test drive" || (string)Luis["intents"][0]["intent"] == "Branch" || (string)Luis["intents"][0]["intent"] == "Test drive car color")
-                            {                                
-                                //luis에서 intnet에서 entity 값 비교
-                                for (int i = 0; i < Luis["entities"].Count(); i++)
-                                {
-                                    if(Luis["entities"][i]["resolution"]["values"][0].ToString() == (string)Luis["intents"][0]["intent"])
-                                    {
-                                        matchCnt += 1;
-                                    }
-                                }
+                            {
+                                List<TestDriveLuisResult> SelectTestDriveLuisResult = db.SelectTestDriveLuisResult(Luis.ToString());
 
-                                if (matchCnt == 0)
-                                {
-                                    CarQouteLuisValue = db.SelectLuisResult(Luis.ToString());
+                                Debug.WriteLine("SelectLuisTestDirve = " + SelectTestDriveLuisResult.Count);
+                                Debug.WriteLine("SelectTestDriveLuisResult[0].intent.ToString() = " + SelectTestDriveLuisResult[0].intent.ToString());
+                                Debug.WriteLine("SelectTestDriveLuisResult[0].entity.ToString() = " + SelectTestDriveLuisResult[0].entity.ToString());
+                                Debug.WriteLine("SelectTestDriveLuisResult[0].entity_value.ToString() = " + SelectTestDriveLuisResult[0].entity_value.ToString());
 
-                                    Debug.WriteLine("CarQouteLuis INTENT : " + CarQouteLuisValue[0].intentValue);
-                                    Debug.WriteLine("CarQouteLuis ENTITY : " + CarQouteLuisValue[0].entityValue);
-
-                                    luis_intent = CarQouteLuisValue[0].intentValue;
-                                    entitiesStr = CarQouteLuisValue[0].entityValue;
-
-                                }
-                                else
-                                {
-                                    List<TestDriveLuisResult> SelectTestDriveLuisResult = db.SelectTestDriveLuisResult(Luis.ToString());
-
-                                    Debug.WriteLine("SelectLuisTestDirve = " + SelectTestDriveLuisResult.Count);
-                                    Debug.WriteLine("SelectTestDriveLuisResult[0].intent.ToString() = " + SelectTestDriveLuisResult[0].intent.ToString());
-                                    Debug.WriteLine("SelectTestDriveLuisResult[0].entity.ToString() = " + SelectTestDriveLuisResult[0].entity.ToString());
-                                    Debug.WriteLine("SelectTestDriveLuisResult[0].entity_value.ToString() = " + SelectTestDriveLuisResult[0].entity_value.ToString());
-
-                                    luis_intent = SelectTestDriveLuisResult[0].intent.ToString();
-                                    entitiesStr = SelectTestDriveLuisResult[0].entity.ToString();
-                                    testDriveWhereStr = SelectTestDriveLuisResult[0].entity_value.ToString();
-                                }
+                                luis_intent = SelectTestDriveLuisResult[0].intent.ToString();
+                                entitiesStr = SelectTestDriveLuisResult[0].entity.ToString();
+                                testDriveWhereStr = SelectTestDriveLuisResult[0].entity_value.ToString();
+                                
                             }
                             else
                             {
@@ -705,17 +682,13 @@ namespace Bot_Application1
                                 }
                             }
 
-                            
-
-
-                            
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 시승 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            if((Luis["intents"][0]["intent"].ToString().Equals("Test drive")
+                            if ((Luis["intents"][0]["intent"].ToString().Equals("Test drive")
                                 || Luis["intents"][0]["intent"].ToString().Equals("Test drive car color")
                                 || Luis["intents"][0]["intent"].ToString().Equals("Branch"))
-                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near") && matchCnt != 0)
+                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near"))
                             {
 
                                 if (entitiesStr.Contains("current location"))
@@ -785,7 +758,7 @@ namespace Bot_Application1
                                 else if (SelectTestDriveList[0].dlgGubun.Equals("3"))
                                 {
                                     Debug.WriteLine("case 3");
-                                    
+
                                     if (testDriveWhereStr.Contains("test drive center address"))
                                     {
                                         Activity reply_ment = activity.CreateReply();
@@ -915,7 +888,7 @@ namespace Bot_Application1
                                     else
                                     {
                                         // dlgStr1 = BR_NM, dlgStr2 = BR_ADDR , dlgStr3 = BR_CCPC, dlgStr4 = BR_XCOO, dlgStr5 = BR_YCOO
-                                        
+
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
                                             var urlImg = "https://openapi.naver.com/v1/map/staticmap.bin?clientId=OPCP0Yh0b2IC9r59XaTR&url=http://www.hyundai.com&crs=EPSG:4326&center=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + "&level=12&w=400&h=300&baselayer=default&markers=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5;
@@ -943,7 +916,7 @@ namespace Bot_Application1
                                             SelectTestDriveList[td].dlgStr5)
                                             );
                                         }
-                                        
+
                                         //await connector.Conversations.SendToConversationAsync(reply_reset);
 
                                     }
@@ -1353,7 +1326,7 @@ namespace Bot_Application1
                                                 trimNM = trimNM.Replace("오토 ", "");
                                                 trimNM = trimNM.Replace("오토", "");
                                                 trimNM = trimNM.Replace("터보 ", "");
-                                                
+
                                                 if (!CarTrimList[td].saleCD.Contains("XX"))
                                                 {
                                                     color = (string)(CarTrimList[td].tuix + CarTrimList[td].cartrim);
