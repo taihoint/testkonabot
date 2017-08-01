@@ -168,6 +168,7 @@
     <Compile Include="Models\CarBranchInfo.cs" />
     <Compile Include="Models\CarBranchList.cs" />
     <Compile Include="Models\CarColorAreaList.cs" />
+    <Compile Include="Models\LuisResult.cs" />
     <Compile Include="Models\CarQouteLuisResult.cs" />
     <Compile Include="Models\CarColorList.cs" />
     <Compile Include="Models\CarExColorList.cs" />

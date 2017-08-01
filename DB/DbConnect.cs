@@ -1431,7 +1431,41 @@ namespace Bot_Application1.DB
             return CarQouteLuisResult;
         }
 
+        public List<LuisResult> LuisResult(string json)
+        {
+            SqlDataReader rdr = null;
+            List<LuisResult> LuisResult = new List<LuisResult>();
 
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                json = json.Replace("'", "''");
+                cmd.CommandText += "  SELECT VAL, INTENT, ENTITY,ENTITY_VALUE  FROM FN_LUIS_RESULT_SUM    ";
+                cmd.CommandText += "  ('" + json + "')                      ";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    string val = rdr["VAL"] as string;
+                    string intentValue = rdr["INTENT"] as string;
+                    string entityValue = rdr["ENTITY"] as string;
+                    string whereValue = rdr["ENTITY_VALUE"] as string;
+
+
+                    LuisResult result = new LuisResult();
+                    result.val = val;
+                    result.intentValue = intentValue;
+                    result.entityValue = entityValue;
+                    result.whereValue = whereValue;
+
+                    LuisResult.Add(result);
+                }
+            }
+            return LuisResult;
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Query Analysis
