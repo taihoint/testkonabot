@@ -1442,7 +1442,7 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
                 json = json.Replace("'", "''");
-                cmd.CommandText += "  SELECT VAL, INTENT, ENTITY,ENTITY_VALUE  FROM FN_LUIS_RESULT_SUM    ";
+                cmd.CommandText += "  SELECT  TOP 1 VAL, INTENT, ENTITY,ENTITY_VALUE , TEST_DRIVEWHERE, CAR_PRICEWHERE  FROM FN_LUIS_RESULT_SUM    ";
                 cmd.CommandText += "  ('" + json + "')                      ";
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
@@ -1452,14 +1452,18 @@ namespace Bot_Application1.DB
                     string val = rdr["VAL"] as string;
                     string intentValue = rdr["INTENT"] as string;
                     string entityValue = rdr["ENTITY"] as string;
-                    string whereValue = rdr["ENTITY_VALUE"] as string;
+                    string entitieWhereValue = rdr["ENTITY_VALUE"] as string;
+                    string testDriveWhereValue = rdr["TEST_DRIVEWHERE"] as string;
+                    string carPriceWhereValue = rdr["CAR_PRICEWHERE"] as string;
 
 
                     LuisResult result = new LuisResult();
                     result.val = val;
                     result.intentValue = intentValue;
                     result.entityValue = entityValue;
-                    result.whereValue = whereValue;
+                    result.entitieWhereValue = entitieWhereValue;
+                    result.testDriveWhereValue = testDriveWhereValue;
+                    result.carPriceWhereValue = carPriceWhereValue;
 
                     LuisResult.Add(result);
                 }

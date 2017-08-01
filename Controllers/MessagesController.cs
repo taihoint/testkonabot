@@ -550,12 +550,16 @@ namespace Bot_Application1
                     string entitiesStr = (string)Luis["entities"];
                     //string entitiesValueStr = (string)Luis["test_driveWhere"];
                     //string entitiesValueStr = (string)Luis["car_priceWhere"];
+
+                    string testDriveWhereStr = (string)Luis["test_driveWhere"];
+                    string priceWhereStr = (string)Luis["car_priceWhere"];
+
                     string entitiesValueStr = (string)Luis["test_driveWhere"];
-                    entitiesValueStr += (string)Luis["car_priceWhere"];                    
+                    //entitiesValueStr += (string)Luis["car_priceWhere"];
                     string colorStr = (string)Luis["car_color"];
                     string carOptionStr = (string)Luis["car_option"];
                     string luis_intent = "";
-                    string gubunVal = (string)Luis["intents"][0]["intent"];
+                    string gubunVal = (string)Luis["car_option"];
                     //string gubunVal = "";
                     //string entitiesValueStr = "";
 
@@ -581,7 +585,10 @@ namespace Bot_Application1
                             gubunVal    = LuisValue[0].val;
                             luis_intent = LuisValue[0].intentValue;
                             entitiesStr = LuisValue[0].entityValue;
-                            entitiesValueStr = LuisValue[0].whereValue;
+                            entitiesValueStr = LuisValue[0].entitieWhereValue;
+                            testDriveWhereStr = LuisValue[0].testDriveWhereValue;
+                            priceWhereStr = LuisValue[0].carPriceWhereValue;
+
 
                             /*
                             if ((string)Luis["intents"][0]["intent"] == "Quote")
@@ -698,9 +705,7 @@ namespace Bot_Application1
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 시승 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            if ((gubunVal.Equals("Test drive") ||
-                                gubunVal.Equals("Test drive car color") ||
-                                gubunVal.Equals("Branch"))
+                            if ((gubunVal.Equals("Test drive") )
                                 && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near"))
                             {
 
@@ -708,27 +713,27 @@ namespace Bot_Application1
                                 {
                                     //int position;
                                     Geolocation.getRegion();
-                                    if (entitiesValueStr.Contains("test drive center region"))
+                                    if (testDriveWhereStr.Contains("test drive center region"))
                                     {
                                         //position = entitiesValueStr.IndexOf(",");
                                         //entitiesValueStr = entitiesValueStr.Substring(position, (int)entitiesValueStr.Length);
                                         //entitiesValueStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + entitiesValueStr;
-                                        entitiesValueStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
+                                        testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
                                     }
                                     else
                                     {
-                                        entitiesValueStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + entitiesValueStr;
+                                        testDriveWhereStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + testDriveWhereStr;
                                     }
                                 }
 
-                                List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(entitiesValueStr);
+                                List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(testDriveWhereStr);
 
                                 if (SelectTestDriveList.Count == 0)
                                 {
                                     Activity reply_err = activity.CreateReply();
                                     reply_err.Recipient = activity.From;
                                     reply_err.Type = "message";
-                                    //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                    //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                     reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                     await connector.Conversations.SendToConversationAsync(reply_err);
 
@@ -773,7 +778,7 @@ namespace Bot_Application1
                                 {
                                     Debug.WriteLine("case 3");
 
-                                    if (entitiesValueStr.Contains("test drive center address"))
+                                    if (testDriveWhereStr.Contains("test drive center address"))
                                     {
                                         Activity reply_ment = activity.CreateReply();
                                         reply_ment.Recipient = activity.From;
@@ -795,7 +800,7 @@ namespace Bot_Application1
                                             SelectTestDriveList[td].dlgStr5));
                                         }
                                     }
-                                    else if (entitiesValueStr.Contains("test drive can") || entitiesValueStr.Contains("test drive center"))
+                                    else if (testDriveWhereStr.Contains("test drive can") || testDriveWhereStr.Contains("test drive center"))
                                     {
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
@@ -892,7 +897,7 @@ namespace Bot_Application1
                                         Activity reply_err = activity.CreateReply();
                                         reply_err.Recipient = activity.From;
                                         reply_err.Type = "message";
-                                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','' ]";
+                                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','' ]";
                                         await connector.Conversations.SendToConversationAsync(reply_err);
 
                                         response = Request.CreateResponse(HttpStatusCode.OK);
@@ -945,7 +950,7 @@ namespace Bot_Application1
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             else if (gubunVal.Equals("Quote"))
                             {
-                                Debug.WriteLine("INTENT ::[ " + (string)Luis["intents"][0]["intent"] + " ]    ENTITY ::[ " + entitiesStr + " ]   entitiesValueStr :: [ " + entitiesValueStr + " ]");
+                                Debug.WriteLine("INTENT ::[ " +gubunVal+ " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
 
                                 if (entitiesStr != "")
                                 {
@@ -955,7 +960,7 @@ namespace Bot_Application1
 
                                         Debug.WriteLine("색상 질문");
 
-                                        List<CarTrimList> CarPriceList = db.SelectCarTrimList1(entitiesValueStr);
+                                        List<CarTrimList> CarPriceList = db.SelectCarTrimList1(priceWhereStr);
 
                                         //데이터가 없을 때 예외 처리
                                         if (CarPriceList.Count == 0)
@@ -963,7 +968,7 @@ namespace Bot_Application1
                                             Activity reply_err = activity.CreateReply();
                                             reply_err.Recipient = activity.From;
                                             reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                             await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
@@ -987,7 +992,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1031,7 +1036,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1075,7 +1080,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1180,7 +1185,7 @@ namespace Bot_Application1
                                             reply_ment.Text = "옵션을 보여드릴게요";
                                             var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
 
-                                            List<CarOptionList> carOptionList = db.SelectOptionList(entitiesValueStr);
+                                            List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
 
                                             //데이터가 없을 때 예외 처리
                                             if (carOptionList.Count == 0)
@@ -1188,7 +1193,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1211,7 +1216,7 @@ namespace Bot_Application1
                                         }
                                         else
                                         {
-                                            List<CarOptionList> carOptionList = db.SelectOptionList(entitiesValueStr);
+                                            List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
                                             string optionMent = activity.Text;
 
                                             optionMent = optionMent.Replace("옵션", "");
@@ -1230,7 +1235,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1267,7 +1272,7 @@ namespace Bot_Application1
                                             Activity reply_err = activity.CreateReply();
                                             reply_err.Recipient = activity.From;
                                             reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                             await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1314,7 +1319,7 @@ namespace Bot_Application1
                                         var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
 
 
-                                        List<CarTrimList> CarTrimList = db.SelectCarTrimList1(entitiesValueStr);
+                                        List<CarTrimList> CarTrimList = db.SelectCarTrimList1(priceWhereStr);
 
                                         //데이터가 없을 때 예외 처리
                                         if (CarTrimList.Count == 0)
@@ -1322,7 +1327,7 @@ namespace Bot_Application1
                                             Activity reply_err = activity.CreateReply();
                                             reply_err.Recipient = activity.From;
                                             reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
                                             await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1542,12 +1547,12 @@ namespace Bot_Application1
 
                         if (LuisDialogID.Count == 0)
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', entitiesValueStr, "", entitiesValueStr, carOptionStr);
+                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
                         }
                         else
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', entitiesValueStr, "", entitiesValueStr, carOptionStr);
+                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
                         }
 
@@ -1575,14 +1580,14 @@ namespace Bot_Application1
                     catch
                     {
 
-                        int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', entitiesValueStr, "", entitiesValueStr, carOptionStr);
+                        int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
                         Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
                         Activity reply_err = activity.CreateReply();
                         reply_err.Recipient = activity.From;
                         reply_err.Type = "message";
-                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
 
                         var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
 

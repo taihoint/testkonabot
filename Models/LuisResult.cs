@@ -10,7 +10,9 @@ namespace Bot_Application1.Models
         public string val;
         public string intentValue;
         public string entityValue;
-        public string whereValue;
+        public string entitieWhereValue;
+        public string testDriveWhereValue;
+        public string carPriceWhereValue;
 
     }
 }
