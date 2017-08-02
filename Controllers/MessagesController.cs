@@ -722,7 +722,8 @@ namespace Bot_Application1
                             // 시승 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             if ((gubunVal.Equals("Test drive") )
-                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near"))
+                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near")
+                                && k < 1 )
                             {
 
                                 if (entitiesStr.Contains("current location"))
@@ -895,7 +896,7 @@ namespace Bot_Application1
                                 {
                                     //branch info                                 
                                     Debug.WriteLine("case 7");
-                                    
+                                    /*
                                     for (int td = 0; td < SelectTestDriveList.Count; td++)
                                     {
                                         replyToConversation.Attachments.Add(
@@ -906,7 +907,7 @@ namespace Bot_Application1
                                         new CardAction())
                                         );
                                     }
-                                    /*
+                                    */
                                     //데이터가 없을 때 예외 처리
                                     if (SelectTestDriveList.Count == 0)
                                     {
@@ -954,12 +955,12 @@ namespace Bot_Application1
                                         //await connector.Conversations.SendToConversationAsync(reply_reset);
 
                                     }
-                                    */
-                                    luis_intent = (string)Luis["intents"][0]["intent"];
-                                    gubunVal = "";
+
                                     //Luis["intents"][0]["intent"] = "";
+                                    
                                 }
-   
+                                luis_intent = (string)Luis["intents"][0]["intent"];
+                                //gubunVal = "";
                             }
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 견적 로직
