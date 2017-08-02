@@ -643,7 +643,7 @@ namespace Bot_Application1
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             //sorryMessageCnt++;
 
-                            await Conversation.SendAsync(activity, () => new RootDialog());
+                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                             //if (activity.Text.StartsWith("코나") == true)
                             //{
@@ -747,12 +747,14 @@ namespace Bot_Application1
 
                                 if (SelectTestDriveList.Count == 0)
                                 {
-                                    Activity reply_err = activity.CreateReply();
-                                    reply_err.Recipient = activity.From;
-                                    reply_err.Type = "message";
-                                    //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
-                                    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                    await connector.Conversations.SendToConversationAsync(reply_err);
+                                    //Activity reply_err = activity.CreateReply();
+                                    //reply_err.Recipient = activity.From;
+                                    //reply_err.Type = "message";
+                                    ////reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                    //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                    //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                    await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                                     response = Request.CreateResponse(HttpStatusCode.OK);
                                     return response;
@@ -911,11 +913,13 @@ namespace Bot_Application1
                                     //데이터가 없을 때 예외 처리
                                     if (SelectTestDriveList.Count == 0)
                                     {
-                                        Activity reply_err = activity.CreateReply();
-                                        reply_err.Recipient = activity.From;
-                                        reply_err.Type = "message";
-                                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','' ]";
-                                        await connector.Conversations.SendToConversationAsync(reply_err);
+                                        //Activity reply_err = activity.CreateReply();
+                                        //reply_err.Recipient = activity.From;
+                                        //reply_err.Type = "message";
+                                        //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','' ]";
+                                        //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                                         response = Request.CreateResponse(HttpStatusCode.OK);
                                         return response;
@@ -982,11 +986,13 @@ namespace Bot_Application1
                                         //데이터가 없을 때 예외 처리
                                         if (CarPriceList.Count == 0)
                                         {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
+                                            //Activity reply_err = activity.CreateReply();
+                                            //reply_err.Recipient = activity.From;
+                                            //reply_err.Type = "message";
+                                            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                            //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
@@ -1050,11 +1056,13 @@ namespace Bot_Application1
                                             //데이터가 없을 때 예외 처리 
                                             if (CarExColorList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
+                                                //Activity reply_err = activity.CreateReply();
+                                                //reply_err.Recipient = activity.From;
+                                                //reply_err.Type = "message";
+                                                //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                                //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1094,11 +1102,13 @@ namespace Bot_Application1
                                             //데이터가 없을 때 예외 처리
                                             if (CarInColorList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
+                                                //Activity reply_err = activity.CreateReply();
+                                                //reply_err.Recipient = activity.From;
+                                                //reply_err.Type = "message";
+                                                //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                                //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1207,11 +1217,13 @@ namespace Bot_Application1
                                             //데이터가 없을 때 예외 처리
                                             if (carOptionList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
+
+                                                //Activity reply_err = activity.CreateReply();
+                                                //reply_err.Recipient = activity.From;
+                                                //reply_err.Type = "message";
+                                                //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                                //await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1249,11 +1261,13 @@ namespace Bot_Application1
                                             //데이터가 없을 때 예외 처리
                                             if (carOptionList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
+                                                //Activity reply_err = activity.CreateReply();
+                                                //reply_err.Recipient = activity.From;
+                                                //reply_err.Type = "message";
+                                                //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                                //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1286,11 +1300,14 @@ namespace Bot_Application1
                                         //데이터가 없을 때 예외 처리
                                         if (CarModelList.Count == 0)
                                         {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
+
+                                            //Activity reply_err = activity.CreateReply();
+                                            //reply_err.Recipient = activity.From;
+                                            //reply_err.Type = "message";
+                                            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                            //await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
@@ -1341,11 +1358,13 @@ namespace Bot_Application1
                                         //데이터가 없을 때 예외 처리
                                         if (CarTrimList.Count == 0)
                                         {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
+                                            //Activity reply_err = activity.CreateReply();
+                                            //reply_err.Recipient = activity.From;
+                                            //reply_err.Type = "message";
+                                            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                            //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
@@ -1602,7 +1621,7 @@ namespace Bot_Application1
                         int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
-                        await Conversation.SendAsync(activity, () => new RootDialog());
+                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr));
 
                         //if (activity.Text.StartsWith("코나") == true)
                         //{
