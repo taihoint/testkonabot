@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using Bot_Application1.Models;
 using Newtonsoft.Json.Linq;
 using Microsoft.Bot.Builder.Dialogs;
+using Bot_Application1.Dialogs;
 
 namespace Bot_Application1
 {
@@ -641,25 +642,31 @@ namespace Bot_Application1
                             // No LUIS result at all, so NLP failed completely
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             //sorryMessageCnt++;
-                            Debug.WriteLine("sorryMessageCnt2 : " + sorryMessageCnt);
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'N', "", "", "", "");
-                            Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
-                            Activity reply_err = activity.CreateReply();
-                            reply_err.Recipient = activity.From;
-                            reply_err.Type = "message";
-                            //reply_err.Text = "죄송해요. 무슨 말인지 잘 모르겠어요..";
-                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
-                            var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
-
+                            if(activity.Text.StartsWith("코나") == true)
+                            {
+                                await Conversation.SendAsync(activity, () => new RootDialog());
+                            }
+                            else
+                            {
+                                Debug.WriteLine("sorryMessageCnt2 : " + sorryMessageCnt);
+                                int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'N', "", "", "", "");
+                                Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+                                Activity reply_err = activity.CreateReply();
+                                reply_err.Recipient = activity.From;
+                                reply_err.Type = "message";
+                                //reply_err.Text = "죄송해요. 무슨 말인지 잘 모르겠어요..";
+                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
+                                var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+                            }
                         }
                     }
                     try
                     {
                         List<DialogList> dlg = new List<DialogList>();
 
-                        List<LuisList> LuisDialogID = db.SelectLuis((string)Luis["intents"][0]["intent"], entitiesStr);
+                        List<LuisList> LuisDialogID = db.SelectLuis(luis_intent, entitiesStr);
 
-                        Debug.WriteLine(LuisDialogID[0].dlgId + " LuisDialogID count : " + LuisDialogID.Count);
+                        //Debug.WriteLine(LuisDialogID[0].dlgId + " LuisDialogID count : " + LuisDialogID.Count);
                         //컬러별 차량이 전시된 매장을 알려줘. showroom에서 car color로 변경되어 , -> . 으로 변경
                         //entitiesStr = (string)entitiesStr.Replace(".", ",");
 
@@ -950,7 +957,7 @@ namespace Bot_Application1
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             else if (gubunVal.Equals("Quote"))
                             {
-                                Debug.WriteLine("INTENT ::[ " +gubunVal+ " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
+                                Debug.WriteLine("INTENT ::[ " + luis_intent + " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
 
                                 if (entitiesStr != "")
                                 {
@@ -968,7 +975,7 @@ namespace Bot_Application1
                                             Activity reply_err = activity.CreateReply();
                                             reply_err.Recipient = activity.From;
                                             reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                             await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
@@ -992,7 +999,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1036,7 +1043,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1080,7 +1087,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1193,7 +1200,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1235,7 +1242,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1272,7 +1279,7 @@ namespace Bot_Application1
                                             Activity reply_err = activity.CreateReply();
                                             reply_err.Recipient = activity.From;
                                             reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                             await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1327,7 +1334,7 @@ namespace Bot_Application1
                                             Activity reply_err = activity.CreateReply();
                                             reply_err.Recipient = activity.From;
                                             reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                             await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1369,6 +1376,8 @@ namespace Bot_Application1
                                 }
                                 //luis_intent = (string)Luis["intents"][0]["intent"];
                             }
+
+                            //other
                             else
                             {
                                 Debug.WriteLine("(LuisDialogID[k].dlgId ====" + (LuisDialogID[k].dlgId));
@@ -1583,13 +1592,20 @@ namespace Bot_Application1
                         int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
-                        Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
-                        Activity reply_err = activity.CreateReply();
-                        reply_err.Recipient = activity.From;
-                        reply_err.Type = "message";
-                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                        if (activity.Text.StartsWith("코나") == true)
+                        {
+                            await Conversation.SendAsync(activity, () => new RootDialog());
+                        }
+                        else
+                        {
+                            Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
+                            Activity reply_err = activity.CreateReply();
+                            reply_err.Recipient = activity.From;
+                            reply_err.Type = "message";
+                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
 
-                        var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+                            var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+                        }
 
                         DateTime endTime = DateTime.Now;
 

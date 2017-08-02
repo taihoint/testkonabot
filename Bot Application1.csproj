@@ -162,12 +162,14 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\Geolocation.cs" />
     <Compile Include="Controllers\NaverLocation.cs" />
+    <Compile Include="Dialogs\RootDialog.cs" />
     <Compile Include="Models\AreaTestCenterCountList.cs" />
     <Compile Include="Models\AreaTestCenterList.cs" />
     <Compile Include="Models\AreaTransfer.cs" />
     <Compile Include="Models\CarBranchInfo.cs" />
     <Compile Include="Models\CarBranchList.cs" />
     <Compile Include="Models\CarColorAreaList.cs" />
+    <Compile Include="Models\LinkHeroCard.cs" />
     <Compile Include="Models\LuisResult.cs" />
     <Compile Include="Models\CarQouteLuisResult.cs" />
     <Compile Include="Models\CarColorList.cs" />
@@ -179,6 +181,8 @@
     <Compile Include="Models\CarModelList.cs" />
     <Compile Include="Models\ColorTransfer.cs" />
     <Compile Include="Models\ContactMessage.cs" />
+    <Compile Include="Models\RootObject.cs" />
+    <Compile Include="Models\Search.cs" />
     <Compile Include="Models\SorryMessageList.cs" />
     <Compile Include="Models\PriceImageList.cs" />
     <Compile Include="Models\EngTransferKor.cs" />
