@@ -35,18 +35,27 @@
             /* When MessageReceivedAsync is called, it's passed an IAwaitable<IMessageActivity>. To get the message,
              *  await the result. */
             var message = await result;
-
+            string messgaeText = "";
             if (message.Text.StartsWith("코나") == true)
+            {
+                messgaeText = message.Text;
+            }
+            else
+            {
+                messgaeText = "코나 " + message.Text;
+            }
+
+            if (messgaeText.StartsWith("코나") == true)
             //if (message.Text != "")
             {
                 //context.Call(new SearchDialog(), this.SearchDialogResumeAfter);
-                string messgaeText = message.Text.Substring(3, message.Text.Length - 3);             
+                //string messgaeText = message.Text.Substring(3, message.Text.Length - 3);             
                 var reply = context.MakeMessage();
-                Debug.WriteLine("SERARCH MESSAGE : " + messgaeText);
+                Debug.WriteLine("SERARCH MESSAGE : " + message.Text);
                 if ((messgaeText != null) && messgaeText.Trim().Length > 0)
                 {
                     //Naver Search API
-                    string url = "https://openapi.naver.com/v1/search/blog?query=" + messgaeText; // JSON result 
+                    string url = "https://openapi.naver.com/v1/search/blog?query=" + messgaeText + "&display=10&start=1&sort=sim"; // JSON result 
                     //string url = "https://openapi.naver.com/v1/search/blog.xml?query=" + query; //XML result
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                     request.Headers.Add("X-Naver-Client-Id", "Y536Z1ZMNv93Oej6TrkF");
@@ -60,26 +69,33 @@
                         string text = reader.ReadToEnd();
 
                         RootObject serarchList = JsonConvert.DeserializeObject<RootObject>(text);
+
+                        Debug.WriteLine("serarchList : " + serarchList);
+                        //description
+
                         if (serarchList.display == 1)
                         {
-                            //Only One item
-                            List<CardImage> cardImages = new List<CardImage>();
-                            CardImage img = new CardImage();
-                            img.Url = "https://bottest.hyundai.com/assets/images/preview.jpg";
-                            cardImages.Add(img);
-                            LinkHeroCard card = new LinkHeroCard()
+                            if (serarchList.items[0].title.Contains("코나"))
                             {
-                                Title = serarchList.items[0].title,
-                                Subtitle = null,
-                                Text = null,
-                                Images = cardImages,
-                                Buttons = null,
-                                Link = serarchList.items[0].link
-                            };
-                            var attachment = card.ToAttachment();
+                                //Only One item
+                                List<CardImage> cardImages = new List<CardImage>();
+                                CardImage img = new CardImage();
+                                img.Url = "https://bottest.hyundai.com/assets/images/preview.jpg";
+                                cardImages.Add(img);
+                                LinkHeroCard card = new LinkHeroCard()
+                                {
+                                    Title = serarchList.items[0].title,
+                                    Subtitle = null,
+                                    Text = serarchList.items[0].description.Substring(0,100)+ "...",
+                                    Images = cardImages,
+                                    Buttons = null,
+                                    Link = serarchList.items[0].link
+                                };
+                                var attachment = card.ToAttachment();
 
-                            reply.Attachments = new List<Attachment>();
-                            reply.Attachments.Add(attachment);
+                                reply.Attachments = new List<Attachment>();
+                                reply.Attachments.Add(attachment);
+                            }
                         }
                         else
                         {
@@ -87,24 +103,30 @@
                             reply.Attachments = new List<Attachment>();
                             for (int i = 0; i < serarchList.display; i++)
                             {
-                                List<CardImage> cardImages = new List<CardImage>();
-                                CardImage img = new CardImage();
-                                img.Url = "https://bottest.hyundai.com/assets/images/preview.jpg";
-                                cardImages.Add(img);
-                                LinkHeroCard card = new LinkHeroCard()
+                                if (serarchList.items[i].title.Contains("코나"))
                                 {
-                                    Title = serarchList.items[i].title,
-                                    Subtitle = null,
-                                    Text = null,
-                                    Images = cardImages,
-                                    Buttons = null,
-                                    Link = serarchList.items[0].link
-                                };
-                                var attachment = card.ToAttachment();
-                                reply.Attachments.Add(attachment);
+                                    List<CardImage> cardImages = new List<CardImage>();
+                                    CardImage img = new CardImage();
+                                    img.Url = "https://bottest.hyundai.com/assets/images/preview.jpg";
+                                    cardImages.Add(img);
+                                    LinkHeroCard card = new LinkHeroCard()
+                                    {
+                                        Title = serarchList.items[i].title,
+                                        Subtitle = null,
+                                        Text = serarchList.items[i].description.Substring(0, 100) + "...",
+                                        Images = cardImages,
+                                        Buttons = null,
+                                        Link = serarchList.items[0].link
+                                    };
+                                    var attachment = card.ToAttachment();
+                                    reply.Attachments.Add(attachment);
+                                }
                             }
                         }
                         await context.PostAsync(reply);
+                        
+
+                        
                     }
                     else
                     {

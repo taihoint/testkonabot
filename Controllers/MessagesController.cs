@@ -559,7 +559,7 @@ namespace Bot_Application1
                     //entitiesValueStr += (string)Luis["car_priceWhere"];
                     string colorStr = (string)Luis["car_color"];
                     string carOptionStr = (string)Luis["car_option"];
-                    string luis_intent = "";
+                    string luis_intent = (string)Luis["intents"][0]["intent"];
                     string gubunVal = (string)Luis["car_option"];
                     //string gubunVal = "";
                     //string entitiesValueStr = "";
@@ -642,23 +642,32 @@ namespace Bot_Application1
                             // No LUIS result at all, so NLP failed completely
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             //sorryMessageCnt++;
-                            if(activity.Text.StartsWith("코나") == true)
-                            {
-                                await Conversation.SendAsync(activity, () => new RootDialog());
-                            }
-                            else
-                            {
-                                Debug.WriteLine("sorryMessageCnt2 : " + sorryMessageCnt);
-                                int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'N', "", "", "", "");
-                                Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
-                                Activity reply_err = activity.CreateReply();
-                                reply_err.Recipient = activity.From;
-                                reply_err.Type = "message";
-                                //reply_err.Text = "죄송해요. 무슨 말인지 잘 모르겠어요..";
-                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
-                                var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
-                            }
+
+                            await Conversation.SendAsync(activity, () => new RootDialog());
+
+                            //if (activity.Text.StartsWith("코나") == true)
+                            //{
+                            //    await Conversation.SendAsync(activity, () => new RootDialog());
+                                
+                            //}
+                            //else
+                            //{
+                            //    Debug.WriteLine("sorryMessageCnt2 : " + sorryMessageCnt);
+                            //    int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'N', "", "", "", "");
+                            //    Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+                            //    Activity reply_err = activity.CreateReply();
+                            //    reply_err.Recipient = activity.From;
+                            //    reply_err.Type = "message";
+                            //    //reply_err.Text = "죄송해요. 무슨 말인지 잘 모르겠어요..";
+                            //    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
+                            //    var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                
+                            //}
+                            response = Request.CreateResponse(HttpStatusCode.OK);
+                            return response;
                         }
+                        
                     }
                     try
                     {
@@ -1592,20 +1601,22 @@ namespace Bot_Application1
                         int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
-                        if (activity.Text.StartsWith("코나") == true)
-                        {
-                            await Conversation.SendAsync(activity, () => new RootDialog());
-                        }
-                        else
-                        {
-                            Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
-                            Activity reply_err = activity.CreateReply();
-                            reply_err.Recipient = activity.From;
-                            reply_err.Type = "message";
-                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                        await Conversation.SendAsync(activity, () => new RootDialog());
 
-                            var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
-                        }
+                        //if (activity.Text.StartsWith("코나") == true)
+                        //{
+                        //    await Conversation.SendAsync(activity, () => new RootDialog());
+                        //}
+                        //else
+                        //{
+                        //    Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
+                        //    Activity reply_err = activity.CreateReply();
+                        //    reply_err.Recipient = activity.From;
+                        //    reply_err.Type = "message";
+                        //    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+
+                        //    var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+                        //}
 
                         DateTime endTime = DateTime.Now;
 
@@ -1676,7 +1687,9 @@ namespace Bot_Application1
             JObject jsonObj = new JObject();
             using (HttpClient client = new HttpClient())
             {
-                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
+                //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
+                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
+                
                 //string RequestURI = "https://api.projectoxford.ai/luis/v1/application?id=fd9f899c-5a48-499e-9037-9ea589953684&subscription-key=7efb093087dd48918b903885b944740c&q=" + Query;
                 HttpResponseMessage msg = await client.GetAsync(RequestURI);
 
