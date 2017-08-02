@@ -16,6 +16,7 @@ using Bot_Application1.Models;
 using Newtonsoft.Json.Linq;
 using Microsoft.Bot.Builder.Dialogs;
 using Bot_Application1.Dialogs;
+using System.IO;
 
 namespace Bot_Application1
 {
@@ -30,6 +31,7 @@ namespace Bot_Application1
         public static int sorryMessageCnt = 0;
         public static string newUserID = "";
         public static string beforeUserID = "";
+        public static string filePath = "";
 
         public virtual async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
@@ -187,6 +189,8 @@ namespace Bot_Application1
             }
             else if (activity.Type == ActivityTypes.Message)
             {
+
+                HistoryLog("test");
 
                 // Db
                 DbConnect db = new DbConnect();
@@ -539,8 +543,15 @@ namespace Bot_Application1
                     Debug.WriteLine("orgMentorgMentorgMent : " + orgMent);
                     orgMent = orgMent.Replace("&#39;", "/'");
                     Debug.WriteLine("orgMent : " + orgMent);
+
+                    
+                    HistoryLog("[ 전처리 ] ==>> userID :: [ "+ activity.Conversation.Id + " ]       message :: [ "+ orgMent + " ]       date :: [ "+ DateTime.Now + " ]" );
+
                     translateInfo = await getTranslate(orgMent);
                     Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+
+                    
+                    HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // For Query Analysis
@@ -590,6 +601,7 @@ namespace Bot_Application1
                             testDriveWhereStr = LuisValue[0].testDriveWhereValue;
                             priceWhereStr = LuisValue[0].carPriceWhereValue;
 
+                            HistoryLog("[ LUIS ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
 
                             /*
                             if ((string)Luis["intents"][0]["intent"] == "Quote")
@@ -1614,6 +1626,7 @@ namespace Bot_Application1
                         }
                         sorryMessageCnt = 0;
                         //});
+                        HistoryLog("[ DIALOG ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
                     }
                     catch
                     {
@@ -1656,7 +1669,7 @@ namespace Bot_Application1
                             Debug.WriteLine("HISTORY RESULT FAIL");
                         }
 
-
+                        HistoryLog("[ DIALOG ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
                         response = Request.CreateResponse(HttpStatusCode.OK);
                         return response;
                     }
@@ -2033,7 +2046,39 @@ namespace Bot_Application1
             };
             return heroCard.ToAttachment();
         }
+
+        public void HistoryLog(String strMsg)
+        {
+            try
+            {
+
+                string m_strLogPrefix = AppDomain.CurrentDomain.BaseDirectory + @"LOG\";
+                string m_strLogExt = @".LOG";
+                DateTime dtNow = DateTime.Now;
+                string strDate = dtNow.ToString("yyyy-MM-dd");
+                string strPath = String.Format("{0}{1}{2}", m_strLogPrefix, strDate, m_strLogExt);
+                string strDir = Path.GetDirectoryName(strPath);
+                DirectoryInfo diDir = new DirectoryInfo(strDir);
+
+                if (!diDir.Exists)
+                {
+                    diDir.Create();
+                    diDir = new DirectoryInfo(strDir);
+                }
+
+                if (diDir.Exists)
+                {
+                    System.IO.StreamWriter swStream = File.AppendText(strPath);
+                    string strLog = String.Format("{0}: {1}", dtNow.ToString(dtNow.Hour + "시mm분ss초"), strMsg);
+                    swStream.WriteLine(strLog);
+                    swStream.Close(); ;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+        }
+
     }
-
-
 }

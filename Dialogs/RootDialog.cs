@@ -29,7 +29,7 @@
         private string entitiesStr;
         private DateTime startTime;
         public static string messgaeText = "";
-
+        
         public RootDialog(string luis_intent, string entitiesStr, DateTime startTime)
         {
             this.luis_intent = luis_intent;
@@ -197,7 +197,7 @@
                             {
                                 Debug.WriteLine("HISTORY RESULT FAIL");
                             }
-
+                            HistoryLog("[ SEARCH ] ==>> userID :: [ " + context.Activity.Conversation.Id + " ]       message :: [ " + messgaeText.Replace("코나 ", "") + " ]       date :: [ " + DateTime.Now + " ]");
                         }
                         
                     }
@@ -286,6 +286,39 @@
             //context.Call(new UsageDialog(), this.UsageDialogResumeAfter);            
         }
 
+        public void HistoryLog(String strMsg)
+        {
+            try
+            {
+
+                string m_strLogPrefix = AppDomain.CurrentDomain.BaseDirectory + @"LOG\";
+                string m_strLogExt = @".LOG";
+                DateTime dtNow = DateTime.Now;
+                string strDate = dtNow.ToString("yyyy-MM-dd");
+                string strPath = String.Format("{0}{1}{2}", m_strLogPrefix, strDate, m_strLogExt);
+                string strDir = Path.GetDirectoryName(strPath);
+                DirectoryInfo diDir = new DirectoryInfo(strDir);
+
+                if (!diDir.Exists)
+                {
+                    diDir.Create();
+                    diDir = new DirectoryInfo(strDir);
+                }
+
+                if (diDir.Exists)
+                {
+                    System.IO.StreamWriter swStream = File.AppendText(strPath);
+                    string strLog = String.Format("{0}: {1}", dtNow.ToString(dtNow.Hour + "시mm분ss초"), strMsg);
+                    swStream.WriteLine(strLog);
+                    swStream.Close(); ;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+        }
+
         //private async Task UsageDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
         //{
         //    try
@@ -322,7 +355,7 @@
         //    try
         //    {
         //        this.genderAge = await result;
-               
+
         //    }
         //    catch (TooManyAttemptsException)
         //    {
