@@ -27,12 +27,15 @@
         public static string beforeUserID = "";
         private string luis_intent;
         private string entitiesStr;
+        private DateTime startTime;
         public static string messgaeText = "";
 
-        public RootDialog(string luis_intent, string entitiesStr)
+        public RootDialog(string luis_intent, string entitiesStr, DateTime startTime)
         {
             this.luis_intent = luis_intent;
             this.entitiesStr = entitiesStr;
+            this.startTime = startTime;
+            
         }
 
         public async Task StartAsync(IDialogContext context)
@@ -172,10 +175,29 @@
                         }
                         else
                         {
-                            Translator translateInfo = await getTranslate(messgaeText);
+                            Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ",""));
 
                             int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, 1, 'S', "", "", "", "SEARCH");
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+
+                            DateTime endTime = DateTime.Now;
+
+                            Debug.WriteLine("USER NUMBER : " + context.Activity.Conversation.Id);
+                            Debug.WriteLine("CUSTOMMER COMMENT KOREAN : " + messgaeText.Replace("코나 ", ""));
+                            Debug.WriteLine("CUSTOMMER COMMENT ENGLISH : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                            Debug.WriteLine("CHANNEL_ID : " + context.Activity.ChannelId);
+                            Debug.WriteLine("프로그램 수행시간 : {0}/ms", ((endTime - startTime).Milliseconds));
+
+                            int inserResult = db.insertHistory(context.Activity.Conversation.Id, messgaeText.Replace("코나 ", ""), translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds));
+                            if (inserResult > 0)
+                            {
+                                Debug.WriteLine("HISTORY RESULT SUCCESS");
+                            }
+                            else
+                            {
+                                Debug.WriteLine("HISTORY RESULT FAIL");
+                            }
+
                         }
                         
                     }
@@ -233,10 +255,29 @@
             reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
             await context.PostAsync(reply_err);
             
-            Translator translateInfo = await getTranslate(messgaeText);
+            Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
 
             int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'D', "", "", "", "");
             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+
+
+            DateTime endTime = DateTime.Now;
+
+            Debug.WriteLine("USER NUMBER : " + context.Activity.Conversation.Id);
+            Debug.WriteLine("CUSTOMMER COMMENT KOREAN : " + messgaeText.Replace("코나 ", ""));
+            Debug.WriteLine("CUSTOMMER COMMENT ENGLISH : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+            Debug.WriteLine("CHANNEL_ID : " + context.Activity.ChannelId);
+            Debug.WriteLine("프로그램 수행시간 : {0}/ms", ((endTime - startTime).Milliseconds));
+
+            int inserResult = db.insertHistory(context.Activity.Conversation.Id, messgaeText.Replace("코나 ", ""), translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds));
+            if (inserResult > 0)
+            {
+                Debug.WriteLine("HISTORY RESULT SUCCESS");
+            }
+            else
+            {
+                Debug.WriteLine("HISTORY RESULT FAIL");
+            }
 
             //response = Request.CreateResponse(HttpStatusCode.OK);
             //return response;
