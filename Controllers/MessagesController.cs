@@ -538,20 +538,20 @@ namespace Bot_Application1
                 }
                 else
                 {
-                    for (int n = 0; n < Regex.Split(orgMent, " ").Length; n++)
-                    {
-                        string chgMsg = db.SelectChgMsg(Regex.Split(orgMent, " ")[n]);
-                        if (!string.IsNullOrEmpty(chgMsg))
-                        {
-                            orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
-                        }
-                    }
+                    //for (int n = 0; n < Regex.Split(orgMent, " ").Length; n++)
+                    //{
+                    //    string chgMsg = db.SelectChgMsg(Regex.Split(orgMent, " ")[n]);
+                    //    if (!string.IsNullOrEmpty(chgMsg))
+                    //    {
+                    //        orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
+                    //    }
+                    //}
 
                     orgKRMent = "";
                     orgENGMent = "";
 
                     Debug.WriteLine("orgMentorgMentorgMent : " + orgMent);
-                    orgMent = orgMent.Replace("&#39;", "/'");
+                    //orgMent = orgMent.Replace("&#39;", "/'");
                     Debug.WriteLine("orgMent : " + orgMent);
 
                     orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
@@ -563,6 +563,17 @@ namespace Bot_Application1
 
                     if(db.SelectKoreanCashCheck(orgKRMent).Length == 0)
                     {
+
+                        for (int n = 0; n < Regex.Split(orgMent, " ").Length; n++)
+                        {
+                            string chgMsg = db.SelectChgMsg(Regex.Split(orgMent, " ")[n]);
+                            if (!string.IsNullOrEmpty(chgMsg))
+                            {
+                                orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
+                            }
+                        }
+
+
                         orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
 
                         translateInfo = await getTranslate(orgKRMent1);
@@ -1089,7 +1100,7 @@ namespace Bot_Application1
                                 if (entitiesStr != "")
                                 {
 
-                                    if ((entitiesStr.Contains("car color") && entitiesStr.Contains("exterior color")) || (entitiesStr.Contains("car color") && entitiesStr.Contains("interior color")) || entitiesStr.Equals("car color") || (entitiesStr.Contains("car color")&& !entitiesStr.Contains("option")))
+                                    if ((entitiesStr.Contains("car color") && entitiesStr.Contains("exterior color")) || (entitiesStr.Contains("car color") && entitiesStr.Contains("interior color")) || (entitiesStr.Contains("car color") && !entitiesStr.Contains("option")) || (entitiesStr.Contains("car color") && !entitiesStr.Contains("price")) || entitiesStr.Equals("car color") )
                                     {
 
                                         Debug.WriteLine("색상 질문");

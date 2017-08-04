@@ -187,6 +187,11 @@
                         else
                         {
 
+                            
+
+                            orgKRMent = Regex.Replace(message.Text, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
+
+
                             for (int n = 0; n < Regex.Split(message.Text, " ").Length; n++)
                             {
                                 string chgMsg = db.SelectChgMsg(Regex.Split(message.Text, " ")[n]);
@@ -196,7 +201,6 @@
                                 }
                             }
 
-                            orgKRMent = Regex.Replace(message.Text, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
 
                             Translator translateInfo = await getTranslate(message.Text);
 
