@@ -17,6 +17,7 @@ namespace Bot_Application1.DB
     public class DbConnect
     {
         string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoML;User ID=faxtime;Password=test2016!;";
+        //string connStr = "Data Source= hyundaidb.database.windows.net;Initial Catalog=taihoML;User ID=taihoinst;Password=taiho123@;";
         //string connStr = "Data Source=10.6.222.21,1433;Initial Catalog=KONA2_DB;User ID=konadb;Password=Didwoehd20-9;";
         StringBuilder sb = new StringBuilder();
 
@@ -1471,6 +1472,57 @@ namespace Bot_Application1.DB
             return LuisResult;
         }
 
+
+
+        public string SelectKoreanCashCheck(string arg)
+        {
+            SqlDataReader rdr = null;
+            string result = ""; 
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT KR_QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '"+ arg + "'";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = rdr["KR_QUERY"] as string;
+                }
+            }
+            return result;
+        }
+
+        public string SelectEnglishCashCheck(string arg)
+        {
+            SqlDataReader rdr = null;
+            string result = "";
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE QUERY = '" + arg + "'";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = rdr["QUERY"] as string;
+                }
+            }
+            return result;
+        }
+
+
+
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Query Analysis
         // Check if dialogue already exists, return Luis format JSON.
@@ -1513,7 +1565,7 @@ namespace Bot_Application1.DB
         // Query Analysis
         // Insert user chat message for history and analysis
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        public int insertUserQuery(string query, string intentID, string entitiesIDS, int luisID, char result, string car_area, string car_colorArea, string car_priceWhere, string car_option)
+        public int insertUserQuery(string korQuery, string enQuery, string intentID, string entitiesIDS, int luisID, char result, string car_area, string car_colorArea, string car_priceWhere, string car_option)
         {
             int dbResult = 0;
             using (SqlConnection conn = new SqlConnection(connStr))
@@ -1527,12 +1579,13 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " VALUES ";
                 cmd.CommandText += " (@query, @intentID, @entitiesIDS, @luisID, @result, @car_color, @car_area) ";
                 */
-                //cmd.CommandText = "sp_insertusehistory2";
-                cmd.CommandText = "sp_insertusehistory";
+                cmd.CommandText = "sp_insertusehistory2";
+                //cmd.CommandText = "sp_insertusehistory";
 
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@query", query.Trim().ToLower());
+                cmd.Parameters.AddWithValue("@krQuery", korQuery.Trim().ToLower());
+                cmd.Parameters.AddWithValue("@query", enQuery.Trim().ToLower());
                 cmd.Parameters.AddWithValue("@intentID", intentID.Trim());
                 cmd.Parameters.AddWithValue("@entitiesIDS", entitiesIDS.Trim().ToLower());
                 cmd.Parameters.AddWithValue("@luisID", luisID);

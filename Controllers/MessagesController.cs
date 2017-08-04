@@ -190,7 +190,18 @@ namespace Bot_Application1
             else if (activity.Type == ActivityTypes.Message)
             {
 
-                HistoryLog("test");
+                JObject Luis = new JObject();
+                string entitiesStr = "";
+                string testDriveWhereStr = "";
+                string priceWhereStr = "";
+
+                string entitiesValueStr = "";
+                string colorStr = "";
+                string carOptionStr = "";
+                string luis_intent = "";
+                string gubunVal = "";
+
+                int luisID = 0;
 
                 // Db
                 DbConnect db = new DbConnect();
@@ -198,17 +209,11 @@ namespace Bot_Application1
                 List<CarQouteLuisResult> CarQouteLuisValue = new List<CarQouteLuisResult>();
                 List<LuisResult> LuisValue = new List<LuisResult>();
 
-                //List<CarQouteLuisResult> CarQouteLuisValue = new List<CarQouteLuisResult>(); --> test drive
-                //List<CarQouteLuisResult> CarQouteLuisValue = new List<CarQouteLuisResult>(); --> etc
-
-                string LuisIntent = "";
-                string LuisEntity = "";
-                string LuisEntityValue = "";
-
-
-
                 int inserResult;
                 string orgMent = "";
+                string orgKRMent = "";
+                string orgKRMent1 = "";
+                string orgENGMent = "";
                 DateTime startTime = DateTime.Now;
                 long unixTime = ((DateTimeOffset)startTime).ToUnixTimeSeconds();
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
@@ -540,40 +545,117 @@ namespace Bot_Application1
                             orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
                         }
                     }
+
+                    orgKRMent = "";
+                    orgENGMent = "";
+
                     Debug.WriteLine("orgMentorgMentorgMent : " + orgMent);
                     orgMent = orgMent.Replace("&#39;", "/'");
                     Debug.WriteLine("orgMent : " + orgMent);
 
-                    
-                    HistoryLog("[ 전처리 ] ==>> userID :: [ "+ activity.Conversation.Id + " ]       message :: [ "+ orgMent + " ]       date :: [ "+ DateTime.Now + " ]" );
+                    orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
 
-                    translateInfo = await getTranslate(orgMent);
-                    Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
-
-                    
-                    HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+                    HistoryLog("[ 전처리 ] ==>> userID :: [ "+ activity.Conversation.Id + " ]       message :: [ "+ orgKRMent + " ]       date :: [ "+ DateTime.Now + " ]" );
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    // For Query Analysis
-                    int luisID = 0;
-                    // Try to find dialogue from log history first before checking LUIS
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    JObject Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
-                    string entitiesStr = (string)Luis["entities"];
-                    //string entitiesValueStr = (string)Luis["test_driveWhere"];
-                    //string entitiesValueStr = (string)Luis["car_priceWhere"];
+                    // 한글 , 영어 질문 cash table 체크
 
-                    string testDriveWhereStr = (string)Luis["test_driveWhere"];
-                    string priceWhereStr = (string)Luis["car_priceWhere"];
+                    if(db.SelectKoreanCashCheck(orgKRMent).Length == 0)
+                    {
+                        orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
 
-                    string entitiesValueStr = (string)Luis["test_driveWhere"];
-                    //entitiesValueStr += (string)Luis["car_priceWhere"];
-                    string colorStr = (string)Luis["car_color"];
-                    string carOptionStr = (string)Luis["car_option"];
-                    string luis_intent = (string)Luis["intents"][0]["intent"];
-                    string gubunVal = (string)Luis["car_option"];
-                    //string gubunVal = "";
-                    //string entitiesValueStr = "";
+                        translateInfo = await getTranslate(orgKRMent1);
+
+                        //translateInfo = await getTranslateJP(orgKRMent1);
+
+                        //translateInfo = await getTranslate(translateInfo.data.translations[0].translatedText);
+
+                        orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+
+                        if(db.SelectEnglishCashCheck(orgENGMent).Length > 0)
+                        {
+                            //translateInfo = await getTranslate(orgMent);
+                            Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                            
+                            HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // For Query Analysis
+                            luisID = 0;
+
+                            // Try to find dialogue from log history first before checking LUIS
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            //Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                            Luis = db.SelectQueryAnalysis(orgENGMent);
+                            entitiesStr = (string)Luis["entities"];
+
+                            testDriveWhereStr = (string)Luis["test_driveWhere"];
+                            priceWhereStr = (string)Luis["car_priceWhere"];
+
+                            entitiesValueStr = (string)Luis["test_driveWhere"];
+
+                            colorStr = (string)Luis["car_color"];
+                            carOptionStr = (string)Luis["car_option"];
+                            luis_intent = (string)Luis["intents"][0]["intent"];
+                            gubunVal = (string)Luis["car_option"];
+                            //string gubunVal = "";
+                            //string entitiesValueStr = "";
+                        }
+                        else 
+                        {
+                            //translateInfo = await getTranslate(orgMent);
+                            Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+
+
+                            HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // For Query Analysis
+                            luisID = 0;
+
+                            // Try to find dialogue from log history first before checking LUIS
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            //Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                            Luis = db.SelectQueryAnalysis(orgENGMent);
+                            entitiesStr = (string)Luis["entities"];
+
+                            testDriveWhereStr = (string)Luis["test_driveWhere"];
+                            priceWhereStr = (string)Luis["car_priceWhere"];
+
+                            entitiesValueStr = (string)Luis["test_driveWhere"];
+
+                            colorStr = (string)Luis["car_color"];
+                            carOptionStr = (string)Luis["car_option"];
+                            luis_intent = (string)Luis["intents"][0]["intent"];
+                            gubunVal = (string)Luis["car_option"];
+                            //string gubunVal = "";
+                            //string entitiesValueStr = "";
+                        }
+
+                    }else
+                    {
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        // For Query Analysis
+                        luisID = 0;
+
+                        // Try to find dialogue from log history first before checking LUIS
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                        Luis = db.SelectQueryAnalysis(orgENGMent);
+                        entitiesStr = (string)Luis["entities"];
+
+                        testDriveWhereStr = (string)Luis["test_driveWhere"];
+                        priceWhereStr = (string)Luis["car_priceWhere"];
+
+                        entitiesValueStr = (string)Luis["test_driveWhere"];
+
+                        colorStr = (string)Luis["car_color"];
+                        carOptionStr = (string)Luis["car_option"];
+                        luis_intent = (string)Luis["intents"][0]["intent"];
+                        gubunVal = (string)Luis["car_option"];
+                        //string gubunVal = "";
+                        //string entitiesValueStr = "";
+                    }
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // For Query Analysis
@@ -655,12 +737,12 @@ namespace Bot_Application1
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             //sorryMessageCnt++;
 
-                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                             //if (activity.Text.StartsWith("코나") == true)
                             //{
                             //    await Conversation.SendAsync(activity, () => new RootDialog());
-                                
+
                             //}
                             //else
                             //{
@@ -674,7 +756,7 @@ namespace Bot_Application1
                             //    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
                             //    var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                
+
                             //}
                             response = Request.CreateResponse(HttpStatusCode.OK);
                             return response;
@@ -766,7 +848,7 @@ namespace Bot_Application1
                                     //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                     //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                    await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                    await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                     response = Request.CreateResponse(HttpStatusCode.OK);
                                     return response;
@@ -931,7 +1013,7 @@ namespace Bot_Application1
                                         //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','' ]";
                                         //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                         response = Request.CreateResponse(HttpStatusCode.OK);
                                         return response;
@@ -1004,7 +1086,7 @@ namespace Bot_Application1
                                             //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                             //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
@@ -1074,7 +1156,7 @@ namespace Bot_Application1
                                                 //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1120,7 +1202,7 @@ namespace Bot_Application1
                                                 //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1178,7 +1260,7 @@ namespace Bot_Application1
                                                     if (!CarPriceList[i].carTrimNm.Contains("투톤"))
                                                     {
 
-                                                        if (entitiesStr.Contains("exterior") || entitiesStr.Contains("car color"))
+                                                        if (entitiesStr.Contains("exterior") )
                                                         {
 
                                                             color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
@@ -1202,6 +1284,19 @@ namespace Bot_Application1
                                                                 "",
                                                                 new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
                                                                 new CardAction(ActionTypes.ImBack, "내장색상", value: trimNM.Replace(" 1.6", "") + " 트림 내장색상"), "", "")
+                                                            );
+                                                        }
+                                                        else if (entitiesStr.Contains("car color"))
+                                                        {
+
+                                                            color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
+                                                            replyToConversation.Attachments.Add(
+                                                            GetHeroCard_show(
+                                                                trimNM.Replace(" 1.6", ""),
+                                                                "",
+                                                                "",
+                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                                new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 트림 외장색상"), "", "")
                                                             );
                                                         }
 
@@ -1229,7 +1324,7 @@ namespace Bot_Application1
                                             //데이터가 없을 때 예외 처리
                                             if (carOptionList.Count == 0)
                                             {
-                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                                 //Activity reply_err = activity.CreateReply();
                                                 //reply_err.Recipient = activity.From;
@@ -1279,7 +1374,7 @@ namespace Bot_Application1
                                                 //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1313,7 +1408,7 @@ namespace Bot_Application1
                                         if (CarModelList.Count == 0)
                                         {
 
-                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                             //Activity reply_err = activity.CreateReply();
                                             //reply_err.Recipient = activity.From;
@@ -1376,7 +1471,7 @@ namespace Bot_Application1
                                             //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                             //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
@@ -1537,9 +1632,7 @@ namespace Bot_Application1
                                             plHeroCard[i] = new UserHeroCard()
                                             {
                                                 Title = card[i].cardTitle,
-                                                //Title = "<b><div style =\"color:rgb(0,0,255)\">" + text + "</div></b>",
                                                 Text = card[i].cardText,
-                                                //Text = "<b><div style =\"color:rgb(0,0,255)\">DDDDDDDDDDDDDDDDDD</div></b>",
                                                 Subtitle = card[i].cardSubTitle,
                                                 Images = cardImages,
                                                 //Tap = tap,
@@ -1582,10 +1675,7 @@ namespace Bot_Application1
                                 Activity reply_start = activity.CreateReply();
                                 reply_start.Recipient = activity.From;
                                 reply_start.Type = "message";
-                                //reply_start.Text = "<b><div style=\"color:rgb(0,0,255)\">" + hambuger + "를 누르면 전체 메뉴가 나와요</div></b>";
-                                //reply_start.Text = "<font color=\"rgb(255,255,0)\">" + hambuger + "를 누르면 전체 메뉴가 나와요</font>";
                                 reply_start.Text = "<span style=\"color:rgb(0,0,255);font-size:15pt; font-weight:bold\">" + hambuger + "</span> 를 누르면 전체 메뉴가 나와요";
-                                //reply_start.Text = "≡ 를 누르면 전체 메뉴가 나와요";
                                 await connector.Conversations.SendToConversationAsync(reply_start);
 
                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1597,12 +1687,17 @@ namespace Bot_Application1
 
                         if (LuisDialogID.Count == 0)
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
-                            Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+                            //int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            ////int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            //Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+
+                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+
                         }
                         else
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
                         }
 
@@ -1631,25 +1726,11 @@ namespace Bot_Application1
                     catch
                     {
 
-                        int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
+                        int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                        //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
-                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime));
-
-                        //if (activity.Text.StartsWith("코나") == true)
-                        //{
-                        //    await Conversation.SendAsync(activity, () => new RootDialog());
-                        //}
-                        //else
-                        //{
-                        //    Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
-                        //    Activity reply_err = activity.CreateReply();
-                        //    reply_err.Recipient = activity.From;
-                        //    reply_err.Type = "message";
-                        //    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
-
-                        //    var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
-                        //}
+                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                         DateTime endTime = DateTime.Now;
 
@@ -1927,6 +2008,31 @@ namespace Bot_Application1
             }
 
         }
+
+
+        private static async Task<Translator> getTranslateJP(string input)
+        {
+            Translator trans = new Translator();
+
+            using (HttpClient client = new HttpClient())
+            {
+                string appId = "AIzaSyDr4CH9BVfENdM9uoSK0fANFVWD0gGXlJM";
+
+                string url = string.Format("https://translation.googleapis.com/language/translate/v2/?key={0}&q={1}&source=ko&target=jp&model=nmt", appId, input);
+
+                HttpResponseMessage msg = await client.GetAsync(url);
+
+                if (msg.IsSuccessStatusCode)
+                {
+                    var JsonDataResponse = await msg.Content.ReadAsStringAsync();
+                    trans = JsonConvert.DeserializeObject<Translator>(JsonDataResponse);
+                }
+                return trans;
+            }
+
+        }
+
+
 
 
         public bool isContainHangul(string s)

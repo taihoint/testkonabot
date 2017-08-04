@@ -29,13 +29,17 @@
         private string entitiesStr;
         private DateTime startTime;
         public static string messgaeText = "";
-        
-        public RootDialog(string luis_intent, string entitiesStr, DateTime startTime)
+        private string orgKRMent;
+        private string orgENGMent;
+
+        public RootDialog(string luis_intent, string entitiesStr, DateTime startTime, string orgKRMent, string orgENGMent)
         {
             this.luis_intent = luis_intent;
             this.entitiesStr = entitiesStr;
             this.startTime = startTime;
-            
+            this.orgKRMent = orgKRMent;
+            this.orgENGMent = orgENGMent;
+
         }
 
         public async Task StartAsync(IDialogContext context)
@@ -55,8 +59,7 @@
             DbConnect db = new DbConnect();
 
             Debug.WriteLine("activity : " + context.Activity.Conversation.Id);
-
-
+            
             newUserID = context.Activity.Conversation.Id;
             if (beforeUserID != newUserID)
             {
@@ -87,7 +90,13 @@
                 if ((messgaeText != null) && messgaeText.Trim().Length > 0)
                 {
                     //Naver Search API
+
+                    //string url = string.Format("https://translation.googleapis.com/language/translate/v2/?key={0}&q={1}&source=ko&target=en&model=nmt", appId, input);
+                    //string url = string.Format("https://openapi.naver.com/v1/search/{1}.json?query={2}&display=10&start=1&sort=sim", , messgaeText);
+
                     string url = "https://openapi.naver.com/v1/search/news.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; // JSON result 
+                    //string blogUrl = "https://openapi.naver.com/v1/search/blog.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; // JSON result 
+                    //string cafeUrl = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; // JSON result 
                     //string url = "https://openapi.naver.com/v1/search/blog.xml?query=" + query; //XML result
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                     request.Headers.Add("X-Naver-Client-Id", "Y536Z1ZMNv93Oej6TrkF");
@@ -112,7 +121,7 @@
                                 //Only One item
                                 List<CardImage> cardImages = new List<CardImage>();
                                 CardImage img = new CardImage();
-                                img.Url = "https://bottest.hyundai.com/assets/images/preview.jpg";
+                                img.Url = "";
                                 cardImages.Add(img);
                                 LinkHeroCard card = new LinkHeroCard()
                                 {
@@ -139,7 +148,7 @@
                                 {
                                     List<CardImage> cardImages = new List<CardImage>();
                                     CardImage img = new CardImage();
-                                    img.Url = "https://bottest.hyundai.com/assets/images/preview.jpg";
+                                    img.Url = "";
                                     cardImages.Add(img);
                                     LinkHeroCard card = new LinkHeroCard()
                                     {
@@ -175,9 +184,23 @@
                         }
                         else
                         {
-                            Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ",""));
 
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, 1, 'S', "", "", "", "SEARCH");
+                            for (int n = 0; n < Regex.Split(message.Text, " ").Length; n++)
+                            {
+                                string chgMsg = db.SelectChgMsg(Regex.Split(message.Text, " ")[n]);
+                                if (!string.IsNullOrEmpty(chgMsg))
+                                {
+                                    message.Text = message.Text.Replace(Regex.Split(message.Text, " ")[n], chgMsg);
+                                }
+                            }
+
+                            orgKRMent = Regex.Replace(message.Text, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
+
+                            Translator translateInfo = await getTranslate(message.Text);
+
+                            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+
+                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, 1, 'S', "", "", "", "SEARCH");
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
                             DateTime endTime = DateTime.Now;
@@ -207,7 +230,7 @@
                         await this.SendWelcomeMessageAsync(context);
                     }
 
-                    context.Done(message.Text);
+                    context.Done(messgaeText);
 
                 }
             }
@@ -257,7 +280,7 @@
             
             Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
 
-            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'D', "", "", "", "");
+            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, 0, 'D', "", "", "", "SEARCH");
             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
 
