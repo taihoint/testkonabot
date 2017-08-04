@@ -1051,7 +1051,7 @@ namespace Bot_Application1.DB
                 cmd.Connection = conn;
 
                 cmd.CommandText += " SELECT TRIMCOLOR_NM	";
-                cmd.CommandText += "       ,TRIMCOLOR_CD	";
+                cmd.CommandText += "       ,LEFT(TRIMCOLOR_CD,CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD	";
                 cmd.CommandText += "  	  ,TRIMCOLOR_PRICE	";
                 cmd.CommandText += "   FROM TBL_TRIMCOLOR2	";
                 cmd.CommandText += "   WHERE TRIMCOLOR_NM NOT LIKE '%)'	";
@@ -1132,7 +1132,7 @@ namespace Bot_Application1.DB
                 cmd.Connection = conn;
 
                 cmd.CommandText += " SELECT TRIMCOLOR_NM											";
-                cmd.CommandText += "      , TRIMCOLOR_CD                                            ";
+                cmd.CommandText += "      , LEFT(TRIMCOLOR_CD,CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD                                            ";
                 cmd.CommandText += " 	 , TRIMCOLOR_PRICE                                          ";
                 cmd.CommandText += " 	 , MODEL_NAME                                               ";
                 cmd.CommandText += "  FROM TBL_TRIMCOLOR2  A                                        ";

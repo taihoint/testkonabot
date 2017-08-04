@@ -55,6 +55,9 @@
             /* When MessageReceivedAsync is called, it's passed an IAwaitable<IMessageActivity>. To get the message,
              *  await the result. */
 
+            Debug.WriteLine("luis_intent : " + luis_intent);
+            Debug.WriteLine("entitiesStr : " + entitiesStr);
+
             // Db
             DbConnect db = new DbConnect();
 
@@ -66,7 +69,6 @@
                 beforeUserID = newUserID;
                 sorryMessageCnt = 0;
             }
-
             
 
             var message = await result;
@@ -200,7 +202,7 @@
 
                             orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
 
-                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, 1, 'S', "", "", "", "SEARCH");
+                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", 1, 'S', "", "", "", "SEARCH");
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
                             DateTime endTime = DateTime.Now;
@@ -280,7 +282,7 @@
             
             Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
 
-            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, 0, 'D', "", "", "", "SEARCH");
+            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", 0, 'D', "", "", "", "SEARCH");
             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
 

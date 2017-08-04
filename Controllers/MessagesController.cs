@@ -920,14 +920,14 @@ namespace Bot_Application1
 
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
-                                            APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr5, SelectTestDriveList[td].dlgStr6);
+                                            APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr4, SelectTestDriveList[td].dlgStr5);
                                             replyToConversation.Attachments.Add(
                                             UserGetHeroCard_location(
                                             SelectTestDriveList[td].dlgStr1 + " 시승센터",
                                             "TEL." + SelectTestDriveList[td].dlgStr3,
                                             "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
                                             //new CardImage(url: "http://www.smartsend.co.kr/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
-                                            new CardImage(url: "http://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                            new CardImage(url: "https://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
                                             SelectTestDriveList[td].dlgStr4,
                                             SelectTestDriveList[td].dlgStr5));
                                         }
@@ -1663,6 +1663,9 @@ namespace Bot_Application1
 
                                             string text = card[i].cardTitle;
 
+                                            //card.Count
+
+
                                             plHeroCard[i] = new UserHeroCard()
                                             {
                                                 Title = card[i].cardTitle,
@@ -1672,9 +1675,41 @@ namespace Bot_Application1
                                                 //Tap = tap,
                                                 Buttons = cardButtons,
                                                 Card_division = card[i].cardDivision,
-                                                Card_value = card[i].cardValue
+                                                Card_value = card[i].cardValue,
+                                                Card_cnt = card.Count
                                             };
 
+                                            //if (i > 0)
+                                            //{
+                                            //    plHeroCard[i] = new UserHeroCard()
+                                            //    {
+                                            //        Title = card[i].cardTitle,
+                                            //        Text = card[i].cardText,
+                                            //        Subtitle = card[i].cardSubTitle,
+                                            //        Images = cardImages,
+                                            //        //Tap = tap,
+                                            //        Buttons = cardButtons,
+                                            //        Card_division = card[i].cardDivision,
+                                            //        Card_value = card[i].cardValue,
+                                            //        Card_cnt = false
+                                            //    };
+                                            //}
+                                            //else if(i == 0)
+                                            //{
+                                            //    plHeroCard[i] = new UserHeroCard()
+                                            //    {
+                                            //        Title = card[i].cardTitle,
+                                            //        Text = card[i].cardText,
+                                            //        Subtitle = card[i].cardSubTitle,
+                                            //        Images = cardImages,
+                                            //        //Tap = tap,
+                                            //        Buttons = cardButtons,
+                                            //        Card_division = card[i].cardDivision,
+                                            //        Card_value = card[i].cardValue,
+                                            //        Card_cnt = true
+                                            //    };
+                                            //}
+                                            
                                             plAttachment[i] = plHeroCard[i].ToAttachment();
                                             replyToConversation.Attachments.Add(plAttachment[i]);
                                         }

@@ -26,5 +26,9 @@ namespace Bot_Application1.Models
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "card_value")]
         public string Card_value { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "card_cnt")]
+        public int Card_cnt { get; set; }
+
     }
 }
