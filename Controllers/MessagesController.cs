@@ -927,7 +927,7 @@ namespace Bot_Application1
                                             "TEL." + SelectTestDriveList[td].dlgStr3,
                                             "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
                                             //new CardImage(url: "http://www.smartsend.co.kr/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
-                                            new CardImage(url: "https://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                            new CardImage(url: "http://www.smartsend.co.kr/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
                                             SelectTestDriveList[td].dlgStr4,
                                             SelectTestDriveList[td].dlgStr5));
                                         }
@@ -1121,7 +1121,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);

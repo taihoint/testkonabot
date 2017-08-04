@@ -277,7 +277,7 @@
             reply_err.Recipient = context.Activity.From;
             reply_err.Type = "message";
             //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
-            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
             await context.PostAsync(reply_err);
             
             Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
