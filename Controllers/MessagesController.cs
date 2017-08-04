@@ -189,6 +189,7 @@ namespace Bot_Application1
             }
             else if (activity.Type == ActivityTypes.Message)
             {
+				HistoryLog("[logic start] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                 JObject Luis = new JObject();
                 string entitiesStr = "";
@@ -225,7 +226,7 @@ namespace Bot_Application1
                 bannedAnswer = Regex.Split(bannedAnswer, "@@")[0];
 
                 Translator translateInfo = await getTranslate(orgMent);
-
+				HistoryLog("[bannedword check end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
                 if (bannedAnswer != "")
                 {
                     {
@@ -555,7 +556,7 @@ namespace Bot_Application1
 
                     orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
 
-                    HistoryLog("[ 전처리 ] ==>> userID :: [ "+ activity.Conversation.Id + " ]       message :: [ "+ orgKRMent + " ]       date :: [ "+ DateTime.Now + " ]" );
+                    HistoryLog("[change msg end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // 한글 , 영어 질문 cash table 체크
@@ -577,7 +578,7 @@ namespace Bot_Application1
                             //translateInfo = await getTranslate(orgMent);
                             Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
                             
-                            HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+                            HistoryLog("[cash check true] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // For Query Analysis
@@ -607,7 +608,7 @@ namespace Bot_Application1
                             Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
 
 
-                            HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+                            HistoryLog("[cash check false] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // For Query Analysis
@@ -680,6 +681,8 @@ namespace Bot_Application1
                         luisID = 1; //Query Analysis
                                     //Debug.WriteLine("Luis.entities.Length : " + Luis.entities.Length);
 
+						HistoryLog("[luis request end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
+
                         //luis 분기
                         try
                         {
@@ -695,12 +698,14 @@ namespace Bot_Application1
                             testDriveWhereStr = LuisValue[0].testDriveWhereValue;
                             priceWhereStr = LuisValue[0].carPriceWhereValue;
 
-                            HistoryLog("[ LUIS ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+                            HistoryLog("[luis result db end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                             /*
                             if ((string)Luis["intents"][0]["intent"] == "Quote")
                             {
                                 CarQouteLuisValue = db.SelectCarQouteLuisResult(Luis.ToString());
+
+								HistoryLog("[car qoute db end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                                 Debug.WriteLine("CarQouteLuis INTENT : " + CarQouteLuisValue[0].intentValue);
                                 Debug.WriteLine("CarQouteLuis ENTITY : " + CarQouteLuisValue[0].entityValue);
@@ -717,6 +722,8 @@ namespace Bot_Application1
                             else if ((string)Luis["intents"][0]["intent"] == "Test drive" || (string)Luis["intents"][0]["intent"] == "Branch" || (string)Luis["intents"][0]["intent"] == "Test drive car color")
                             {
                                 List<TestDriveLuisResult> SelectTestDriveLuisResult = db.SelectTestDriveLuisResult(Luis.ToString());
+
+								HistoryLog("[test drive db end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                                 Debug.WriteLine("SelectLuisTestDirve = " + SelectTestDriveLuisResult.Count);
                                 Debug.WriteLine("SelectTestDriveLuisResult[0].intent.ToString() = " + SelectTestDriveLuisResult[0].intent.ToString());
@@ -913,7 +920,7 @@ namespace Bot_Application1
 
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
-                                            //APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr5, SelectTestDriveList[td].dlgStr6);
+                                            APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr5, SelectTestDriveList[td].dlgStr6);
                                             replyToConversation.Attachments.Add(
                                             UserGetHeroCard_location(
                                             SelectTestDriveList[td].dlgStr1 + " 시승센터",
@@ -1779,7 +1786,7 @@ namespace Bot_Application1
                             Debug.WriteLine("HISTORY RESULT FAIL");
                         }
 
-                        HistoryLog("[ DIALOG ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+                        HistoryLog("[dialog response end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
                         response = Request.CreateResponse(HttpStatusCode.OK);
                         return response;
                     }
@@ -2204,7 +2211,7 @@ namespace Bot_Application1
                 if (diDir.Exists)
                 {
                     System.IO.StreamWriter swStream = File.AppendText(strPath);
-                    string strLog = String.Format("{0}: {1}", dtNow.ToString(dtNow.Hour + "시mm분ss초"), strMsg);
+                    string strLog = String.Format("{0}: {1}", dtNow.ToString("MM/dd/yyyy hh:mm:ss.fff"), strMsg);
                     swStream.WriteLine(strLog);
                     swStream.Close(); ;
                 }

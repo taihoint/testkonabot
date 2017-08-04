@@ -15,6 +15,8 @@ using System.Text.RegularExpressions;
 using Bot_Application1.Models;
 using Newtonsoft.Json.Linq;
 using Microsoft.Bot.Builder.Dialogs;
+using Bot_Application1.Dialogs;
+using System.IO;
 
 namespace Bot_Application1
 {
@@ -29,6 +31,7 @@ namespace Bot_Application1
         public static int sorryMessageCnt = 0;
         public static string newUserID = "";
         public static string beforeUserID = "";
+        public static string filePath = "";
 
         public virtual async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
@@ -187,22 +190,30 @@ namespace Bot_Application1
             else if (activity.Type == ActivityTypes.Message)
             {
 
+                JObject Luis = new JObject();
+                string entitiesStr = "";
+                string testDriveWhereStr = "";
+                string priceWhereStr = "";
+
+                string entitiesValueStr = "";
+                string colorStr = "";
+                string carOptionStr = "";
+                string luis_intent = "";
+                string gubunVal = "";
+
+                int luisID = 0;
+
                 // Db
                 DbConnect db = new DbConnect();
 
                 List<CarQouteLuisResult> CarQouteLuisValue = new List<CarQouteLuisResult>();
-
-                //List<CarQouteLuisResult> CarQouteLuisValue = new List<CarQouteLuisResult>(); --> test drive
-                //List<CarQouteLuisResult> CarQouteLuisValue = new List<CarQouteLuisResult>(); --> etc
-
-                string LuisIntent = "";
-                string LuisEntity = "";
-                string LuisEntityValue = "";
-
-
+                List<LuisResult> LuisValue = new List<LuisResult>();
 
                 int inserResult;
                 string orgMent = "";
+                string orgKRMent = "";
+                string orgKRMent1 = "";
+                string orgENGMent = "";
                 DateTime startTime = DateTime.Now;
                 long unixTime = ((DateTimeOffset)startTime).ToUnixTimeSeconds();
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
@@ -277,7 +288,7 @@ namespace Bot_Application1
                             "",
                             //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\exterior\\" + CarExColorList[td].trimColorCd + ".jpg"),
                             new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)//,
-                                                                                                                                                                                              //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"),"turn", CarExColorList[td].trimColorCd)
+                            //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"),"turn", CarExColorList[td].trimColorCd)
 
                         );
                     }
@@ -534,25 +545,129 @@ namespace Bot_Application1
                             orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
                         }
                     }
+
+                    orgKRMent = "";
+                    orgENGMent = "";
+
                     Debug.WriteLine("orgMentorgMentorgMent : " + orgMent);
                     orgMent = orgMent.Replace("&#39;", "/'");
                     Debug.WriteLine("orgMent : " + orgMent);
-                    translateInfo = await getTranslate(orgMent);
-                    Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+
+                    orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
+
+                    HistoryLog("[ 전처리 ] ==>> userID :: [ "+ activity.Conversation.Id + " ]       message :: [ "+ orgKRMent + " ]       date :: [ "+ DateTime.Now + " ]" );
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    // For Query Analysis
-                    int luisID = 0;
-                    // Try to find dialogue from log history first before checking LUIS
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    JObject Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
-                    string entitiesStr = (string)Luis["entities"];
-                    string testDriveWhereStr = (string)Luis["test_driveWhere"];
-                    string priceWhereStr = (string)Luis["car_priceWhere"];
-                    string colorStr = (string)Luis["car_color"];
-                    string carOptionStr = (string)Luis["car_option"];
-                    string luis_intent = "";
-                    //string priceWhereStr = "";
+                    // 한글 , 영어 질문 cash table 체크
+
+                    if(db.SelectKoreanCashCheck(orgKRMent).Length == 0)
+                    {
+                        orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+
+                        translateInfo = await getTranslate(orgKRMent1);
+
+                        //translateInfo = await getTranslateJP(orgKRMent1);
+
+                        //translateInfo = await getTranslate(translateInfo.data.translations[0].translatedText);
+
+                        orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+
+                        if(db.SelectEnglishCashCheck(orgENGMent).Length > 0)
+                        {
+                            //translateInfo = await getTranslate(orgMent);
+                            Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                            
+                            HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // For Query Analysis
+                            luisID = 0;
+
+                            // Try to find dialogue from log history first before checking LUIS
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            //Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                            Luis = db.SelectQueryAnalysis(orgENGMent);
+                            entitiesStr = (string)Luis["entities"];
+
+                            testDriveWhereStr = (string)Luis["test_driveWhere"];
+                            priceWhereStr = (string)Luis["car_priceWhere"];
+
+                            entitiesValueStr = (string)Luis["test_driveWhere"];
+
+                            colorStr = (string)Luis["car_color"];
+                            carOptionStr = (string)Luis["car_option"];
+                            luis_intent = (string)Luis["intents"][0]["intent"];
+                            gubunVal = (string)Luis["car_option"];
+                            //string gubunVal = "";
+                            //string entitiesValueStr = "";
+                        }
+                        else 
+                        {
+                            //translateInfo = await getTranslate(orgMent);
+                            Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+
+
+                            HistoryLog("[ 번역 ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // For Query Analysis
+                            luisID = 0;
+
+                            // Try to find dialogue from log history first before checking LUIS
+                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            //Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+                            Luis = db.SelectQueryAnalysis(orgENGMent);
+                            entitiesStr = (string)Luis["entities"];
+
+                            testDriveWhereStr = (string)Luis["test_driveWhere"];
+                            priceWhereStr = (string)Luis["car_priceWhere"];
+
+                            entitiesValueStr = (string)Luis["test_driveWhere"];
+
+                            colorStr = (string)Luis["car_color"];
+                            carOptionStr = (string)Luis["car_option"];
+                            luis_intent = (string)Luis["intents"][0]["intent"];
+                            gubunVal = (string)Luis["car_option"];
+                            //string gubunVal = "";
+                            //string entitiesValueStr = "";
+                        }
+
+                    }else
+                    {
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        // For Query Analysis
+                        luisID = 0;
+
+                        // Try to find dialogue from log history first before checking LUIS
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+
+
+                        orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+
+                        translateInfo = await getTranslate(orgKRMent1);
+
+                        //translateInfo = await getTranslateJP(orgKRMent1);
+
+                        //translateInfo = await getTranslate(translateInfo.data.translations[0].translatedText);
+
+                        orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+
+                        Luis = db.SelectQueryAnalysis(orgENGMent);
+                        entitiesStr = (string)Luis["entities"];
+
+                        testDriveWhereStr = (string)Luis["test_driveWhere"];
+                        priceWhereStr = (string)Luis["car_priceWhere"];
+
+                        entitiesValueStr = (string)Luis["test_driveWhere"];
+
+                        colorStr = (string)Luis["car_color"];
+                        carOptionStr = (string)Luis["car_option"];
+                        luis_intent = (string)Luis["intents"][0]["intent"];
+                        gubunVal = (string)Luis["car_option"];
+                        //string gubunVal = "";
+                        //string entitiesValueStr = "";
+                    }
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // For Query Analysis
@@ -571,6 +686,18 @@ namespace Bot_Application1
                             Debug.WriteLine("score : " + (float)Luis["intents"][0]["score"]);
                             Debug.WriteLine("score : " + Luis["entities"].Count());
 
+                            LuisValue = db.LuisResult(Luis.ToString());
+
+                            gubunVal    = LuisValue[0].val;
+                            luis_intent = LuisValue[0].intentValue;
+                            entitiesStr = LuisValue[0].entityValue;
+                            entitiesValueStr = LuisValue[0].entitieWhereValue;
+                            testDriveWhereStr = LuisValue[0].testDriveWhereValue;
+                            priceWhereStr = LuisValue[0].carPriceWhereValue;
+
+                            HistoryLog("[ LUIS ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+
+                            /*
                             if ((string)Luis["intents"][0]["intent"] == "Quote")
                             {
                                 CarQouteLuisValue = db.SelectCarQouteLuisResult(Luis.ToString());
@@ -581,10 +708,10 @@ namespace Bot_Application1
 
                                 luis_intent = CarQouteLuisValue[0].intentValue;
                                 entitiesStr = CarQouteLuisValue[0].entityValue;
-                                priceWhereStr = CarQouteLuisValue[0].whereValue;
+                                entitiesValueStr = CarQouteLuisValue[0].whereValue;
 
-                                priceWhereStr = priceWhereStr.Replace("pricing", "price");
-                                priceWhereStr = priceWhereStr.Replace("premium special", "premium s");
+                                entitiesValueStr = entitiesValueStr.Replace("pricing", "price");
+                                entitiesValueStr = entitiesValueStr.Replace("premium special", "premium s");
 
                             }
                             else if ((string)Luis["intents"][0]["intent"] == "Test drive" || (string)Luis["intents"][0]["intent"] == "Branch" || (string)Luis["intents"][0]["intent"] == "Test drive car color")
@@ -598,8 +725,8 @@ namespace Bot_Application1
 
                                 luis_intent = SelectTestDriveLuisResult[0].intent.ToString();
                                 entitiesStr = SelectTestDriveLuisResult[0].entity.ToString();
-                                testDriveWhereStr = SelectTestDriveLuisResult[0].entity_value.ToString();
-
+                                entitiesValueStr = SelectTestDriveLuisResult[0].entity_value.ToString();
+                                
                             }
                             else
                             {
@@ -612,6 +739,7 @@ namespace Bot_Application1
                                 luis_intent = CarQouteLuisValue[0].intentValue;
                                 entitiesStr = CarQouteLuisValue[0].entityValue;
                             }
+                            */
                         }
                         catch (Exception ex)
                         {
@@ -620,25 +748,40 @@ namespace Bot_Application1
                             // No LUIS result at all, so NLP failed completely
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             //sorryMessageCnt++;
-                            Debug.WriteLine("sorryMessageCnt2 : " + sorryMessageCnt);
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'N', "", "", "", "");
-                            Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
-                            Activity reply_err = activity.CreateReply();
-                            reply_err.Recipient = activity.From;
-                            reply_err.Type = "message";
-                            //reply_err.Text = "죄송해요. 무슨 말인지 잘 모르겠어요..";
-                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
-                            var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
 
+                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+
+                            //if (activity.Text.StartsWith("코나") == true)
+                            //{
+                            //    await Conversation.SendAsync(activity, () => new RootDialog());
+
+                            //}
+                            //else
+                            //{
+                            //    Debug.WriteLine("sorryMessageCnt2 : " + sorryMessageCnt);
+                            //    int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", "", 0, 'N', "", "", "", "");
+                            //    Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+                            //    Activity reply_err = activity.CreateReply();
+                            //    reply_err.Recipient = activity.From;
+                            //    reply_err.Type = "message";
+                            //    //reply_err.Text = "죄송해요. 무슨 말인지 잘 모르겠어요..";
+                            //    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
+                            //    var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+
+
+                            //}
+                            response = Request.CreateResponse(HttpStatusCode.OK);
+                            return response;
                         }
+                        
                     }
                     try
                     {
                         List<DialogList> dlg = new List<DialogList>();
 
-                        List<LuisList> LuisDialogID = db.SelectLuis((string)Luis["intents"][0]["intent"], entitiesStr);
+                        List<LuisList> LuisDialogID = db.SelectLuis(luis_intent, entitiesStr);
 
-                        Debug.WriteLine(LuisDialogID[0].dlgId + " LuisDialogID count : " + LuisDialogID.Count);
+                        //Debug.WriteLine(LuisDialogID[0].dlgId + " LuisDialogID count : " + LuisDialogID.Count);
                         //컬러별 차량이 전시된 매장을 알려줘. showroom에서 car color로 변경되어 , -> . 으로 변경
                         //entitiesStr = (string)entitiesStr.Replace(".", ",");
 
@@ -681,17 +824,12 @@ namespace Bot_Application1
                                 }
                             }
 
-                            
-
-
-                            
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 시승 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            if((Luis["intents"][0]["intent"].ToString().Equals("Test drive")
-                                || Luis["intents"][0]["intent"].ToString().Equals("Test drive car color")
-                                || Luis["intents"][0]["intent"].ToString().Equals("Branch"))
-                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near"))
+                            if ((gubunVal.Equals("Test drive") )
+                                && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near")
+                                && k < 1 )
                             {
 
                                 if (entitiesStr.Contains("current location"))
@@ -700,9 +838,9 @@ namespace Bot_Application1
                                     Geolocation.getRegion();
                                     if (testDriveWhereStr.Contains("test drive center region"))
                                     {
-                                        //position = testDriveWhereStr.IndexOf(",");
-                                        //testDriveWhereStr = testDriveWhereStr.Substring(position, (int)testDriveWhereStr.Length);
-                                        //testDriveWhereStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + testDriveWhereStr;
+                                        //position = entitiesValueStr.IndexOf(",");
+                                        //entitiesValueStr = entitiesValueStr.Substring(position, (int)entitiesValueStr.Length);
+                                        //entitiesValueStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + entitiesValueStr;
                                         testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
                                     }
                                     else
@@ -715,11 +853,14 @@ namespace Bot_Application1
 
                                 if (SelectTestDriveList.Count == 0)
                                 {
-                                    Activity reply_err = activity.CreateReply();
-                                    reply_err.Recipient = activity.From;
-                                    reply_err.Type = "message";
-                                    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                    await connector.Conversations.SendToConversationAsync(reply_err);
+                                    //Activity reply_err = activity.CreateReply();
+                                    //reply_err.Recipient = activity.From;
+                                    //reply_err.Type = "message";
+                                    ////reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+                                    //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                    //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                    await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                     response = Request.CreateResponse(HttpStatusCode.OK);
                                     return response;
@@ -761,7 +902,7 @@ namespace Bot_Application1
                                 else if (SelectTestDriveList[0].dlgGubun.Equals("3"))
                                 {
                                     Debug.WriteLine("case 3");
-                                    
+
                                     if (testDriveWhereStr.Contains("test drive center address"))
                                     {
                                         Activity reply_ment = activity.CreateReply();
@@ -772,7 +913,7 @@ namespace Bot_Application1
 
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
-                                            //APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr5, SelectTestDriveList[td].dlgStr6);
+                                            APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr5, SelectTestDriveList[td].dlgStr6);
                                             replyToConversation.Attachments.Add(
                                             UserGetHeroCard_location(
                                             SelectTestDriveList[td].dlgStr1 + " 시승센터",
@@ -855,7 +996,7 @@ namespace Bot_Application1
                                         SelectTestDriveList[td].dlgStr1,
                                         "",
                                         SelectTestDriveList[td].dlgStr1 + " 지역, " + SelectTestDriveList[td].dlgStr2 + " 차량이 전시된 매장",
-                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + "에 " + SelectTestDriveList[td].dlgStr2 + " 컬러가 전시된 매장이에요"))
+                                        new CardAction(ActionTypes.ImBack, "매장 보기", value: SelectTestDriveList[td].dlgStr1 + "에 " + SelectTestDriveList[td].dlgStr2 + " 컬러가 전시된 매장"))
                                         );
                                     }
                                 }
@@ -864,8 +1005,7 @@ namespace Bot_Application1
                                     //branch info                                 
                                     Debug.WriteLine("case 7");
                                     /*
-                                     * 이미지 없이 출력 테스트용
-                                    for (int td = 0; td < CarBranchInfo.Count; td++)
+                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
                                     {
                                         replyToConversation.Attachments.Add(
                                         GetHeroCard_location(
@@ -879,11 +1019,13 @@ namespace Bot_Application1
                                     //데이터가 없을 때 예외 처리
                                     if (SelectTestDriveList.Count == 0)
                                     {
-                                        Activity reply_err = activity.CreateReply();
-                                        reply_err.Recipient = activity.From;
-                                        reply_err.Type = "message";
-                                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','' ]";
-                                        await connector.Conversations.SendToConversationAsync(reply_err);
+                                        //Activity reply_err = activity.CreateReply();
+                                        //reply_err.Recipient = activity.From;
+                                        //reply_err.Type = "message";
+                                        //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','' ]";
+                                        //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                         response = Request.CreateResponse(HttpStatusCode.OK);
                                         return response;
@@ -891,7 +1033,7 @@ namespace Bot_Application1
                                     else
                                     {
                                         // dlgStr1 = BR_NM, dlgStr2 = BR_ADDR , dlgStr3 = BR_CCPC, dlgStr4 = BR_XCOO, dlgStr5 = BR_YCOO
-                                        /*
+
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
                                             var urlImg = "https://openapi.naver.com/v1/map/staticmap.bin?clientId=OPCP0Yh0b2IC9r59XaTR&url=http://www.hyundai.com&crs=EPSG:4326&center=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + "&level=12&w=400&h=300&baselayer=default&markers=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5;
@@ -899,6 +1041,15 @@ namespace Bot_Application1
 
                                             System.Net.WebClient client = new System.Net.WebClient();
                                             client.DownloadFile(urlImg, fileName);
+
+                                            if (SelectTestDriveList[td].dlgStr2.Length > 40)
+                                            {
+                                                addressStr = SelectTestDriveList[td].dlgStr2.Substring(0, 37) + "...";
+                                            }
+                                            else
+                                            {
+                                                addressStr = SelectTestDriveList[td].dlgStr2;
+                                            }
 
                                             replyToConversation.Attachments.Add(
                                             UserGetHeroCard_location(
@@ -910,36 +1061,28 @@ namespace Bot_Application1
                                             SelectTestDriveList[td].dlgStr5)
                                             );
                                         }
-                                        */
-                                        Activity reply_reset = activity.CreateReply();
-                                        reply_reset.Recipient = activity.From;
-                                        reply_reset.Type = "message";
-                                        reply_reset.Attachments = new List<Attachment>();
-                                        reply_reset.AttachmentLayout = AttachmentLayoutTypes.Carousel;
 
-                                        reply_reset.Attachments.Add(
-                                        GetHeroCard_reset(
-                                            new CardAction(ActionTypes.ImBack, "다음에하기", value: "다음에 와서 해볼게"),
-                                            new CardAction(ActionTypes.ImBack, "다른 컬러 차량으로 찾기", value: "컬러별 차량이 전시된 매장을 알려줘"))
-                                        );
+                                        //await connector.Conversations.SendToConversationAsync(reply_reset);
 
                                     }
+
+                                    //Luis["intents"][0]["intent"] = "";
+                                    
                                 }
                                 luis_intent = (string)Luis["intents"][0]["intent"];
-                                Luis["intents"][0]["intent"] = "";
-
+                                //gubunVal = "";
                             }
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 견적 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            if (Luis["intents"][0]["intent"].ToString().Equals("Quote"))
+                            else if (gubunVal.Equals("Quote"))
                             {
-                                Debug.WriteLine("INTENT ::[ " + (string)Luis["intents"][0]["intent"] + " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
+                                Debug.WriteLine("INTENT ::[ " + luis_intent + " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
 
                                 if (entitiesStr != "")
                                 {
 
-                                    if ((entitiesStr.Contains("car color") && entitiesStr.Contains("exterior color")) || (entitiesStr.Contains("car color") && entitiesStr.Contains("interior color")) || entitiesStr.Equals("car color") || entitiesStr.Contains("car color"))
+                                    if ((entitiesStr.Contains("car color") && entitiesStr.Contains("exterior color")) || (entitiesStr.Contains("car color") && entitiesStr.Contains("interior color")) || entitiesStr.Equals("car color") || (entitiesStr.Contains("car color")&& !entitiesStr.Contains("option")))
                                     {
 
                                         Debug.WriteLine("색상 질문");
@@ -949,12 +1092,7 @@ namespace Bot_Application1
                                         //데이터가 없을 때 예외 처리
                                         if (CarPriceList.Count == 0)
                                         {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
-
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
                                         }
@@ -962,6 +1100,13 @@ namespace Bot_Application1
                                         if (entitiesStr.Equals("car color"))
                                         {
                                             Debug.WriteLine("전체 색상 질문");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "전체 색상을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
                                             List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
                                             //데이터가 없을 때 예외 처리
                                             if (CarExColorList.Count == 0)
@@ -969,7 +1114,7 @@ namespace Bot_Application1
                                                 Activity reply_err = activity.CreateReply();
                                                 reply_err.Recipient = activity.From;
                                                 reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
+                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                                 await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -999,17 +1144,18 @@ namespace Bot_Application1
                                         {
                                             Debug.WriteLine("외장 전체 색상 질문");
 
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "전체 외장색상을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
                                             List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
                                             Debug.WriteLine("exteriorexteriorexteriorexterior");
-                                            //데이터가 없을 때 예외 처리
+                                            //데이터가 없을 때 예외 처리 
                                             if (CarExColorList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
-
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
                                             }
@@ -1036,17 +1182,19 @@ namespace Bot_Application1
                                         else if (entitiesStr.Equals("car color.interior color"))
                                         {
                                             Debug.WriteLine("내장 전체 색상 질문");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "전체 내장색상을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
                                             List<CarInColorList> CarInColorList = db.SelectCarInColorAllList();
                                             Debug.WriteLine("interiorinteriorinteriorinterior");
                                             //데이터가 없을 때 예외 처리
                                             if (CarInColorList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
-
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
                                             }
@@ -1072,6 +1220,37 @@ namespace Bot_Application1
                                         else
                                         {
                                             Debug.WriteLine("트림, 엔진, 드라이브 휠, 칼라 패키지, 튜익스 색상 질문");
+                                            string colorMent = activity.Text;
+                                            //colorMent = activity.Text.Replace("옵션", "");
+                                            colorMent = colorMent.Replace("가격", "");
+                                            colorMent = colorMent.Replace("exterior", "외장");
+                                            colorMent = colorMent.Replace("interior", "내장");
+                                            colorMent = colorMent.Replace("color", "색상");
+                                            //priceMent = activity.Text.Replace("price", "");
+
+                                            int index = colorMent.IndexOf("색상") + 2;
+
+                                            //Debug.WriteLine("1 : " + colorMent.Substring(0, index));
+                                            //Debug.WriteLine("2 : " + colorMent.Substring(0, index + 1));
+                                            //Debug.WriteLine("3 : " + colorMent.Substring(0, index + 1));
+
+                                            colorMent = colorMent.Substring(0, index);
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            //reply_ment.Text = colorMent + "을 보여드릴게요";
+                                            if(priceWhereStr.Contains("exterior"))
+                                            {
+                                                reply_ment.Text = "선택하신 트림의 외장 색상을 보여드릴게요";
+                                            }
+                                            else if (priceWhereStr.Contains("interior"))
+                                            {
+                                                reply_ment.Text = "선택하신 트림의 내장색상을 보여드릴게요";
+                                            }
+                                                
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
                                             string color = "";
                                             for (int i = 0; i < CarPriceList.Count(); i++)
                                             {
@@ -1081,7 +1260,6 @@ namespace Bot_Application1
                                                 trimNM = trimNM.Replace("1.6 ", "");
                                                 trimNM = trimNM.Replace("오토 ", "");
                                                 trimNM = trimNM.Replace("터보 ", "");
-                                                trimNM = trimNM.Replace("오토", "");
 
                                                 if (!CarPriceList[i].saleCD.Contains("X"))
                                                 {
@@ -1089,7 +1267,7 @@ namespace Bot_Application1
                                                     if (!CarPriceList[i].carTrimNm.Contains("투톤"))
                                                     {
 
-                                                        if (entitiesStr.Contains("exterior") || entitiesStr.Contains("car color"))
+                                                        if (entitiesStr.Contains("exterior") )
                                                         {
 
                                                             color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
@@ -1115,6 +1293,19 @@ namespace Bot_Application1
                                                                 new CardAction(ActionTypes.ImBack, "내장색상", value: trimNM.Replace(" 1.6", "") + " 트림 내장색상"), "", "")
                                                             );
                                                         }
+                                                        else if (entitiesStr.Contains("car color"))
+                                                        {
+
+                                                            color = (string)(CarPriceList[i].tuix + CarPriceList[i].cartrim);
+                                                            replyToConversation.Attachments.Add(
+                                                            GetHeroCard_show(
+                                                                trimNM.Replace(" 1.6", ""),
+                                                                "",
+                                                                "",
+                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                                new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 트림 외장색상"), "", "")
+                                                            );
+                                                        }
 
                                                     }
                                                 }
@@ -1122,23 +1313,32 @@ namespace Bot_Application1
                                         }
                                         luis_intent = (string)Luis["intents"][0]["intent"];
                                     }
-                                    else if (!entitiesStr.Contains("car color") && entitiesStr.Contains("option"))
+                                    //else if (!entitiesStr.Contains("car color") && entitiesStr.Contains("option"))
+                                    else if (entitiesStr.Contains("option"))
                                     {
                                         Debug.WriteLine("옵션 질문");
                                         if (entitiesStr.Equals("option"))
                                         {
                                             Debug.WriteLine("전체 옵션");
 
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            reply_ment.Text = "전체 옵션을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
                                             List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
 
                                             //데이터가 없을 때 예외 처리
                                             if (carOptionList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+
+                                                //Activity reply_err = activity.CreateReply();
+                                                //reply_err.Recipient = activity.From;
+                                                //reply_err.Type = "message";
+                                                //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                                //await connector.Conversations.SendToConversationAsync(reply_err);
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1161,15 +1361,38 @@ namespace Bot_Application1
                                         else
                                         {
                                             List<CarOptionList> carOptionList = db.SelectOptionList(priceWhereStr);
+                                            string optionMent = activity.Text;
+
+                                            //optionMent = optionMent.Replace("가격", "");
+                                            //priceMent = activity.Text.Replace("price", "");
+
+                                            //int index = optionMent.IndexOf("옵션") + 2;
+
+                                            //Debug.WriteLine("1 : " + optionMent.Substring(0, index));
+                                            //Debug.WriteLine("2 : " + optionMent.Substring(0, index + 1));
+                                            
+
+                                            //optionMent = optionMent.Substring(0, index);
+
+                                            //optionMent = optionMent.Replace("옵션", "");
+
+                                            Activity reply_ment = activity.CreateReply();
+                                            reply_ment.Recipient = activity.From;
+                                            reply_ment.Type = "message";
+                                            //reply_ment.Text = optionMent + "의 추가 옵션을 보여드릴게요";
+                                            reply_ment.Text = "선택하신 트림의 추가 옵션을 보여드릴게요";
+                                            var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
 
                                             //데이터가 없을 때 예외 처리
                                             if (carOptionList.Count == 0)
                                             {
-                                                Activity reply_err = activity.CreateReply();
-                                                reply_err.Recipient = activity.From;
-                                                reply_err.Type = "message";
-                                                reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                                await connector.Conversations.SendToConversationAsync(reply_err);
+                                                //Activity reply_err = activity.CreateReply();
+                                                //reply_err.Recipient = activity.From;
+                                                //reply_err.Type = "message";
+                                                //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                                //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                                await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                                 return response;
@@ -1202,11 +1425,14 @@ namespace Bot_Application1
                                         //데이터가 없을 때 예외 처리
                                         if (CarModelList.Count == 0)
                                         {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+
+                                            //Activity reply_err = activity.CreateReply();
+                                            //reply_err.Recipient = activity.From;
+                                            //reply_err.Type = "message";
+                                            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                            //await connector.Conversations.SendToConversationAsync(reply_err);
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
@@ -1239,24 +1465,47 @@ namespace Bot_Application1
                                         Debug.WriteLine("트림, 엔진, 드라이브 휠, 칼라 패키지, 튜익스 가격 질문");
 
                                         string color = "";
+                                        string priceMent = "";
+                                        //Debug.WriteLine("가격 질문 멘트 : " + orgMent.Replace("가격", ""));
+                                        int index = 0;
+
+                                        //priceMent = activity.Text.Replace("price", "");
+                                        
+                                        //index = priceMent.IndexOf("가격") + 2;
+                                        //index = priceMent.IndexOf("price") + 5;
+
+                                        //priceMent = priceMent.Substring(0, index);
+
+                                        //priceMent = activity.Text.Replace("가격", "");
+                                        //priceMent = activity.Text.Replace("price", "");
+
+                                        Activity reply_ment = activity.CreateReply();
+                                        reply_ment.Recipient = activity.From;
+                                        reply_ment.Type = "message";
+                                        //reply_ment.Text = priceMent + " 가격을 보여드릴게요";
+                                        reply_ment.Text = "선택하신 트림의 가격을 보여드릴게요";
+                                        var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
 
                                         List<CarTrimList> CarTrimList = db.SelectCarTrimList1(priceWhereStr);
 
                                         //데이터가 없을 때 예외 처리
                                         if (CarTrimList.Count == 0)
                                         {
-                                            Activity reply_err = activity.CreateReply();
-                                            reply_err.Recipient = activity.From;
-                                            reply_err.Type = "message";
-                                            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-                                            await connector.Conversations.SendToConversationAsync(reply_err);
+                                            //Activity reply_err = activity.CreateReply();
+                                            //reply_err.Recipient = activity.From;
+                                            //reply_err.Type = "message";
+                                            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
+                                            //await connector.Conversations.SendToConversationAsync(reply_err);
+
+                                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                                             response = Request.CreateResponse(HttpStatusCode.OK);
                                             return response;
                                         }
 
 
-                                        if (CarTrimList.Count > 1)
+                                        if (CarTrimList.Count > 0)
                                         {
                                             for (int td = 0; td < CarTrimList.Count; td++)
                                             {
@@ -1267,46 +1516,6 @@ namespace Bot_Application1
                                                 trimNM = trimNM.Replace("오토 ", "");
                                                 trimNM = trimNM.Replace("오토", "");
                                                 trimNM = trimNM.Replace("터보 ", "");
-
-                                                //Activity reply_ment = activity.CreateReply();
-                                                //reply_ment.Recipient = activity.From;
-                                                //reply_ment.Type = "message";
-                                                //reply_ment.Text = "코나 " + trimNM + "의 외장색상, 내장색상, 옵션을 보여 드릴게요,상세 견적은 견적 바로가기를 눌러주세요";
-                                                //var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
-
-
-                                                /*
-                                                 GetHeroCard_trim(
-                                                    trimNM,
-                                                    //orgMent,
-                                                    "",
-                                                    "",
-                                                    //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\trim\\" + color.Replace(" ", "") + ".jpg"),
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
-                                                    new CardAction(ActionTypes.ImBack, "외장색상", value: orgMent + " 외장색상 보여줄래"),
-                                                    new CardAction(ActionTypes.ImBack, "내장색상", value: orgMent + " 내장색상 보여줄래"),
-                                                    new CardAction(ActionTypes.ImBack, "옵션보기", value: orgMent + " 옵션 보여줄래"),
-                                                    new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?car code=RV104"))
-                                                 */
-
-
-                                                //if (!CarTrimList[td].saleCD.Contains("XX"))
-                                                //{
-                                                //    color = (string)(CarTrimList[td].tuix + CarTrimList[td].cartrim);
-                                                //    //Debug.WriteLine("AA : " + CarTrimList[td].tuix + CarTrimList[td].cartrim);
-                                                //    //Debug.WriteLine("color : " + color);
-                                                //    replyToConversation.Attachments.Add(
-                                                //    GetHeroCard_trim(
-                                                //    trimNM,
-                                                //    string.Format("{0}", CarTrimList[td].salePrice.ToString("n0")) + "원",
-                                                //    "",
-                                                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
-                                                //    new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM + " 외장색상"),
-                                                //    new CardAction(ActionTypes.ImBack, "내장색상", value: trimNM + " 내장색상"),
-                                                //    new CardAction(ActionTypes.ImBack, "옵션보기", value: trimNM + " 옵션보기"),
-                                                //    new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?car code=RV104"))
-                                                //    );
-                                                //}
 
                                                 if (!CarTrimList[td].saleCD.Contains("XX"))
                                                 {
@@ -1325,33 +1534,13 @@ namespace Bot_Application1
 
                                             }
                                         }
-                                        //else
-                                        //{
-                                        //    string trimNM = CarTrimList[0].carTrimNm;
-                                        //    trimNM = trimNM.Replace("코나 ", "");
-                                        //    trimNM = trimNM.Replace("1.6 ", "");
-                                        //    trimNM = trimNM.Replace("오토 ", "");
-                                        //    trimNM = trimNM.Replace("오토", "");
-                                        //    trimNM = trimNM.Replace("터보 ", "");
-
-                                        //    Activity reply_ment = activity.CreateReply();
-                                        //    reply_ment.Recipient = activity.From;
-                                        //    reply_ment.Type = "message";
-                                        //    reply_ment.Text = "코나 " + trimNM + "의 외장색상, 내장색상, 옵션을 보여 드릴게요,상세 견적은 견적 바로가기를 눌러주세요";
-                                        //    var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
-
-
-
-
-                                        //}
-
-
-
                                         luis_intent = (string)Luis["intents"][0]["intent"];
                                     }
                                 }
                                 //luis_intent = (string)Luis["intents"][0]["intent"];
                             }
+
+                            //other
                             else
                             {
                                 Debug.WriteLine("(LuisDialogID[k].dlgId ====" + (LuisDialogID[k].dlgId));
@@ -1470,9 +1659,7 @@ namespace Bot_Application1
                                             plHeroCard[i] = new UserHeroCard()
                                             {
                                                 Title = card[i].cardTitle,
-                                                //Title = "<b><div style =\"color:rgb(0,0,255)\">" + text + "</div></b>",
                                                 Text = card[i].cardText,
-                                                //Text = "<b><div style =\"color:rgb(0,0,255)\">DDDDDDDDDDDDDDDDDD</div></b>",
                                                 Subtitle = card[i].cardSubTitle,
                                                 Images = cardImages,
                                                 //Tap = tap,
@@ -1515,10 +1702,7 @@ namespace Bot_Application1
                                 Activity reply_start = activity.CreateReply();
                                 reply_start.Recipient = activity.From;
                                 reply_start.Type = "message";
-                                //reply_start.Text = "<b><div style=\"color:rgb(0,0,255)\">" + hambuger + "를 누르면 전체 메뉴가 나와요</div></b>";
-                                //reply_start.Text = "<font color=\"rgb(255,255,0)\">" + hambuger + "를 누르면 전체 메뉴가 나와요</font>";
                                 reply_start.Text = "<span style=\"color:rgb(0,0,255);font-size:15pt; font-weight:bold\">" + hambuger + "</span> 를 누르면 전체 메뉴가 나와요";
-                                //reply_start.Text = "≡ 를 누르면 전체 메뉴가 나와요";
                                 await connector.Conversations.SendToConversationAsync(reply_start);
 
                                 response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1530,12 +1714,19 @@ namespace Bot_Application1
 
                         if (LuisDialogID.Count == 0)
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, carOptionStr);
-                            Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+                            //int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            ////int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            //Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+
+                            await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+
+                            response = Request.CreateResponse(HttpStatusCode.OK);
+                            return response;
                         }
                         else
                         {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, carOptionStr);
+                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
                         }
 
@@ -1559,20 +1750,16 @@ namespace Bot_Application1
                         }
                         sorryMessageCnt = 0;
                         //});
+                        HistoryLog("[ DIALOG ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
                     }
                     catch
                     {
 
-                        int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, carOptionStr);
+                        int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                        //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
-                        Debug.WriteLine("sorryMessageCnt3 : " + sorryMessageCnt);
-                        Activity reply_err = activity.CreateReply();
-                        reply_err.Recipient = activity.From;
-                        reply_err.Type = "message";
-                        reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + (string)Luis["intents"][0]["intent"] + "','" + entitiesStr + "' ]";
-
-                        var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+                        await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
 
                         DateTime endTime = DateTime.Now;
 
@@ -1592,7 +1779,7 @@ namespace Bot_Application1
                             Debug.WriteLine("HISTORY RESULT FAIL");
                         }
 
-
+                        HistoryLog("[ DIALOG ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
                         response = Request.CreateResponse(HttpStatusCode.OK);
                         return response;
                     }
@@ -1643,7 +1830,9 @@ namespace Bot_Application1
             JObject jsonObj = new JObject();
             using (HttpClient client = new HttpClient())
             {
-                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
+                //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
+                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
+                
                 //string RequestURI = "https://api.projectoxford.ai/luis/v1/application?id=fd9f899c-5a48-499e-9037-9ea589953684&subscription-key=7efb093087dd48918b903885b944740c&q=" + Query;
                 HttpResponseMessage msg = await client.GetAsync(RequestURI);
 
@@ -1850,6 +2039,31 @@ namespace Bot_Application1
         }
 
 
+        private static async Task<Translator> getTranslateJP(string input)
+        {
+            Translator trans = new Translator();
+
+            using (HttpClient client = new HttpClient())
+            {
+                string appId = "AIzaSyDr4CH9BVfENdM9uoSK0fANFVWD0gGXlJM";
+
+                string url = string.Format("https://translation.googleapis.com/language/translate/v2/?key={0}&q={1}&source=ko&target=jp&model=nmt", appId, input);
+
+                HttpResponseMessage msg = await client.GetAsync(url);
+
+                if (msg.IsSuccessStatusCode)
+                {
+                    var JsonDataResponse = await msg.Content.ReadAsStringAsync();
+                    trans = JsonConvert.DeserializeObject<Translator>(JsonDataResponse);
+                }
+                return trans;
+            }
+
+        }
+
+
+
+
         public bool isContainHangul(string s)
         {
             char[] charArr = s.ToCharArray();
@@ -1967,7 +2181,39 @@ namespace Bot_Application1
             };
             return heroCard.ToAttachment();
         }
+
+        public void HistoryLog(String strMsg)
+        {
+            try
+            {
+
+                string m_strLogPrefix = AppDomain.CurrentDomain.BaseDirectory + @"LOG\";
+                string m_strLogExt = @".LOG";
+                DateTime dtNow = DateTime.Now;
+                string strDate = dtNow.ToString("yyyy-MM-dd");
+                string strPath = String.Format("{0}{1}{2}", m_strLogPrefix, strDate, m_strLogExt);
+                string strDir = Path.GetDirectoryName(strPath);
+                DirectoryInfo diDir = new DirectoryInfo(strDir);
+
+                if (!diDir.Exists)
+                {
+                    diDir.Create();
+                    diDir = new DirectoryInfo(strDir);
+                }
+
+                if (diDir.Exists)
+                {
+                    System.IO.StreamWriter swStream = File.AppendText(strPath);
+                    string strLog = String.Format("{0}: {1}", dtNow.ToString(dtNow.Hour + "시mm분ss초"), strMsg);
+                    swStream.WriteLine(strLog);
+                    swStream.Close(); ;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
+        }
+
     }
-
-
 }
