@@ -508,7 +508,7 @@ namespace Bot_Application1
                         new CardAction(ActionTypes.ImBack, "외장색상", value: orgMent + " 트림 외장색상"),
                         new CardAction(ActionTypes.ImBack, "내장색상", value: orgMent + " 트림 내장색상"),
                         new CardAction(ActionTypes.ImBack, "옵션보기", value: orgMent + " 트림 옵션보기"),
-                        new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?car code=RV104"))
+                        new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?carcode=RV104"))
                     );
 
                     var reply1 = await connector.Conversations.SendToConversationAsync(reply_trim_only);
@@ -654,18 +654,27 @@ namespace Bot_Application1
                         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         //Luis = db.SelectQueryAnalysis(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
 
+                        //for (int n = 0; n < Regex.Split(orgMent, " ").Length; n++)
+                        //{
+                        //    string chgMsg = db.SelectChgMsg(Regex.Split(orgMent, " ")[n]);
+                        //    if (!string.IsNullOrEmpty(chgMsg))
+                        //    {
+                        //        orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
+                        //    }
+                        //}
 
-                        orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
 
-                        translateInfo = await getTranslate(orgKRMent1);
+                        //orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
 
-                        //translateInfo = await getTranslateJP(orgKRMent1);
+                        //translateInfo = await getTranslate(orgKRMent1);
 
-                        //translateInfo = await getTranslate(translateInfo.data.translations[0].translatedText);
+                        ////translateInfo = await getTranslateJP(orgKRMent1);
 
-                        orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+                        ////translateInfo = await getTranslate(translateInfo.data.translations[0].translatedText);
 
-                        Luis = db.SelectQueryAnalysis(orgENGMent);
+                        //orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+
+                        Luis = db.SelectQueryAnalysis(db.SelectKoreanCashCheck(orgKRMent));
                         entitiesStr = (string)Luis["entities"];
 
                         testDriveWhereStr = (string)Luis["test_driveWhere"];

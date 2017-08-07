@@ -1485,17 +1485,44 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
 
-                cmd.CommandText += "SELECT KR_QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '"+ arg + "'";
+                cmd.CommandText += "SELECT QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '" + arg + "'";
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
                 while (rdr.Read())
                 {
-                    result = rdr["KR_QUERY"] as string;
+                    result = rdr["QUERY"] as string;
                 }
             }
             return result;
         }
+
+
+        public string SelectKoreanCashIntentEntities(string arg)
+        {
+            SqlDataReader rdr = null;
+            string result = "";
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT INTENT_ID, ENTITIES_IDS FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '" + arg + "'";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = rdr["INTENT_ID"] as string +"@@"+ rdr["ENTITIES_IDS"] as string;
+                }
+            }
+            return result;
+        }
+
+
+
 
         public string SelectEnglishCashCheck(string arg)
         {
