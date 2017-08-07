@@ -1606,7 +1606,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " VALUES ";
                 cmd.CommandText += " (@query, @intentID, @entitiesIDS, @luisID, @result, @car_color, @car_area) ";
                 */
-                cmd.CommandText = "sp_insertusehistory2";
+                //cmd.CommandText = "sp_insertusehistory2";
+                cmd.CommandText = "sp_insertusehistory3";
                 //cmd.CommandText = "sp_insertusehistory";
 
                 cmd.CommandType = CommandType.StoredProcedure;
