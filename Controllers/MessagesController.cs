@@ -582,9 +582,11 @@ namespace Bot_Application1
 
                         //translateInfo = await getTranslate(translateInfo.data.translations[0].translatedText);
 
-                        orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+                        orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s-&#39;]", "", RegexOptions.Singleline);
 
-                        if(db.SelectEnglishCashCheck(orgENGMent).Length > 0)
+                        orgENGMent = orgENGMent.Replace("&#39;", "'");
+
+                        if (db.SelectEnglishCashCheck(orgENGMent).Length > 0)
                         {
                             //translateInfo = await getTranslate(orgMent);
                             Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));

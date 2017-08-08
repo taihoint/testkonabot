@@ -1528,7 +1528,7 @@ namespace Bot_Application1.DB
         {
             SqlDataReader rdr = null;
             string result = "";
-
+            arg = arg.Replace("'", "''");
             using (SqlConnection conn = new SqlConnection(connStr))
             {
                 conn.Open();
@@ -1608,6 +1608,7 @@ namespace Bot_Application1.DB
                 */
                 //cmd.CommandText = "sp_insertusehistory2";
                 cmd.CommandText = "sp_insertusehistory3";
+                //cmd.CommandText = "sp_insertusehistory4";
                 //cmd.CommandText = "sp_insertusehistory";
 
                 cmd.CommandType = CommandType.StoredProcedure;
