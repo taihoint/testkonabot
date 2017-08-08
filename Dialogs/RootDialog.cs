@@ -28,9 +28,11 @@
         private string luis_intent;
         private string entitiesStr;
         private DateTime startTime;
+        public static string beforeMessgaeText = "";
         public static string messgaeText = "";
         private string orgKRMent;
         private string orgENGMent;
+
 
         public RootDialog(string luis_intent, string entitiesStr, DateTime startTime, string orgKRMent, string orgENGMent)
         {
@@ -70,9 +72,8 @@
                 sorryMessageCnt = 0;
             }
             
-
             var message = await result;
-            
+            beforeMessgaeText = message.Text;
             if (message.Text.StartsWith("코나") == true)
             {
                 messgaeText = message.Text;
@@ -283,8 +284,30 @@
             //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
             reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
             await context.PostAsync(reply_err);
+
+            //Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
+
             
-            Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
+
+            orgKRMent = Regex.Replace(beforeMessgaeText, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
+
+
+            for (int n = 0; n < Regex.Split(beforeMessgaeText, " ").Length; n++)
+            {
+                string chgMsg = db.SelectChgMsg(Regex.Split(beforeMessgaeText, " ")[n]);
+                if (!string.IsNullOrEmpty(chgMsg))
+                {
+                    beforeMessgaeText = beforeMessgaeText.Replace(Regex.Split(beforeMessgaeText, " ")[n], chgMsg);
+                }
+            }
+
+
+            Translator translateInfo = await getTranslate(beforeMessgaeText);
+
+            //orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s-&#39;]", "", RegexOptions.Singleline);
+
+            orgENGMent = orgENGMent.Replace("&#39;", "'");
 
             int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", 0, 'D', "", "", "", "SEARCH");
             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
@@ -293,12 +316,12 @@
             DateTime endTime = DateTime.Now;
 
             Debug.WriteLine("USER NUMBER : " + context.Activity.Conversation.Id);
-            Debug.WriteLine("CUSTOMMER COMMENT KOREAN : " + messgaeText.Replace("코나 ", ""));
+            Debug.WriteLine("CUSTOMMER COMMENT KOREAN : " + beforeMessgaeText);
             Debug.WriteLine("CUSTOMMER COMMENT ENGLISH : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
             Debug.WriteLine("CHANNEL_ID : " + context.Activity.ChannelId);
             Debug.WriteLine("프로그램 수행시간 : {0}/ms", ((endTime - startTime).Milliseconds));
 
-            int inserResult = db.insertHistory(context.Activity.Conversation.Id, messgaeText.Replace("코나 ", ""), translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds));
+            int inserResult = db.insertHistory(context.Activity.Conversation.Id, beforeMessgaeText, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds));
             if (inserResult > 0)
             {
                 Debug.WriteLine("HISTORY RESULT SUCCESS");

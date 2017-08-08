@@ -32,6 +32,8 @@ namespace Bot_Application1
         public static string newUserID = "";
         public static string beforeUserID = "";
         public static string filePath = "";
+        public static string searchLuisIntent = "";
+        public static string searchLuisEntities = "";
 
         public virtual async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
@@ -822,6 +824,9 @@ namespace Bot_Application1
                     try
                     {
                         List<DialogList> dlg = new List<DialogList>();
+
+                        searchLuisIntent = luis_intent;
+                        searchLuisEntities = entitiesStr;
 
                         List<LuisList> LuisDialogID = db.SelectLuis(luis_intent, entitiesStr);
 
