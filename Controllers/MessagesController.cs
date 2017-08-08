@@ -556,7 +556,7 @@ namespace Bot_Application1
                     orgMent = orgMent.Replace("&#39;", "/'");
                     Debug.WriteLine("orgMent : " + orgMent);
                     translateInfo = await getTranslate(orgMent);
-                    orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
+                    orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
 
                     HistoryLog("[change msg end] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
@@ -576,7 +576,7 @@ namespace Bot_Application1
                         }
 
 
-                        orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+                        orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣-\s]", "", RegexOptions.Singleline);
 
                         translateInfo = await getTranslate(orgKRMent1);
 

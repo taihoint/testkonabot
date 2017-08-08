@@ -190,7 +190,7 @@
 
                             
 
-                            orgKRMent = Regex.Replace(message.Text, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
+                            orgKRMent = Regex.Replace(message.Text, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
 
 
                             for (int n = 0; n < Regex.Split(message.Text, " ").Length; n++)
@@ -205,7 +205,7 @@
 
                             Translator translateInfo = await getTranslate(message.Text);
 
-                            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s-&#39;]", "", RegexOptions.Singleline);
+                            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9ㄱ-힣-\s-&#39;]", "", RegexOptions.Singleline);
 
                             orgENGMent = orgENGMent.Replace("&#39;", "'");
 
@@ -291,7 +291,7 @@
 
             
 
-            orgKRMent = Regex.Replace(beforeMessgaeText, @"[^a-zA-Z0-9가-힣]", "", RegexOptions.Singleline);
+            orgKRMent = Regex.Replace(beforeMessgaeText, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
 
 
             for (int n = 0; n < Regex.Split(beforeMessgaeText, " ").Length; n++)
@@ -307,7 +307,7 @@
             Translator translateInfo = await getTranslate(beforeMessgaeText);
 
             //orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
-            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s-&#39;]", "", RegexOptions.Singleline);
+            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9ㄱ-힣-\s-&#39;]", "", RegexOptions.Singleline);
 
             orgENGMent = orgENGMent.Replace("&#39;", "'");
 
