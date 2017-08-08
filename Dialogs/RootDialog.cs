@@ -205,7 +205,9 @@
 
                             Translator translateInfo = await getTranslate(message.Text);
 
-                            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
+                            orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s-&#39;]", "", RegexOptions.Singleline);
+
+                            orgENGMent = orgENGMent.Replace("&#39;", "'");
 
                             int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", 1, 'S', "", "", "", "SEARCH");
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
