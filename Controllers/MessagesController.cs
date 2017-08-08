@@ -921,13 +921,86 @@ namespace Bot_Application1
                                     //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" + luis_intent + "','" + entitiesStr + "' ]";
                                     //await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                    await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+                                    //await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+
+                                    //response = Request.CreateResponse(HttpStatusCode.OK);
+                                    //return response;
+
+                                    priceWhereStr = "";
+
+                                    switch (luis_intent)
+                                    {
+                                        case "Test drive":
+                                            gubunVal = "Test drive";
+                                            luis_intent = "Test drive";
+                                            entitiesStr = "test drive";
+                                            entitiesValueStr = "";
+                                            testDriveWhereStr = "search directly=direct search,query=Direct Search";
+                                            break;
+                                        case "Test drive car color":
+                                            gubunVal = "Test drive";
+                                            luis_intent = "Test drive car color";
+                                            entitiesStr = "branch info.color-specific";
+                                            entitiesValueStr = "";
+                                            testDriveWhereStr = "branch info=store,color-specific=colored cars,query=Store with colored cars";
+                                            break;
+                                        case "Branch":
+                                            gubunVal = "Test drive";
+                                            luis_intent = "Test drive car color";
+                                            entitiesStr = "branch info.color-specific";
+                                            entitiesValueStr = "";
+                                            testDriveWhereStr = "branch info=store,color-specific=colored cars,query=Store with colored cars";
+                                            break;
+                                        default:
+                                            gubunVal = "Test drive";
+                                            luis_intent = "Test drive";
+                                            entitiesStr = "test drive";
+                                            entitiesValueStr = "";
+                                            testDriveWhereStr = "search directly=direct search,query=Direct Search";
+                                            break;
+                                    }
+
+                                    List<TestDriveListInit> SelectTestDriveListInit = db.SelectTestDriveListInit(testDriveWhereStr);
+
+                                    if (SelectTestDriveListInit[0].dlgGubun == "1") {
+                                        for (int td = 0; td < SelectTestDriveListInit.Count; td++)
+                                        {
+                                            replyToConversation.Attachments.Add(
+                                            GetHeroCard_location(
+                                            SelectTestDriveListInit[td].dlgStr1 + " 시승센터",
+                                            "",
+                                            SelectTestDriveListInit[td].dlgStr2 + " 등 총 " + SelectTestDriveListInit[td].dlgStr3 + " 곳",
+                                            new CardAction(ActionTypes.ImBack, "정보보기", value: SelectTestDriveListInit[td].dlgStr1 + " 시승센터 "))
+                                            );
+                                        }
+                                    } else {
+                                        for (int td = 0; td < SelectTestDriveListInit.Count; td++)
+                                        {
+                                            replyToConversation.Attachments.Add(
+                                            GetHeroCard_show(
+                                            "",
+                                            //CarColorListDialog[td].dlgXrclCtyNM,
+                                            SelectTestDriveListInit[td].dlgStr1,
+                                            SelectTestDriveListInit[td].dlgStr3 + "개 매장에 전시",
+                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveListInit[td].dlgStr2 + ".jpg"),
+                                            //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
+                                            new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveListInit[td].dlgStr1 + " 컬러가 있는 매장"), "", "")
+                                            );
+                                        }
+
+                                    }
+                                                                    
+                                    await connector.Conversations.ReplyToActivityAsync(replyToConversation);
+
+                                    int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                    //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                    Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
                                     response = Request.CreateResponse(HttpStatusCode.OK);
                                     return response;
                                 }
 
-                                if (SelectTestDriveList[0].dlgGubun.Equals("1"))
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("1"))
                                 {
                                     // dlgStr1 = AREANM, dlgStr2 = AREALIST , dlgStr3 = AREACNT
                                     Debug.WriteLine("case 1");
@@ -1078,6 +1151,7 @@ namespace Bot_Application1
                                     }
                                     */
                                     //데이터가 없을 때 예외 처리
+
                                     if (SelectTestDriveList.Count == 0)
                                     {
                                         //Activity reply_err = activity.CreateReply();
@@ -1126,9 +1200,9 @@ namespace Bot_Application1
                                         //await connector.Conversations.SendToConversationAsync(reply_reset);
 
                                     }
-
-                                    //Luis["intents"][0]["intent"] = "";
                                     
+                                    //Luis["intents"][0]["intent"] = "";
+
                                 }
                                 luis_intent = (string)Luis["intents"][0]["intent"];
                                 //gubunVal = "";
@@ -1139,9 +1213,6 @@ namespace Bot_Application1
                             else if (gubunVal.Equals("Quote"))
                             {
                                 Debug.WriteLine("INTENT ::[ " + luis_intent + " ]    ENTITY ::[ " + entitiesStr + " ]   priceWhereStr :: [ " + priceWhereStr + " ]");
-
-                                
-
 
                                 if (entitiesStr != "")
                                 {
@@ -2108,6 +2179,107 @@ namespace Bot_Application1
                                 response = Request.CreateResponse(HttpStatusCode.OK);
                                 return response;
                                 
+
+                            }
+                            //시승 다이얼로그가 없을때 출력 - 시승
+                            else if (luis_intent.Equals("Test drive")|| luis_intent.Equals("Test drive car color") || luis_intent.Equals("Branch"))
+                            {
+                                List<CardList> card = db.SelectDialogCard(1162);
+
+                                if (string.IsNullOrEmpty(luis_intent))
+                                {
+                                    luis_intent = (string)Luis["intents"][0]["intent"];
+                                }
+
+
+                                if (card.Count > 0)
+                                {
+                                    // HeroCard 
+
+                                    for (int i = 0; i < card.Count; i++)
+                                    {
+                                        List<ButtonList> btn = db.SelectBtn(card[i].dlgId, card[i].cardId);
+                                        List<ImagesList> img = db.SelectImage(card[i].dlgId, card[i].cardId);
+                                        List<MediaList> media1 = db.SelectMedia(card[i].dlgId, card[i].cardId);
+
+                                        List<CardImage> cardImages = new List<CardImage>();
+                                        CardImage[] plImage = new CardImage[img.Count];
+
+                                        ThumbnailUrl plThumnail = new ThumbnailUrl();
+
+                                        List<CardAction> cardButtons = new List<CardAction>();
+                                        CardAction[] plButton = new CardAction[btn.Count];
+
+                                        CardAction tap = new CardAction();
+
+                                        ReceiptCard[] plReceiptCard = new ReceiptCard[card.Count];
+                                        //HeroCard[] plHeroCard = new HeroCard[card.Count];
+                                        UserHeroCard[] plHeroCard = new UserHeroCard[card.Count];
+                                        
+                                        Attachment[] plAttachment = new Attachment[card.Count];
+
+                                        for (int l = 0; l < img.Count; l++)
+                                        {
+                                            if (card[i].cardType == "herocard")
+                                            {
+                                                if (img[l].imgUrl != null)
+                                                {
+                                                    plImage[l] = new CardImage()
+                                                    {
+                                                        Url = img[l].imgUrl
+                                                    };
+                                                }
+                                            }
+                                        }
+
+                                        cardImages = new List<CardImage>(plImage);                                        
+
+                                        for (int m = 0; m < btn.Count; m++)
+                                        {
+                                            if (btn[m].btnTitle != null)
+                                            {
+                                                plButton[m] = new CardAction()
+                                                {
+                                                    Value = btn[m].btnContext,
+                                                    Type = btn[m].btnType,
+                                                    Title = btn[m].btnTitle
+                                                };
+                                            }
+                                        }
+                                        cardButtons = new List<CardAction>(plButton);
+
+                                        if (card[i].cardType == "herocard")
+                                        {
+
+                                            string text = card[i].cardTitle;
+
+                                            plHeroCard[i] = new UserHeroCard()
+                                            {
+                                                Title = card[i].cardTitle,
+                                                Text = card[i].cardText,
+                                                Subtitle = card[i].cardSubTitle,
+                                                Images = cardImages,
+                                                //Tap = tap,
+                                                Buttons = cardButtons,
+                                                Card_division = card[i].cardDivision,
+                                                Card_value = card[i].cardValue,
+                                                Card_cnt = card.Count
+                                            };                                            
+
+                                            plAttachment[i] = plHeroCard[i].ToAttachment();
+                                            replyToConversation.Attachments.Add(plAttachment[i]);
+                                        }
+                                    }
+                                }
+
+                                await connector.Conversations.ReplyToActivityAsync(replyToConversation);
+
+                                int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+
+                                response = Request.CreateResponse(HttpStatusCode.OK);
+                                return response;
 
                             }
                             else

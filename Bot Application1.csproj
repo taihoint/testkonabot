@@ -193,6 +193,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="DB\DbConnect.cs" />
+    <Compile Include="Models\TestDriveListInit.cs" />
     <Compile Include="Models\TestDriveLuisResult.cs" />
     <Compile Include="Models\TestDriverColorList.cs" />
     <Compile Include="Models\TestDriverCenterList.cs" />

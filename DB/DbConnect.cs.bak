@@ -17,6 +17,7 @@ namespace Bot_Application1.DB
     public class DbConnect
     {
         string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoML;User ID=faxtime;Password=test2016!;";
+        //string connStr = "Data Source= hyundaidb.database.windows.net;Initial Catalog=taihoML;User ID=taihoinst;Password=taiho123@;";
         //string connStr = "Data Source=10.6.222.21,1433;Initial Catalog=KONA2_DB;User ID=konadb;Password=Didwoehd20-9;";
         StringBuilder sb = new StringBuilder();
 
@@ -55,6 +56,7 @@ namespace Bot_Application1.DB
                 cmd.Connection = conn;
 
                 cmd.CommandText = "sp_selectdialogid_new";
+                //cmd.CommandText = "sp_selectdialogid_new2";
 
                 cmd.CommandType = CommandType.StoredProcedure;
 
@@ -155,7 +157,7 @@ namespace Bot_Application1.DB
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
-                cmd.CommandText = "SELECT CARD_ID, DLG_ID, CARD_TYPE, CARD_TITLE, CARD_SUBTITLE, CARD_TEXT FROM TBL_DLG_CARD WHERE DLG_ID = @dlgID AND USE_YN = 'Y' AND DLG_ID > 999";
+                cmd.CommandText = "SELECT CARD_ID, DLG_ID, CARD_TYPE, CARD_TITLE, CARD_SUBTITLE, CARD_TEXT, CARD_DIVISION, CARD_VALUE FROM TBL_DLG_CARD WHERE DLG_ID = @dlgID AND USE_YN = 'Y' AND DLG_ID > 999";
 
                 cmd.Parameters.AddWithValue("@dlgID", dlgID);
 
@@ -169,6 +171,8 @@ namespace Bot_Application1.DB
                     string cardText = rdr["CARD_TEXT"] as string;
                     string cardTitle = rdr["CARD_TITLE"] as string;
                     string cardSubTitle = rdr["CARD_SUBTITLE"] as string;
+                    string cardDivision = rdr["CARD_DIVISION"] as string;
+                    string cardValue = rdr["CARD_VALUE"] as string;
 
                     CardList dlgCard = new CardList();
                     dlgCard.cardId = cardId;
@@ -177,6 +181,8 @@ namespace Bot_Application1.DB
                     dlgCard.cardText = cardText;
                     dlgCard.cardTitle = cardTitle;
                     dlgCard.cardSubTitle = cardSubTitle;
+                    dlgCard.cardDivision = cardDivision;
+                    dlgCard.cardValue = cardValue;
 
                     dialogCard.Add(dlgCard);
                 }
@@ -218,7 +224,7 @@ namespace Bot_Application1.DB
                     btn.btnType = btnType;
                     btn.btnTitle = btnTitle;
                     btn.btnContext = btnContext;
-                    
+
                     button.Add(btn);
                 }
             }
@@ -366,7 +372,7 @@ namespace Bot_Application1.DB
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
                 while (rdr.Read())
                 {
-                    answerMsg = rdr["BANNED_WORD_ANSWER"]+"@@"+ rdr["BANNED_WORD"] +"@@"+ rdr["BANNED_WORD_TYPE"];
+                    answerMsg = rdr["BANNED_WORD_ANSWER"] + "@@" + rdr["BANNED_WORD"] + "@@" + rdr["BANNED_WORD_TYPE"];
                 }
             }
             return answerMsg;
@@ -405,7 +411,7 @@ namespace Bot_Application1.DB
         {
             SqlDataReader rdr = null;
             List<TestDriverCenterList> dialog = new List<TestDriverCenterList>();
-            String  engTransferKor= "";
+            String engTransferKor = "";
 
             engTransferKor = EngTransferKor.GetEngTransferKor(entitiesStr);
 
@@ -414,7 +420,7 @@ namespace Bot_Application1.DB
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
-               
+
                 cmd.CommandText = "  SELECT A.CTR_NM, A.CTR_ADDR, A.CTR_PHONE, A.CAR_DTL_INFO, A.MAP_X_TN, A.MAP_Y_TN, XRCL_CTY_NM, A.TRIMCOLOR_CD  " +
                                   "  FROM ( " +
                                   "  SELECT B.CTR_NM, B.CTR_ADDR, RTRIM(B.TH1_TN) + '-' + RTRIM(B.TH2_TN) + '-' + RTRIM(B.TH3_TN) AS CTR_PHONE, A.CAR_DTL_INFO, MAP_X_TN, MAP_Y_TN, XRCL_CTY_NM, C.TRIMCOLOR_CD  " +
@@ -476,10 +482,10 @@ namespace Bot_Application1.DB
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
-                
+
                 cmd.CommandText = "SELECT B.BR_NM, B.BR_ADDR, B.BR_CCPC, REPLACE(A.XRCL_CTY_NM, ' ',''), B.BR_XCOO, B.BR_YCOO " +
                                   " FROM dbo.TBL_CAR_MGMT A, TBL_BR_MGMT B " +
-                                  "  WHERE A.DSP_BR_CD = B.CTR_CD " +
+                                  "  WHERE A.DSP_BR_CD = B.BR_CD " +
                                   "  AND A.SCN_CD = '1' " +
                                   "  AND A.CARN LIKE '코나%' " +
                                   //"  AND B.BR_ADDR LIKE '서울%' " +
@@ -490,7 +496,7 @@ namespace Bot_Application1.DB
 
                 while (rdr.Read())
                 {
-                    
+
                     string dlgBr_NM = rdr["BR_NM"] as string;
                     string dlgBr_Addr = rdr["BR_ADDR"] as string;
                     string dlgBr_Ccpc = rdr["BR_CCPC"] as string;
@@ -534,7 +540,7 @@ namespace Bot_Application1.DB
 
                 cmd.CommandText = " SELECT REPLACE(A.XRCL_CTY_NM, ' ','') AS XRCL_CTY_NM, TRIMCOLOR_CD, COUNT(*) AS CNT " +
                                  " FROM dbo.TBL_CAR_MGMT A, TBL_BR_MGMT B, (SELECT TRIMCOLOR_CD, TRIMCOLOR_NM FROM TBL_TRIMCOLOR2 WHERE RIGHT(TRIMCOLOR_NM,1) <> ')' GROUP BY TRIMCOLOR_CD, TRIMCOLOR_NM ) C " +
-                                 " WHERE A.DSP_BR_CD = B.CTR_CD " +
+                                 " WHERE A.DSP_BR_CD = B.BR_CD " +
                                  " AND A.XRCL_CTY_NM = C.TRIMCOLOR_NM " +
                                  " AND A.SCN_CD = '1' " +
                                  " AND A.CARN LIKE '코나%'  " +
@@ -579,7 +585,7 @@ namespace Bot_Application1.DB
                                     " FROM " +
                                     " (SELECT BR_DTL_ADDR1, COUNT(*) AS CNT " +
                                     " FROM dbo.TBL_CAR_MGMT A, TBL_BR_MGMT B " +
-                                    " WHERE A.DSP_BR_CD = B.CTR_CD " +
+                                    " WHERE A.DSP_BR_CD = B.BR_CD " +
                                     " AND A.SCN_CD = '1' " +
                                     " AND A.CARN LIKE '코나%'  " +
                                     " AND A.XRCL_CTY_NM = '" + str + "' " +
@@ -617,7 +623,7 @@ namespace Bot_Application1.DB
                 //cmd.CommandText = "SELECT DLG_ID, DLG_NM, DLG_MENT, DLG_LANG FROM TBL_DLG WHERE DLG_ID = '" + dlgID  + "' AND USE_YN = 'Y'";
                 cmd.CommandText = " SELECT B.BR_NM, BR_ADDR, B.BR_CCPC " +
                                   " FROM dbo.TBL_CAR_MGMT A, TBL_BR_MGMT B " +
-                                  " WHERE A.DSP_BR_CD = B.CTR_CD " +
+                                  " WHERE A.DSP_BR_CD = B.BR_CD " +
                                   " AND A.XRCL_CTY_NM = '" + color + "' " +
                                   //" AND A.XRCL_CTY_NM = '" & color & "' " +                                   
                                   " AND A.SCN_CD = '1' " +
@@ -648,7 +654,7 @@ namespace Bot_Application1.DB
         }
 
         //대리점 정보
-        public List<CarBranchInfo> SelectCarBranchDialog(string area, string gubun)
+        public List<CarBranchInfo> SelectCarBranchDialog(string msg)
         {
             SqlDataReader rdr = null;
             List<CarBranchInfo> dialog = new List<CarBranchInfo>();
@@ -659,6 +665,7 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
                 //cmd.CommandText = "SELECT DLG_ID, DLG_NM, DLG_MENT, DLG_LANG FROM TBL_DLG WHERE DLG_ID = '" + dlgID  + "' AND USE_YN = 'Y'";
+                /*
                 if(gubun.Equals("branch"))
                 {
                     cmd.CommandText = " SELECT B.BR_NM, BR_ADDR, B.BR_CCPC, B.BR_XCOO, B.BR_YCOO  " +
@@ -678,7 +685,25 @@ namespace Bot_Application1.DB
                                   " AND B.CTR_NM LIKE '" + area + "%' " +
                                   " GROUP BY B.CTR_NM, B.CTR_ADDR, RTRIM(B.TH1_TN) + '-' + RTRIM(B.TH2_TN) + '-' + RTRIM(B.TH3_TN),MAP_X_TN, MAP_Y_TN ";
                 }
-                
+                *
+                */
+                cmd.CommandText = " SELECT B.BR_NM, BR_ADDR, B.BR_CCPC, B.BR_XCOO, B.BR_YCOO  " +
+                                  " FROM dbo.TBL_CAR_MGMT A, TBL_BR_MGMT B " +
+                                  " WHERE A.DSP_BR_CD = B.BR_CD " +
+                                  " AND A.SCN_CD = '1' " +
+                                  " AND A.CARN LIKE '코나%' " +
+                                  " AND B.BR_NM = ( " +
+                                  "     SELECT TOP 1 TBL.BRANCH_NM " +
+                                  "     FROM(" +
+                                  "         SELECT A.BRANCH_NM, LEN(A.BRANCH_ENG) AS ENG_LEN, " +
+                                  "             CASE WHEN CHARINDEX(A.BRANCH_ENG, '" + msg.ToLower() + "') > 0 THEN 1 ELSE 0 END AS CNT " +
+                                  "         FROM TBL_BRANCH A " +
+                                  "         ) TBL " +
+                                  "     WHERE   TBL.CNT > 0  ORDER BY TBL.ENG_LEN DESC " +
+                                  //"     AND TBL.LENGTH1 > 2" +
+                                  ") " +
+                                  " GROUP BY B.BR_NM, B.BR_CCPC, BR_ADDR, B.BR_XCOO, B.BR_YCOO  ";
+
 
                 //cmd.Parameters.AddWithValue("@dlgID", dlgID);
 
@@ -826,6 +851,21 @@ namespace Bot_Application1.DB
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //견적 쿼리
+
         public List<CarModelList> SelectCarModelList()
         {
             SqlDataReader rdr = null;
@@ -862,46 +902,6 @@ namespace Bot_Application1.DB
             return carModel;
         }
 
-        public List<CarModelList> SelectCarModelInList(string carCd)
-        {
-            SqlDataReader rdr = null;
-            List<CarModelList> carModel = new List<CarModelList>();
-
-            using (SqlConnection conn = new SqlConnection(connStr))
-            {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-                cmd.Connection = conn;
-                //cmd.CommandText = "SELECT DLG_ID, DLG_NM, DLG_MENT, DLG_LANG FROM TBL_DLG WHERE DLG_ID = '" + dlgID  + "' AND USE_YN = 'Y'";
-                cmd.CommandText = " SELECT CAR_CD_TYPE "
-                                  + " ,SUBSTRING(CAR_NAME, CHARINDEX(' ', CAR_NAME) + 1, LEN(CAR_NAME)) AS MODEL_NM "
-                                  + " FROM TBL_CARNM "
-                                  + "WHERE CAR_CD_TYPE IN ("+ carCd + ") ";
-                Debug.WriteLine("carCd : " +  carCd );
-                //cmd.Parameters.AddWithValue("@carCdType", carCd);
-
-                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (rdr.Read())
-                {
-                    //int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
-                    string carCdType = rdr["CAR_CD_TYPE"] as string;
-                    string carModelNm = rdr["MODEL_NM"] as string;
-
-                    //Debug.WriteLine("carCdType : " + carCdType);
-                    //Debug.WriteLine("carModelNm : " + carModelNm);
-
-                    CarModelList model = new CarModelList();
-                    model.carCdType = carCdType;
-                    model.carModelNm = carModelNm;
-
-                    carModel.Add(model);
-                }
-            }
-            return carModel;
-        }
-
-
 
         public List<CarTrimList> SelectCarTrimList(string modelNm)
         {
@@ -934,23 +934,23 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " 	 ) CAR_TRIM_NM                                                                                                              ";
                 cmd.CommandText += " 	 , SALE_CD                                                                                                                  ";
                 cmd.CommandText += " 	 , FNUM_CD                                                                                                                  ";
-                cmd.CommandText += " 	 , SALE_PRICE   ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM                                                                                                             ";
+                cmd.CommandText += " 	 , SALE_PRICE   ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM                                                              ";
                 cmd.CommandText += " 	 FROM TBL_CARMODEL B                                                                                                        ";
                 cmd.CommandText += " 	 WHERE CAR_CD_TYPE IN                                                                                                       ";
                 cmd.CommandText += " 	 (                                                                                                                          ";
                 cmd.CommandText += " 		SELECT CAR_CD_TYPE                                                                                                      ";
                 cmd.CommandText += " 		  FROM TBL_CAR_MODEL_DEF                                                                                                ";
                 cmd.CommandText += " 		 where SUBSTRING(CAR_NAME,CHARINDEX(' ',CAR_NAME)+1,LEN(CAR_NAME)) = @modelNm                                           ";
-                cmd.CommandText += " 	 ) AND SALE_CD NOT LIKE ('OSJX%')                                                                                                                         ";
+                cmd.CommandText += " 	 ) AND SALE_CD NOT LIKE ('OSJX%')                                                                                           ";
                 cmd.CommandText += " ) A                                                                                                                            ";
-                cmd.CommandText += "  GROUP BY CAR_TRIM_NM                                                                                                             ";
+                cmd.CommandText += "  GROUP BY CAR_TRIM_NM                                                                                                          ";
                 cmd.CommandText += " 	 , SALE_CD                                                                                                                  ";
                 cmd.CommandText += " 	 , FNUM_CD                                                                                                                  ";
-                cmd.CommandText += " 	 , SALE_PRICE  ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM                                                                                                              ";
+                cmd.CommandText += " 	 , SALE_PRICE  ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM                                                               ";
 
                 cmd.Parameters.AddWithValue("@modelNm", modelNm);
 
-                Debug.WriteLine("query : "+ cmd);
+                Debug.WriteLine("query : " + cmd);
 
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
@@ -966,7 +966,7 @@ namespace Bot_Application1.DB
                     string trimPackage = rdr["COLORPACKAGE"] as string;
                     string carTrim = rdr["CARTRIM"] as string;
                     int salePrice = Convert.ToInt32(rdr["SALE_PRICE"]);
-                    
+
 
                     CarTrimList trim = new CarTrimList();
                     trim.carTrimNm = carTrimNm;
@@ -1006,7 +1006,7 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " 			,TUIX ";
                 cmd.CommandText += " 			,COLORPACKAGE ";
                 cmd.CommandText += " 			,CARTRIM ";
-                cmd.CommandText += " 	from FN_TRIM_PRICE ('" + modelNm + "','','','','','','','')  ";
+                cmd.CommandText += " 	from FN_PRICE_TRIM ('" + modelNm + "')  ";
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
@@ -1051,7 +1051,7 @@ namespace Bot_Application1.DB
                 cmd.Connection = conn;
 
                 cmd.CommandText += " SELECT TRIMCOLOR_NM	";
-                cmd.CommandText += "       ,TRIMCOLOR_CD	";
+                cmd.CommandText += "       ,LEFT(TRIMCOLOR_CD,CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD	";
                 cmd.CommandText += "  	  ,TRIMCOLOR_PRICE	";
                 cmd.CommandText += "   FROM TBL_TRIMCOLOR2	";
                 cmd.CommandText += "   WHERE TRIMCOLOR_NM NOT LIKE '%)'	";
@@ -1132,7 +1132,7 @@ namespace Bot_Application1.DB
                 cmd.Connection = conn;
 
                 cmd.CommandText += " SELECT TRIMCOLOR_NM											";
-                cmd.CommandText += "      , TRIMCOLOR_CD                                            ";
+                cmd.CommandText += "      , LEFT(TRIMCOLOR_CD,CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD                                            ";
                 cmd.CommandText += " 	 , TRIMCOLOR_PRICE                                          ";
                 cmd.CommandText += " 	 , MODEL_NAME                                               ";
                 cmd.CommandText += "  FROM TBL_TRIMCOLOR2  A                                        ";
@@ -1190,7 +1190,7 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "  (                                                                                               ";
                 cmd.CommandText += " 	SELECT	A.SALE_CD,                                                                            ";
                 cmd.CommandText += " 			A.MINUS_OPT,                                                                          ";
-                cmd.CommandText += " 			AA.MODEL_NAME                                                      ";
+                cmd.CommandText += " 			AA.MODEL_NAME                                                                         ";
                 cmd.CommandText += " 	 FROM TBL_TRIMCOLOR2  A JOIN                                                                  ";
                 cmd.CommandText += " 	 (                                                                                            ";
                 cmd.CommandText += " 		SELECT B.SALE_CD, B.FNUM_CD  , B.MODEL_NAME                                               ";
@@ -1199,8 +1199,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " 	 ) AA                                                                                         ";
                 cmd.CommandText += " 	ON A.SALE_CD = AA.SALE_CD AND A.MINUS_OPT = AA.FNUM_CD                                        ";
                 cmd.CommandText += "  )BB                                                                                             ";
-                cmd.CommandText += "  ON B.SALE_CD = BB.SALE_CD AND B.MINUS_OPT = BB.MINUS_OPT                                         ";
-                cmd.CommandText += "  GROUP BY INTERNALCOLOR_NM , INTERNALCOLOR_CD  , INTERNALCOLOR_PRICE , MODEL_NAME                            ";
+                cmd.CommandText += "  ON B.SALE_CD = BB.SALE_CD AND B.MINUS_OPT = BB.MINUS_OPT                                        ";
+                cmd.CommandText += "  GROUP BY INTERNALCOLOR_NM , INTERNALCOLOR_CD  , INTERNALCOLOR_PRICE , MODEL_NAME                ";
 
                 cmd.Parameters.AddWithValue("@modelNm", modelNm);
 
@@ -1242,11 +1242,11 @@ namespace Bot_Application1.DB
 
                 cmd.CommandText += "  SELECT OPT_NM                                         ";
                 cmd.CommandText += "      , OPT_PRICE ,OPT_CD       , PKG_DT                ";
-                cmd.CommandText += "  FROM FN_OPTION_PRICE                                  ";
-                cmd.CommandText += "  ('"+ msg + "')                                        ";
+                cmd.CommandText += "  FROM FN_PRICE_OPTION                                  ";
+                cmd.CommandText += "  ('" + msg + "')                                        ";
 
                 cmd.Parameters.AddWithValue("@msg", msg);
-                
+
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
@@ -1271,53 +1271,6 @@ namespace Bot_Application1.DB
             return carOptionList;
         }
 
-
-        //public List<CarOptionList> SelectCarOptionList(string modelNm)
-        //{
-        //    SqlDataReader rdr = null;
-        //    List<CarOptionList> carOptionList = new List<CarOptionList>();
-
-        //    using (SqlConnection conn = new SqlConnection(connStr))
-        //    {
-        //        conn.Open();
-        //        SqlCommand cmd = new SqlCommand();
-        //        cmd.Connection = conn;
-
-        //        cmd.CommandText += "  SELECT OPT_NM                                                                                   ";
-        //        cmd.CommandText += "      , OPT_PRICE ,OPT_CD       , MODEL_NAME                                                             ";
-        //        cmd.CommandText += "  FROM TBL_OPT A JOIN                                                                             ";
-        //        cmd.CommandText += "  (                                                                                               ";
-        //        cmd.CommandText += " 	SELECT B.SALE_CD, B.FNUM_CD , B.MODEL_NAME                                                    ";
-        //        cmd.CommandText += " 		FROM TBL_CAR_TRIM_DEF B                                                                   ";
-        //        cmd.CommandText += " 		WHERE MODEL_NAME = @modelNm                                 							  ";
-        //        cmd.CommandText += "  ) AA                                                                                            ";
-        //        cmd.CommandText += " ON A.SALE_CD = AA.SALE_CD AND A.FNUM_CD = AA.FNUM_CD                                             ";
-
-        //        cmd.Parameters.AddWithValue("@modelNm", modelNm);
-
-        //        Debug.WriteLine("query : " + cmd);
-
-
-        //        rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        while (rdr.Read())
-        //        {
-        //            string optNm = rdr["OPT_NM"] as string;
-        //            int optPrice = Convert.ToInt32(rdr["OPT_PRICE"]);
-        //            string model = rdr["MODEL_NAME"] as string;
-        //            string optCd = rdr["OPT_CD"] as string;
-
-
-        //            CarOptionList option = new CarOptionList();
-        //            option.optNm = optNm;
-        //            option.optPrice = optPrice;
-        //            option.model = model;
-        //            option.optCd = optCd;
-        //            carOptionList.Add(option);
-        //        }
-        //    }
-        //    return carOptionList;
-        //}
         //DB
         public List<CarOptionList> SelectCarOptionList(string modelNm)
         {
@@ -1366,109 +1319,10 @@ namespace Bot_Application1.DB
             return carOptionList;
         }
 
-
-
-
-        public List<CarPriceList> SelectCarPriceList(string arg)
-        {
-            SqlDataReader rdr = null;
-            List<CarPriceList> carPriceList = new List<CarPriceList>();
-            //SqlCommandBuilder builder = new SqlCommandBuilder();
-
-            //arg = builder.QuoteIdentifier(arg);
-
-            using (SqlConnection conn = new SqlConnection(connStr))
-            {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand();
-                cmd.Connection = conn;
-
-                cmd.CommandText += " SELECT  ";
-                cmd.CommandText += " 		MODEL_NM ";
-                cmd.CommandText += "        , FNUM_CD ";
-                cmd.CommandText += " 	   , SALE_CD ";
-                cmd.CommandText += "        , CAR_CD_TYPE ";
-                cmd.CommandText += " 	   ,SALE_PRICE ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM ";
-                cmd.CommandText += " 	   ,QUOTE_TYPE ";
-                cmd.CommandText += "     FROM ";
-                cmd.CommandText += "     ( ";
-                cmd.CommandText += " 			SELECT ";
-                cmd.CommandText += " 			( ";
-                cmd.CommandText += " 				SELECT MAX(CASE WHEN POS = 2 AND VAL1 != '터보' THEN VAL1 + ' ' ELSE '' END)  +  ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 4 AND VAL1 != '터보' AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 5  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END) + ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 6  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 7  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 8  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 9  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 10 AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-                cmd.CommandText += " 				   MAX(CASE WHEN POS = 11 AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END) model_nm ";
-                cmd.CommandText += " 				FROM FN_SPLIT(REPLACE(B.MODEL_NM ,' ','-'),'-') A ";
-                cmd.CommandText += " 			) model_nm, ";
-                cmd.CommandText += " 			fnum_cd, ";
-                cmd.CommandText += " 			sale_cd, ";
-                cmd.CommandText += " 			car_cd_type, ";
-                cmd.CommandText += " 			sale_price, fuel, drivewheel, tuix, COLORPACKAGE, cartrim ,";
-                cmd.CommandText += " 			case when sale_cd like '%X' then 'FUEL' ";
-                cmd.CommandText += " 			else  'TRIM' ";
-                cmd.CommandText += " 			end QUOTE_TYPE ";
-                cmd.CommandText += " 		from TBL_CARMODEL B ";
-                cmd.CommandText += " 		where  '"+ arg + "' ";
-                cmd.CommandText += " ) A ";
-                cmd.CommandText += " GROUP BY MODEL_NM, FNUM_CD, SALE_CD, CAR_CD_TYPE,SALE_PRICE,QUOTE_TYPE,SALE_PRICE ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM   ";
-                cmd.CommandText += " order by sale_cd desc ";
-
-                //cmd.Parameters.AddWithValue("@arg", arg);
-
-                Debug.WriteLine("query : " + cmd.CommandText);
-
-
-                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (rdr.Read())
-                {
-                    string modelNm = rdr["MODEL_NM"] as string;
-                    string fnumCd = rdr["FNUM_CD"] as string;
-                    string saleCd = rdr["SALE_CD"] as string;
-                    string carCdType = rdr["CAR_CD_TYPE"] as string;
-                    string quoteType = rdr["QUOTE_TYPE"] as string;
-                    string fuel = rdr["FUEL"] as string;
-                    string driveWheel = rdr["DRIVEWHEEL"] as string;
-                    string tuix = rdr["TUIX"] as string;
-                    string trimPackage = rdr["COLORPACKAGE"] as string;
-                    string carTrim = rdr["CARTRIM"] as string;
-                    int salePrice = Convert.ToInt32(rdr["SALE_PRICE"]);
-
-                    //Debug.WriteLine("modelNm : " + modelNm);
-                    //Debug.WriteLine("fnumCd : " + fnumCd);
-                    //Debug.WriteLine("saleCd : " + saleCd);
-                    //Debug.WriteLine("carCdType : " + carCdType);
-                    //Debug.WriteLine("quoteType : " + quoteType);
-                    //Debug.WriteLine("salePrice : " + salePrice);
-
-                    CarPriceList price = new CarPriceList();
-                    price.modelNm = modelNm;
-                    price.fnumCd = fnumCd;
-                    price.saleCd = saleCd;
-                    price.carCdType = carCdType;
-                    price.quoteType = quoteType;
-                    price.fuel = fuel;
-                    price.drivewheel = driveWheel;
-                    price.tuix = tuix;
-                    price.trimpackage = trimPackage;
-                    price.cartrim = carTrim;
-                    price.salePrice = salePrice;
-                    carPriceList.Add(price);
-                }
-            }
-            return carPriceList;
-        }
-
-
         public string SelectOnlyTrimColor(string arg)
         {
             SqlDataReader rdr = null;
-            string color = "";  string color1 = ""; string color2 = "";
+            string color = ""; string color1 = ""; string color2 = "";
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
@@ -1483,7 +1337,7 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " 				(                                                       ";
                 cmd.CommandText += " 					SELECT B.SALE_CD, B.FNUM_CD                         ";
                 cmd.CommandText += " 					  FROM TBL_CAR_TRIM_DEF B                           ";
-                cmd.CommandText += " 					  WHERE MODEL_NAME = '"+ arg + "'                   ";
+                cmd.CommandText += " 					  WHERE MODEL_NAME = '" + arg + "'                   ";
                 cmd.CommandText += " 				) AA                                                    ";
                 cmd.CommandText += " 				ON A.SALE_CD = AA.SALE_CD AND A.FNUM_CD = AA.FNUM_CD    ";
 
@@ -1510,6 +1364,192 @@ namespace Bot_Application1.DB
         }
 
 
+        public List<CarQouteLuisResult> SelectCarQouteLuisResult(string json)
+        {
+            SqlDataReader rdr = null;
+            List<CarQouteLuisResult> CarQouteLuisResult = new List<CarQouteLuisResult>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                json = json.Replace("'", "''");
+                cmd.CommandText += "  select INTENT, ENTITY,ENTITY_VALUE  FROM FN_LUIS_RESULT_PRICE    ";
+                cmd.CommandText += "  ('" + json + "')                      ";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    string intentValue = rdr["INTENT"] as string;
+                    string entityValue = rdr["ENTITY"] as string;
+                    string whereValue = rdr["ENTITY_VALUE"] as string;
+
+
+                    CarQouteLuisResult result = new CarQouteLuisResult();
+                    result.intentValue = intentValue;
+                    result.entityValue = entityValue;
+                    result.whereValue = whereValue;
+
+                    CarQouteLuisResult.Add(result);
+                }
+            }
+            return CarQouteLuisResult;
+        }
+
+        public List<CarQouteLuisResult> SelectLuisResult(string json)
+        {
+            SqlDataReader rdr = null;
+            List<CarQouteLuisResult> CarQouteLuisResult = new List<CarQouteLuisResult>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                json = json.Replace("'", "''");
+                cmd.CommandText += "  select INTENT, ENTITY,ENTITY_VALUE  FROM FN_LUIS_RESULT    ";
+                cmd.CommandText += "  ('" + json + "')                      ";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    string intentValue = rdr["INTENT"] as string;
+                    string entityValue = rdr["ENTITY"] as string;
+                    string whereValue = rdr["ENTITY_VALUE"] as string;
+
+
+                    CarQouteLuisResult result = new CarQouteLuisResult();
+                    result.intentValue = intentValue;
+                    result.entityValue = entityValue;
+                    result.whereValue = whereValue;
+
+                    CarQouteLuisResult.Add(result);
+                }
+            }
+            return CarQouteLuisResult;
+        }
+
+        public List<LuisResult> LuisResult(string json)
+        {
+            SqlDataReader rdr = null;
+            List<LuisResult> LuisResult = new List<LuisResult>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                json = json.Replace("'", "''");
+                cmd.CommandText += "  SELECT  TOP 1 VAL, INTENT, ENTITY,ENTITY_VALUE , TEST_DRIVEWHERE, CAR_PRICEWHERE  FROM FN_LUIS_RESULT_SUM_JSL    ";
+                cmd.CommandText += "  ('" + json + "')                      ";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    string val = rdr["VAL"] as string;
+                    string intentValue = rdr["INTENT"] as string;
+                    string entityValue = rdr["ENTITY"] as string;
+                    string entitieWhereValue = rdr["ENTITY_VALUE"] as string;
+                    string testDriveWhereValue = rdr["TEST_DRIVEWHERE"] as string;
+                    string carPriceWhereValue = rdr["CAR_PRICEWHERE"] as string;
+
+
+                    LuisResult result = new LuisResult();
+                    result.val = val;
+                    result.intentValue = intentValue;
+                    result.entityValue = entityValue;
+                    result.entitieWhereValue = entitieWhereValue;
+                    result.testDriveWhereValue = testDriveWhereValue;
+                    result.carPriceWhereValue = carPriceWhereValue;
+
+                    LuisResult.Add(result);
+                }
+            }
+            return LuisResult;
+        }
+
+
+
+        public string SelectKoreanCashCheck(string arg)
+        {
+            SqlDataReader rdr = null;
+            string result = ""; 
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '" + arg + "'";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = rdr["QUERY"] as string;
+                }
+            }
+            return result;
+        }
+
+
+        public string SelectKoreanCashIntentEntities(string arg)
+        {
+            SqlDataReader rdr = null;
+            string result = "";
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT INTENT_ID, ENTITIES_IDS FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '" + arg + "'";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = rdr["INTENT_ID"] as string +"@@"+ rdr["ENTITIES_IDS"] as string;
+                }
+            }
+            return result;
+        }
+
+
+
+
+        public string SelectEnglishCashCheck(string arg)
+        {
+            SqlDataReader rdr = null;
+            string result = "";
+            arg = arg.Replace("'", "''");
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE QUERY = '" + arg + "'";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = rdr["QUERY"] as string;
+                }
+            }
+            return result;
+        }
+
+
+
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Query Analysis
         // Check if dialogue already exists, return Luis format JSON.
@@ -1519,8 +1559,7 @@ namespace Bot_Application1.DB
             String json = @"{
                 'entities':'',
                 'intents':[{'intent':''}],
-                'car_colorArea':'',
-                'car_area':'',
+                'test_driveWhere':'',
                 'car_priceWhere':'',
                 'car_option':''
             }";
@@ -1532,6 +1571,7 @@ namespace Bot_Application1.DB
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
+                //cmd.CommandText = "SELECT TOP 1 INTENT_ID, ENTITIES_IDS, ISNULL(CAR_COLOR,'') AS CAR_COLOR, ISNULL(CAR_AREA,'') AS CAR_AREA  ,ISNULL(CAR_PRICEWHERE,'') AS CAR_PRICEWHERE  ,ISNULL(CAR_OPTION,'') AS CAR_OPTION FROM TBL_QUERY_ANALYSIS_RESULT2 WHERE QUERY = @query AND RESULT = 'H'";
                 cmd.CommandText = "SELECT TOP 1 INTENT_ID, ENTITIES_IDS, ISNULL(CAR_COLOR,'') AS CAR_COLOR, ISNULL(CAR_AREA,'') AS CAR_AREA  ,ISNULL(CAR_PRICEWHERE,'') AS CAR_PRICEWHERE  ,ISNULL(CAR_OPTION,'') AS CAR_OPTION FROM TBL_QUERY_ANALYSIS_RESULT WHERE QUERY = @query AND RESULT = 'H'";
                 cmd.Parameters.AddWithValue("@query", query.Trim().ToLower());
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
@@ -1540,8 +1580,7 @@ namespace Bot_Application1.DB
                 {
                     returnJson["entities"] = rdr["ENTITIES_IDS"] as string;
                     returnJson["intents"][0]["intent"] = rdr["INTENT_ID"] as string;
-                    returnJson["car_colorArea"] = rdr["CAR_COLOR"] as string;
-                    returnJson["car_area"] = rdr["CAR_AREA"] as string;
+                    returnJson["test_driveWhere"] = rdr["CAR_AREA"] as string;
                     returnJson["car_priceWhere"] = rdr["CAR_PRICEWHERE"] as string;
                     returnJson["car_option"] = rdr["car_option"] as string;
                 }
@@ -1553,7 +1592,7 @@ namespace Bot_Application1.DB
         // Query Analysis
         // Insert user chat message for history and analysis
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        public int insertUserQuery(string query, string intentID, string entitiesIDS, int luisID, char result, string car_area, string car_colorArea, string car_priceWhere, string car_option)
+        public int insertUserQuery(string korQuery, string enQuery, string intentID, string entitiesIDS, int luisID, char result, string car_area, string car_colorArea, string car_priceWhere, string car_option)
         {
             int dbResult = 0;
             using (SqlConnection conn = new SqlConnection(connStr))
@@ -1567,12 +1606,16 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " VALUES ";
                 cmd.CommandText += " (@query, @intentID, @entitiesIDS, @luisID, @result, @car_color, @car_area) ";
                 */
-                cmd.CommandText = "sp_insertusehistory";
+                //cmd.CommandText = "sp_insertusehistory2";
+                cmd.CommandText = "sp_insertusehistory3";
+                //cmd.CommandText = "sp_insertusehistory4";
+                //cmd.CommandText = "sp_insertusehistory";
 
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@query", query.Trim().ToLower());
-                cmd.Parameters.AddWithValue("@intentID", intentID.Trim().ToLower());
+                cmd.Parameters.AddWithValue("@krQuery", korQuery.Trim().ToLower());
+                cmd.Parameters.AddWithValue("@query", enQuery.Trim().ToLower());
+                cmd.Parameters.AddWithValue("@intentID", intentID.Trim());
                 cmd.Parameters.AddWithValue("@entitiesIDS", entitiesIDS.Trim().ToLower());
                 cmd.Parameters.AddWithValue("@luisID", luisID);
                 cmd.Parameters.AddWithValue("@result", result);
@@ -1587,103 +1630,96 @@ namespace Bot_Application1.DB
             return dbResult;
         }
 
+        public List<TestDriveLuisResult> SelectTestDriveLuisResult(String arg)
+        {
+            SqlDataReader rdr = null;
+
+            List<TestDriveLuisResult> testDriveLuisResult = new List<TestDriveLuisResult>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "    SELECT INTENT, ENTITY, ENTITY_VALUE ";
+                cmd.CommandText += "    FROM ";
+                cmd.CommandText += "        FN_LUIS_RESULT_DRIVE ";
+                cmd.CommandText += "        (N'" + arg.Replace("'", "''") + "') ";
+
+                //cmd.Parameters.AddWithValue("@arg", arg);
+
+                Debug.WriteLine("query : " + cmd.CommandText);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    //int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
+                    string dlgIntent = rdr["INTENT"] as string;
+                    string dlgEntity = rdr["ENTITY"] as string;
+                    string dlgEntityValue = rdr["ENTITY_VALUE"] as string;
+
+                    TestDriveLuisResult dlg = new TestDriveLuisResult();
+                    dlg.intent = dlgIntent;
+                    dlg.entity = dlgEntity;
+                    dlg.entity_value = dlgEntityValue;
+
+                    testDriveLuisResult.Add(dlg);
+                }
+            }
+            return testDriveLuisResult;
+        }
+
+        public List<TestDriveList> SelectTestDriveList(String arg)
+        {
+            SqlDataReader rdr = null;
+
+            List<TestDriveList> testDriveList = new List<TestDriveList>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "    SELECT GUBUN, STR1, STR2, STR3, STR4, STR5, STR6, STR7, STR8 FROM FN_LUIS_BRANCH_DRIVE (@arg) ";
+
+                cmd.Parameters.AddWithValue("@arg", arg);
+
+                Debug.WriteLine("query : " + cmd.CommandText);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    //int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
+                    string dlgGubun = rdr["GUBUN"] as string;
+                    string dlgStr1 = rdr["STR1"] as string;
+                    string dlgStr2 = rdr["STR2"] as string;
+                    string dlgStr3 = rdr["STR3"] as string;
+                    string dlgStr4 = rdr["STR4"] as string;
+                    string dlgStr5 = rdr["STR5"] as string;
+                    string dlgStr6 = rdr["STR6"] as string;
+                    string dlgStr7 = rdr["STR7"] as string;
+                    string dlgStr8 = rdr["STR8"] as string;
 
 
-        //public List<CarPriceList> SelectCarPriceList(string arg)
-        //{
-        //    SqlDataReader rdr = null;
-        //    List<CarPriceList> carPriceList = new List<CarPriceList>();
-        //    //SqlCommandBuilder builder = new SqlCommandBuilder();
+                    TestDriveList dlg = new TestDriveList();
+                    dlg.dlgGubun = dlgGubun;
+                    dlg.dlgStr1 = dlgStr1;
+                    dlg.dlgStr2 = dlgStr2;
+                    dlg.dlgStr3 = dlgStr3;
+                    dlg.dlgStr4 = dlgStr4;
+                    dlg.dlgStr5 = dlgStr5;
+                    dlg.dlgStr6 = dlgStr6;
+                    dlg.dlgStr7 = dlgStr7;
+                    dlg.dlgStr8 = dlgStr8;
 
-        //    //arg = builder.QuoteIdentifier(arg);
-
-        //    using (SqlConnection conn = new SqlConnection(connStr))
-        //    {
-        //        conn.Open();
-        //        SqlCommand cmd = new SqlCommand();
-        //        cmd.Connection = conn;
-
-        //        cmd.CommandText += " SELECT  ";
-        //        cmd.CommandText += " 		MODEL_NM ";
-        //        cmd.CommandText += "        , FNUM_CD ";
-        //        cmd.CommandText += " 	   , SALE_CD ";
-        //        cmd.CommandText += "        , CAR_CD_TYPE ";
-        //        cmd.CommandText += " 	   ,SALE_PRICE ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM ";
-        //        cmd.CommandText += " 	   ,QUOTE_TYPE ";
-        //        cmd.CommandText += "     FROM ";
-        //        cmd.CommandText += "     ( ";
-        //        cmd.CommandText += " 			SELECT ";
-        //        cmd.CommandText += " 			( ";
-        //        cmd.CommandText += " 				SELECT MAX(CASE WHEN POS = 2 AND VAL1 != '터보' THEN VAL1 + ' ' ELSE '' END)  +  ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 4 AND VAL1 != '터보' AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 5  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END) + ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 6  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 7  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 8  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 9  AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 10 AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END)+ ";
-        //        cmd.CommandText += " 				   MAX(CASE WHEN POS = 11 AND VAL1 != ('오토')  THEN VAL1 + ' ' ELSE '' END) model_nm ";
-        //        cmd.CommandText += " 				FROM FN_SPLIT(REPLACE(B.MODEL_NM ,' ','-'),'-') A ";
-        //        cmd.CommandText += " 			) model_nm, ";
-        //        cmd.CommandText += " 			fnum_cd, ";
-        //        cmd.CommandText += " 			sale_cd, ";
-        //        cmd.CommandText += " 			car_cd_type, ";
-        //        cmd.CommandText += " 			sale_price, fuel, drivewheel, tuix, COLORPACKAGE, cartrim ,";
-        //        cmd.CommandText += " 			case when sale_cd like '%X' then 'FUEL' ";
-        //        cmd.CommandText += " 			else  'TRIM' ";
-        //        cmd.CommandText += " 			end QUOTE_TYPE ";
-        //        cmd.CommandText += " 		from TBL_CARMODEL B ";
-        //        cmd.CommandText += " 		where  " + arg + " ";
-        //        cmd.CommandText += " ) A ";
-        //        cmd.CommandText += " GROUP BY MODEL_NM, FNUM_CD, SALE_CD, CAR_CD_TYPE,SALE_PRICE,QUOTE_TYPE,SALE_PRICE ,FUEL, DRIVEWHEEL, TUIX, COLORPACKAGE, CARTRIM   ";
-        //        cmd.CommandText += " order by sale_cd desc ";
-
-        //        //cmd.Parameters.AddWithValue("@arg", arg);
-
-        //        Debug.WriteLine("query : " + cmd.CommandText);
-
-
-        //        rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-        //        while (rdr.Read())
-        //        {
-        //            string modelNm = rdr["MODEL_NM"] as string;
-        //            string fnumCd = rdr["FNUM_CD"] as string;
-        //            string saleCd = rdr["SALE_CD"] as string;
-        //            string carCdType = rdr["CAR_CD_TYPE"] as string;
-        //            string quoteType = rdr["QUOTE_TYPE"] as string;
-        //            string fuel = rdr["FUEL"] as string;
-        //            string driveWheel = rdr["DRIVEWHEEL"] as string;
-        //            string tuix = rdr["TUIX"] as string;
-        //            string trimPackage = rdr["COLORPACKAGE"] as string;
-        //            string carTrim = rdr["CARTRIM"] as string;
-        //            int salePrice = Convert.ToInt32(rdr["SALE_PRICE"]);
-
-        //            //Debug.WriteLine("modelNm : " + modelNm);
-        //            //Debug.WriteLine("fnumCd : " + fnumCd);
-        //            //Debug.WriteLine("saleCd : " + saleCd);
-        //            //Debug.WriteLine("carCdType : " + carCdType);
-        //            //Debug.WriteLine("quoteType : " + quoteType);
-        //            //Debug.WriteLine("salePrice : " + salePrice);
-
-        //            CarPriceList price = new CarPriceList();
-        //            price.modelNm = modelNm;
-        //            price.fnumCd = fnumCd;
-        //            price.saleCd = saleCd;
-        //            price.carCdType = carCdType;
-        //            price.quoteType = quoteType;
-        //            price.fuel = fuel;
-        //            price.drivewheel = driveWheel;
-        //            price.tuix = tuix;
-        //            price.trimpackage = trimPackage;
-        //            price.cartrim = carTrim;
-        //            price.salePrice = salePrice;
-        //            carPriceList.Add(price);
-        //        }
-        //    }
-        //    return carPriceList;
-        //}
-
-
+                    testDriveList.Add(dlg);
+                }
+            }
+            return testDriveList;
+        }
     }
 }

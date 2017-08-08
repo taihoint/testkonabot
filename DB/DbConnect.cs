@@ -1721,5 +1721,56 @@ namespace Bot_Application1.DB
             }
             return testDriveList;
         }
+
+        public List<TestDriveListInit> SelectTestDriveListInit(String arg)
+        {
+            SqlDataReader rdr = null;
+
+            List<TestDriveListInit> testDriveList = new List<TestDriveListInit>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "    SELECT GUBUN, STR1, STR2, STR3, STR4, STR5, STR6, STR7, STR8 FROM FN_LUIS_BRANCH_DRIVE (@arg) ";
+
+                cmd.Parameters.AddWithValue("@arg", arg);
+
+                Debug.WriteLine("query : " + cmd.CommandText);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    //int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
+                    string dlgGubun = rdr["GUBUN"] as string;
+                    string dlgStr1 = rdr["STR1"] as string;
+                    string dlgStr2 = rdr["STR2"] as string;
+                    string dlgStr3 = rdr["STR3"] as string;
+                    string dlgStr4 = rdr["STR4"] as string;
+                    string dlgStr5 = rdr["STR5"] as string;
+                    string dlgStr6 = rdr["STR6"] as string;
+                    string dlgStr7 = rdr["STR7"] as string;
+                    string dlgStr8 = rdr["STR8"] as string;
+
+
+                    TestDriveListInit dlg = new TestDriveListInit();
+                    dlg.dlgGubun = dlgGubun;
+                    dlg.dlgStr1 = dlgStr1;
+                    dlg.dlgStr2 = dlgStr2;
+                    dlg.dlgStr3 = dlgStr3;
+                    dlg.dlgStr4 = dlgStr4;
+                    dlg.dlgStr5 = dlgStr5;
+                    dlg.dlgStr6 = dlgStr6;
+                    dlg.dlgStr7 = dlgStr7;
+                    dlg.dlgStr8 = dlgStr8;
+
+                    testDriveList.Add(dlg);
+                }
+            }
+            return testDriveList;
+        }
     }
 }
