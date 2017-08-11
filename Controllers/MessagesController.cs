@@ -202,7 +202,9 @@ namespace Bot_Application1
                 string colorStr = "";
                 string carOptionStr = "";
                 string luis_intent = "";
+                string luis_intent_score = "";
                 string gubunVal = "";
+
 
                 int luisID = 0;
 
@@ -239,10 +241,47 @@ namespace Bot_Application1
                         var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
                     }
 
-                    response = Request.CreateResponse(HttpStatusCode.OK);
+                    if (luis_intent.Equals("Quote"))
+                    {
+                        gubunVal = "Quote";
+                    }
+                    else if (luis_intent.Equals("Branch") || luis_intent.Equals("Test drive") || luis_intent.Equals("Test drive car color"))
+                    {
+                        gubunVal = "Test drive";
+                    }
+                    else
+                    {
+                        gubunVal = "OTHER";
+                    }
+                    int dbResult = db.insertUserQuery(orgMent, orgMent, luis_intent, entitiesStr, luis_intent_score, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                    //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                    Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
+                
+
+                DateTime endTime = DateTime.Now;
+                Debug.WriteLine("USER NUMBER : " + activity.Conversation.Id);
+                Debug.WriteLine("CUSTOMMER COMMENT KOREAN : " + activity.Text);
+                Debug.WriteLine("CUSTOMMER COMMENT ENGLISH : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
+
+                Debug.WriteLine("CHATBOT_COMMENT_CODE : " + "dlg.bannedword");
+                Debug.WriteLine("CHANNEL_ID : " + activity.ChannelId);
+                Debug.WriteLine("프로그램 수행시간 : {0}/ms", ((endTime - startTime).Milliseconds));
+
+                inserResult = db.insertHistory(activity.Conversation.Id, activity.Text, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "dlg.bannedword", activity.ChannelId, ((endTime - startTime).Milliseconds));
+                if (inserResult > 0)
+                {
+                    Debug.WriteLine("HISTORY RESULT SUCCESS");
+                }
+                else
+                {
+                    Debug.WriteLine("HISTORY RESULT FAIL");
+                }
+                sorryMessageCnt = 0;
+                //});
+                HistoryLog("[ DIALOG ] ==>> userID :: [ " + activity.Conversation.Id + " ]       message :: [ " + orgMent + " ]       date :: [ " + DateTime.Now + " ]");
+                response = Request.CreateResponse(HttpStatusCode.OK);
                     sorryMessageCnt = 0;
                     return response;
-
 
                 }
 
@@ -362,7 +401,7 @@ namespace Bot_Application1
                             "추가 금액 : " + string.Format("{0}", CarInColorList[td].inColorPrice.ToString("n0")) + "원",
                             "",
                             //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\interior\\" + CarInColorList[td].internalColorCd + ".jpg"),
-                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "", "")//,
+                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "img", "")//,
                                                                                                                                                                   //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "", "")
                         );
                     }
@@ -437,7 +476,7 @@ namespace Bot_Application1
                             "추가 금액 : " + string.Format("{0}", CarOptionList[td].optPrice.ToString("n0")) + "원",
                             "",
                             //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\option\\" + translateInfo.data.translations[0].translatedText + ".jpg"),
-                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + translateInfo.data.translations[0].translatedText.Replace(" ", "_") + ".jpg"), "", "")
+                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + translateInfo.data.translations[0].translatedText.Replace(" ", "_") + ".jpg"), "img", "")
                         //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://bottest.hyundai.com/assets/images/price/option/" + translateInfo.data.translations[0].translatedText.Replace(" ", "_") + ".jpg"), "", "")
                         );
                     }
@@ -613,6 +652,7 @@ namespace Bot_Application1
                             colorStr = (string)Luis["car_color"];
                             carOptionStr = (string)Luis["car_option"];
                             luis_intent = (string)Luis["intents"][0]["intent"];
+                            luis_intent_score = (string)Luis["intent_score"];
                             gubunVal = (string)Luis["car_option"];
                             //string gubunVal = "";
                             //string entitiesValueStr = "";
@@ -644,6 +684,7 @@ namespace Bot_Application1
                             colorStr = (string)Luis["car_color"];
                             carOptionStr = (string)Luis["car_option"];
                             luis_intent = (string)Luis["intents"][0]["intent"];
+                            luis_intent_score = (string)Luis["intent_score"];
                             gubunVal = (string)Luis["car_option"];
                             //string gubunVal = "";
                             //string entitiesValueStr = "";
@@ -692,6 +733,7 @@ namespace Bot_Application1
                         colorStr = (string)Luis["car_color"];
                         carOptionStr = (string)Luis["car_option"];
                         luis_intent = (string)Luis["intents"][0]["intent"];
+                        luis_intent_score = (string)Luis["intent_score"];
                         gubunVal = (string)Luis["car_option"];
                         //string gubunVal = "";
                         //string entitiesValueStr = "";
@@ -713,7 +755,7 @@ namespace Bot_Application1
                                 orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
                             }
                         }
-
+                        orgMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣-\s]", "", RegexOptions.Singleline);
                         translateInfo = await getTranslate(orgMent); 
 
                         Luis = await GetIntentFromKonaBotLUIS(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
@@ -733,6 +775,7 @@ namespace Bot_Application1
                             gubunVal    = LuisValue[0].val;
                             luis_intent = LuisValue[0].intentValue;
                             entitiesStr = LuisValue[0].entityValue;
+                            luis_intent_score = LuisValue[0].intentScore;
                             entitiesValueStr = LuisValue[0].entitieWhereValue;
                             testDriveWhereStr = LuisValue[0].testDriveWhereValue;
                             priceWhereStr = LuisValue[0].carPriceWhereValue;
@@ -991,8 +1034,19 @@ namespace Bot_Application1
                                     }
                                                                     
                                     await connector.Conversations.ReplyToActivityAsync(replyToConversation);
-
-                                    int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                    if (luis_intent.Equals("Quote"))
+                                    {
+                                        gubunVal = "Quote";
+                                    }
+                                    else if (luis_intent.Equals("Branch") || luis_intent.Equals("Test drive") || luis_intent.Equals("Test drive car color"))
+                                    {
+                                        gubunVal = "Test drive";
+                                    }
+                                    else
+                                    {
+                                        gubunVal = "OTHER";
+                                    }
+                                    int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, luis_intent_score, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                     //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                     Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
@@ -1473,7 +1527,7 @@ namespace Bot_Application1
                                                     trimNM,
                                                     "추가 금액 : " + string.Format("{0}", CarInColorList[td].inColorPrice.ToString("n0")) + "원",
                                                     "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "", "")
+                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "img", "")
                                                     );
                                                 }
                                             }
@@ -1633,7 +1687,7 @@ namespace Bot_Application1
                                                 Activity reply_ment = activity.CreateReply();
                                                 reply_ment.Recipient = activity.From;
                                                 reply_ment.Type = "message";
-                                                reply_ment.Text = "전체 옵션을 보여드릴게요";
+                                                reply_ment.Text = "선택하신 옵션을 보여드릴게요";
                                                 var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
 
                                                 for (int td = 0; td < carOptionList.Count; td++)
@@ -1646,7 +1700,7 @@ namespace Bot_Application1
                                                     carOptionList[td].optNm,
                                                     "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
                                                     "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "", "")
+                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "img", "")
                                                     );
                                                 }
                                             }
@@ -1728,7 +1782,7 @@ namespace Bot_Application1
                                                     carOptionList[td].optNm,
                                                     "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
                                                     "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "", "")
+                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "img", "")
                                                     );
                                                 }
                                             }
@@ -2171,8 +2225,19 @@ namespace Bot_Application1
                                     );
                                 }
                                 var reply1 = await connector.Conversations.SendToConversationAsync(replyToConversation);
-
-                                int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                if (luis_intent.Equals("Quote"))
+                                {
+                                    gubunVal = "Quote";
+                                }
+                                else if (luis_intent.Equals("Branch") || luis_intent.Equals("Test drive") || luis_intent.Equals("Test drive car color"))
+                                {
+                                    gubunVal = "Test drive";
+                                }
+                                else
+                                {
+                                    gubunVal = "OTHER";
+                                }
+                                int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luis_intent_score, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                 //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                 Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
@@ -2273,8 +2338,19 @@ namespace Bot_Application1
                                 }
 
                                 await connector.Conversations.ReplyToActivityAsync(replyToConversation);
-
-                                int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                if (luis_intent.Equals("Quote"))
+                                {
+                                    gubunVal = "Quote";
+                                }
+                                else if (luis_intent.Equals("Branch") || luis_intent.Equals("Test drive") || luis_intent.Equals("Test drive car color"))
+                                {
+                                    gubunVal = "Test drive";
+                                }
+                                else
+                                {
+                                    gubunVal = "OTHER";
+                                }
+                                int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luis_intent_score, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                 //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                 Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
@@ -2293,7 +2369,19 @@ namespace Bot_Application1
                         }
                         else
                         {
-                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                            if (luis_intent.Equals("Quote"))
+                            {
+                                gubunVal = "Quote";
+                            }
+                            else if (luis_intent.Equals("Branch") || luis_intent.Equals("Test drive") || luis_intent.Equals("Test drive car color"))
+                            {
+                                gubunVal = "Test drive";
+                            }
+                            else
+                            {
+                                gubunVal = "OTHER";
+                            }
+                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luis_intent_score, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                             //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
                         }
@@ -2323,7 +2411,19 @@ namespace Bot_Application1
                     catch
                     {
                         //Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
-                        int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                        if (luis_intent.Equals("Quote"))
+                        {
+                            gubunVal = "Quote";
+                        }
+                        else if (luis_intent.Equals("Branch") || luis_intent.Equals("Test drive") || luis_intent.Equals("Test drive car color"))
+                        {
+                            gubunVal = "Test drive";
+                        }
+                        else
+                        {
+                            gubunVal = "OTHER";
+                        }
+                        int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luis_intent_score, luisID, 'D', testDriveWhereStr, "", priceWhereStr, gubunVal);
                         //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'D', testDriveWhereStr, "",priceWhereStr, gubunVal);
                         Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 

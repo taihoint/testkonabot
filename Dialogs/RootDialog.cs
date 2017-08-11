@@ -209,7 +209,7 @@
 
                             orgENGMent = orgENGMent.Replace("&#39;", "'");
 
-                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", 1, 'S', "", "", "", "SEARCH");
+                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 1, 'S', "", "", "", "SEARCH");
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
                             DateTime endTime = DateTime.Now;
@@ -311,7 +311,7 @@
 
             orgENGMent = orgENGMent.Replace("&#39;", "'");
 
-            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", 0, 'D', "", "", "", "SEARCH");
+            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 0, 'D', "", "", "", "SEARCH");
             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
 
