@@ -738,7 +738,7 @@ namespace Bot_Application1
                         //string gubunVal = "";
                         //string entitiesValueStr = "";
                     }
-
+                    //위도경도 메세지 노출X
                     if (orgMent.Contains(":"))
                     {
                         response = Request.CreateResponse(HttpStatusCode.OK);
