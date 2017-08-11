@@ -739,6 +739,11 @@ namespace Bot_Application1
                         //string entitiesValueStr = "";
                     }
 
+                    if (orgMent.Contains(":"))
+                    {
+                        response = Request.CreateResponse(HttpStatusCode.OK);
+                        return response;
+                    }
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // For Query Analysis
                     // No results from DB
