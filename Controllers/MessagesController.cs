@@ -1051,7 +1051,7 @@ namespace Bot_Application1
                                     {
                                         gubunVal = "OTHER";
                                     }
-                                    int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, luis_intent_score, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
+                                    int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, luis_intent, entitiesStr, luis_intent_score, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                     //int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), luis_intent, entitiesStr, luisID, 'H', testDriveWhereStr, "", priceWhereStr, gubunVal);
                                     Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
