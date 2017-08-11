@@ -935,22 +935,23 @@ namespace Bot_Application1
                                     }
                                 }
 
-
+                                //현재위치사용승인
                                 if (entitiesStr.Contains("current location"))
-                                {
-                                    //int position;
-                                    Geolocation.getRegion();
-                                    if (testDriveWhereStr.Contains("test drive center region"))
+                                {                                    
+                                    try {
+                                        string regionStr = "";
+                                        string location = activity.Text;
+                                        //테스트용
+                                        //string location = "129.0929788:35.2686635";
+                                        string[] location_result = location.Split(':');
+
+                                        regionStr = db.LocationValue(location_result[0], location_result[1]);
+
+                                        testDriveWhereStr = "test drive center region=" + regionStr + ",current location=current location,query=Approve your current location";
+                                    } catch
                                     {
-                                        //position = entitiesValueStr.IndexOf(",");
-                                        //entitiesValueStr = entitiesValueStr.Substring(position, (int)entitiesValueStr.Length);
-                                        //entitiesValueStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + entitiesValueStr;
                                         testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
-                                    }
-                                    else
-                                    {
-                                        testDriveWhereStr = "test drive center region=" + Geolocation.ll.regionName.ToLower().ToString() + "," + testDriveWhereStr;
-                                    }
+                                    }   
                                 }
 
                                 List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(testDriveWhereStr);

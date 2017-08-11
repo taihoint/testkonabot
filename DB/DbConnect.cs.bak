@@ -18,7 +18,7 @@ namespace Bot_Application1.DB
     {
         string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoML;User ID=faxtime;Password=test2016!;";
         //string connStr = "Data Source= hyundaidb.database.windows.net;Initial Catalog=taihoML;User ID=taihoinst;Password=taiho123@;";
-        //string connStr = "Data Source=10.6.222.21,1433;Initial Catalog=KONA2_DB;User ID=konadb;Password=Didwoehd20-9;";
+        //string connStr = "Data Source=10.6.222.21,1433;Initial Catalog=konadb;User ID=konadb;Password=Didwoehd20-9!;";
         StringBuilder sb = new StringBuilder();
 
         public void ConnectDb()
@@ -1443,7 +1443,7 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
                 json = json.Replace("'", "''");
-                cmd.CommandText += "  SELECT  TOP 1 VAL, INTENT, ENTITY,ENTITY_VALUE , TEST_DRIVEWHERE, CAR_PRICEWHERE  FROM FN_LUIS_RESULT_SUM_JSL    ";
+                cmd.CommandText += "  SELECT  TOP 1 VAL, INTENT, ENTITY,INTENTS_SCORE, ENTITY_VALUE , TEST_DRIVEWHERE, CAR_PRICEWHERE  FROM FN_LUIS_RESULT_SUM_JSL1    ";
                 cmd.CommandText += "  ('" + json + "')                      ";
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
@@ -1453,6 +1453,7 @@ namespace Bot_Application1.DB
                     string val = rdr["VAL"] as string;
                     string intentValue = rdr["INTENT"] as string;
                     string entityValue = rdr["ENTITY"] as string;
+                    string intentScore = rdr["INTENTS_SCORE"] as string;
                     string entitieWhereValue = rdr["ENTITY_VALUE"] as string;
                     string testDriveWhereValue = rdr["TEST_DRIVEWHERE"] as string;
                     string carPriceWhereValue = rdr["CAR_PRICEWHERE"] as string;
@@ -1462,6 +1463,7 @@ namespace Bot_Application1.DB
                     result.val = val;
                     result.intentValue = intentValue;
                     result.entityValue = entityValue;
+                    result.intentScore = intentScore;
                     result.entitieWhereValue = entitieWhereValue;
                     result.testDriveWhereValue = testDriveWhereValue;
                     result.carPriceWhereValue = carPriceWhereValue;
@@ -1559,6 +1561,7 @@ namespace Bot_Application1.DB
             String json = @"{
                 'entities':'',
                 'intents':[{'intent':''}],
+                'intent_score':'',
                 'test_driveWhere':'',
                 'car_priceWhere':'',
                 'car_option':''
@@ -1572,7 +1575,7 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
                 //cmd.CommandText = "SELECT TOP 1 INTENT_ID, ENTITIES_IDS, ISNULL(CAR_COLOR,'') AS CAR_COLOR, ISNULL(CAR_AREA,'') AS CAR_AREA  ,ISNULL(CAR_PRICEWHERE,'') AS CAR_PRICEWHERE  ,ISNULL(CAR_OPTION,'') AS CAR_OPTION FROM TBL_QUERY_ANALYSIS_RESULT2 WHERE QUERY = @query AND RESULT = 'H'";
-                cmd.CommandText = "SELECT TOP 1 INTENT_ID, ENTITIES_IDS, ISNULL(CAR_COLOR,'') AS CAR_COLOR, ISNULL(CAR_AREA,'') AS CAR_AREA  ,ISNULL(CAR_PRICEWHERE,'') AS CAR_PRICEWHERE  ,ISNULL(CAR_OPTION,'') AS CAR_OPTION FROM TBL_QUERY_ANALYSIS_RESULT WHERE QUERY = @query AND RESULT = 'H'";
+                cmd.CommandText = "SELECT TOP 1 INTENT_ID, ENTITIES_IDS, ISNULL(INTENT_SCORE,'') AS INTENT_SCORE, ISNULL(CAR_COLOR,'') AS CAR_COLOR, ISNULL(CAR_AREA,'') AS CAR_AREA  ,ISNULL(CAR_PRICEWHERE,'') AS CAR_PRICEWHERE  ,ISNULL(CAR_OPTION,'') AS CAR_OPTION FROM TBL_QUERY_ANALYSIS_RESULT WHERE QUERY = @query AND RESULT = 'H'";
                 cmd.Parameters.AddWithValue("@query", query.Trim().ToLower());
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
@@ -1580,6 +1583,7 @@ namespace Bot_Application1.DB
                 {
                     returnJson["entities"] = rdr["ENTITIES_IDS"] as string;
                     returnJson["intents"][0]["intent"] = rdr["INTENT_ID"] as string;
+                    returnJson["intent_score"] = rdr["INTENT_SCORE"] as string;
                     returnJson["test_driveWhere"] = rdr["CAR_AREA"] as string;
                     returnJson["car_priceWhere"] = rdr["CAR_PRICEWHERE"] as string;
                     returnJson["car_option"] = rdr["car_option"] as string;
@@ -1592,7 +1596,7 @@ namespace Bot_Application1.DB
         // Query Analysis
         // Insert user chat message for history and analysis
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        public int insertUserQuery(string korQuery, string enQuery, string intentID, string entitiesIDS, int luisID, char result, string car_area, string car_colorArea, string car_priceWhere, string car_option)
+        public int insertUserQuery(string korQuery, string enQuery, string intentID, string entitiesIDS, string intentScore,int luisID, char result, string car_area, string car_colorArea, string car_priceWhere, string car_option)
         {
             int dbResult = 0;
             using (SqlConnection conn = new SqlConnection(connStr))
@@ -1607,8 +1611,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " (@query, @intentID, @entitiesIDS, @luisID, @result, @car_color, @car_area) ";
                 */
                 //cmd.CommandText = "sp_insertusehistory2";
-                cmd.CommandText = "sp_insertusehistory3";
-                //cmd.CommandText = "sp_insertusehistory4";
+                //cmd.CommandText = "sp_insertusehistory3";
+                cmd.CommandText = "sp_insertusehistory4";
                 //cmd.CommandText = "sp_insertusehistory";
 
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -1617,6 +1621,7 @@ namespace Bot_Application1.DB
                 cmd.Parameters.AddWithValue("@query", enQuery.Trim().ToLower());
                 cmd.Parameters.AddWithValue("@intentID", intentID.Trim());
                 cmd.Parameters.AddWithValue("@entitiesIDS", entitiesIDS.Trim().ToLower());
+                cmd.Parameters.AddWithValue("@intentScore", intentScore.Trim().ToLower());
                 cmd.Parameters.AddWithValue("@luisID", luisID);
                 cmd.Parameters.AddWithValue("@result", result);
                 cmd.Parameters.AddWithValue("@car_color", car_colorArea);
@@ -1706,6 +1711,57 @@ namespace Bot_Application1.DB
 
 
                     TestDriveList dlg = new TestDriveList();
+                    dlg.dlgGubun = dlgGubun;
+                    dlg.dlgStr1 = dlgStr1;
+                    dlg.dlgStr2 = dlgStr2;
+                    dlg.dlgStr3 = dlgStr3;
+                    dlg.dlgStr4 = dlgStr4;
+                    dlg.dlgStr5 = dlgStr5;
+                    dlg.dlgStr6 = dlgStr6;
+                    dlg.dlgStr7 = dlgStr7;
+                    dlg.dlgStr8 = dlgStr8;
+
+                    testDriveList.Add(dlg);
+                }
+            }
+            return testDriveList;
+        }
+
+        public List<TestDriveListInit> SelectTestDriveListInit(String arg)
+        {
+            SqlDataReader rdr = null;
+
+            List<TestDriveListInit> testDriveList = new List<TestDriveListInit>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "    SELECT GUBUN, STR1, STR2, STR3, STR4, STR5, STR6, STR7, STR8 FROM FN_LUIS_BRANCH_DRIVE (@arg) ";
+
+                cmd.Parameters.AddWithValue("@arg", arg);
+
+                Debug.WriteLine("query : " + cmd.CommandText);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    //int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
+                    string dlgGubun = rdr["GUBUN"] as string;
+                    string dlgStr1 = rdr["STR1"] as string;
+                    string dlgStr2 = rdr["STR2"] as string;
+                    string dlgStr3 = rdr["STR3"] as string;
+                    string dlgStr4 = rdr["STR4"] as string;
+                    string dlgStr5 = rdr["STR5"] as string;
+                    string dlgStr6 = rdr["STR6"] as string;
+                    string dlgStr7 = rdr["STR7"] as string;
+                    string dlgStr8 = rdr["STR8"] as string;
+
+
+                    TestDriveListInit dlg = new TestDriveListInit();
                     dlg.dlgGubun = dlgGubun;
                     dlg.dlgStr1 = dlgStr1;
                     dlg.dlgStr2 = dlgStr2;
