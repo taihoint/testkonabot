@@ -944,14 +944,13 @@ namespace Bot_Application1
                                         //테스트용
                                         //string location = "129.0929788:35.2686635";
                                         string[] location_result = location.Split(':');
-
                                         regionStr = db.LocationValue(location_result[0], location_result[1]);
 
                                         testDriveWhereStr = "test drive center region=" + regionStr + ",current location=current location,query=Approve your current location";
                                     } catch
                                     {
                                         testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
-                                    }   
+                                    }  
                                 }
 
                                 List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(testDriveWhereStr);
