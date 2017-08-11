@@ -16,9 +16,9 @@ namespace Bot_Application1.DB
 
     public class DbConnect
     {
-        //string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoML;User ID=faxtime;Password=test2016!;";
+        string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoML;User ID=faxtime;Password=test2016!;";
         //string connStr = "Data Source= hyundaidb.database.windows.net;Initial Catalog=taihoML;User ID=taihoinst;Password=taiho123@;";
-        string connStr = "Data Source=10.6.222.21,1433;Initial Catalog=konadb;User ID=konadb;Password=Didwoehd20-9!;";
+        //string connStr = "Data Source=10.6.222.21,1433;Initial Catalog=konadb;User ID=konadb;Password=Didwoehd20-9!;";
         StringBuilder sb = new StringBuilder();
 
         public void ConnectDb()
