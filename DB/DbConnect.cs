@@ -1443,7 +1443,7 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
                 json = json.Replace("'", "''");
-                cmd.CommandText += "  SELECT  TOP 1 VAL, INTENT, ENTITY,INTENTS_SCORE, ENTITY_VALUE , TEST_DRIVEWHERE, CAR_PRICEWHERE  FROM FN_LUIS_RESULT_SUM_JSL1    ";
+                cmd.CommandText += "  SELECT  TOP 1 VAL, INTENT, ENTITY,INTENTS_SCORE, ENTITY_VALUE , TEST_DRIVEWHERE, CAR_PRICEWHERE  FROM FN_LUIS_RESULT_SUM";
                 cmd.CommandText += "  ('" + json + "')                      ";
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);

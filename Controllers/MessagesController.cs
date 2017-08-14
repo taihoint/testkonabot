@@ -286,6 +286,11 @@ namespace Bot_Application1
                 }
 
 
+                //else if(orgMent.Equals("안녕"))
+                //{
+                //    Debug.WriteLine("안녕은 초기 메뉴 인사말로");
+                //}
+
                 else if (orgMent.Contains(" 트림 외장색상"))
                 //else if (orgMent.Substring(orgMent.Length - 8).Equals(" 트림 외장색상"))
                 {
@@ -738,12 +743,6 @@ namespace Bot_Application1
                         //string gubunVal = "";
                         //string entitiesValueStr = "";
                     }
-                    //위도경도 메세지 노출X
-                    if (orgMent.Contains(":"))
-                    {
-                        response = Request.CreateResponse(HttpStatusCode.OK);
-                        return response;
-                    }
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // For Query Analysis
                     // No results from DB
@@ -877,27 +876,9 @@ namespace Bot_Application1
                         searchLuisEntities = entitiesStr;
 
                         List<LuisList> LuisDialogID = db.SelectLuis(luis_intent, entitiesStr);
+                        
 
-                        //Debug.WriteLine(LuisDialogID[0].dlgId + " LuisDialogID count : " + LuisDialogID.Count);
-                        //컬러별 차량이 전시된 매장을 알려줘. showroom에서 car color로 변경되어 , -> . 으로 변경
-                        //entitiesStr = (string)entitiesStr.Replace(".", ",");
 
-                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        // Query Analysis
-                        // Result from LUIS or History available, but (if) no dialogue or (else) has dialogue available
-                        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        /* 아래로 이동
-                        if (LuisDialogID.Count == 0)
-                        {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), (string)Luis["intents"][0]["intent"], entitiesStr, luisID, 'D', colorAreaStr, areaStr);
-                            Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
-                        }
-                        else
-                        {
-                            int dbResult = db.insertUserQuery(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), (string)Luis["intents"][0]["intent"], entitiesStr, luisID, 'H', colorAreaStr, areaStr);
-                            Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
-                        }
-                        */
                         String addressStr = "";
                         Activity replyToConversation = activity.CreateReply();
 
@@ -908,8 +889,14 @@ namespace Bot_Application1
                             replyToConversation.Attachments = new List<Attachment>();
                             replyToConversation.AttachmentLayout = AttachmentLayoutTypes.Carousel;
 
-                            dlg = db.SelectDialog(LuisDialogID[k].dlgId);
-
+                            //if(LuisDialogID[k].dlgId == 5162)
+                            //{
+                            //    dlg = db.SelectInitDialog();
+                            //}
+                            //else
+                            //{ 
+                                dlg = db.SelectDialog(LuisDialogID[k].dlgId);
+                            //}
                             //if (dlg.Count > 0)
                             //{
                             //    Debug.WriteLine("dlg[0].dlgMent : [" + dlg[0].dlgMent + "]");
@@ -942,20 +929,34 @@ namespace Bot_Application1
 
                                 //현재위치사용승인
                                 if (entitiesStr.Contains("current location"))
-                                {                                    
-                                    try {
-                                        string regionStr = "";
-                                        string location = activity.Text;
-                                        //테스트용
-                                        //string location = "129.0929788:35.2686635";
-                                        string[] location_result = location.Split(':');
-                                        regionStr = db.LocationValue(location_result[0], location_result[1]);
-
-                                        testDriveWhereStr = "test drive center region=" + regionStr + ",current location=current location,query=Approve your current location";
-                                    } catch
+                                {
+                                    if (!testDriveWhereStr.Contains(':'))
                                     {
-                                        testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
-                                    }  
+                                        //첫번쨰 메세지 출력 x
+                                        response = Request.CreateResponse(HttpStatusCode.OK);
+                                        return response;
+                                    }
+                                    else
+                                    {
+                                        //위도경도에 따른 값 출력
+                                        try
+                                        {
+                                            string regionStr = "";
+                                            string location = activity.Text;
+                                            location = location.Replace("current location=current location,query=current location:", "");
+                                            //테스트용
+                                            //string location = "129.0929788:35.2686635";
+                                            string[] location_result = location.Split(':');
+                                            regionStr = db.LocationValue(location_result[0], location_result[1]);
+
+                                            testDriveWhereStr = "test drive center region=" + regionStr + ",current location=current location,query=Approve your current location";
+                                        }
+                                        catch
+                                        {
+                                            testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
+                                        }
+                                    }
+
                                 }
 
                                 List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(testDriveWhereStr);
@@ -2504,8 +2505,10 @@ namespace Bot_Application1
             using (HttpClient client = new HttpClient())
             {
                 //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
-                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
-                
+                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query; // taiho azure
+                //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/7f77d1c8-011d-402c-acd9-6a7188d368f7?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai luis
+
+
                 //string RequestURI = "https://api.projectoxford.ai/luis/v1/application?id=fd9f899c-5a48-499e-9037-9ea589953684&subscription-key=7efb093087dd48918b903885b944740c&q=" + Query;
                 HttpResponseMessage msg = await client.GetAsync(RequestURI);
 
