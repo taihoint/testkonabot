@@ -162,6 +162,10 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\Geolocation.cs" />
     <Compile Include="Controllers\NaverLocation.cs" />
+    <Compile Include="Dialogs\UsageDialog.cs" />
+    <Compile Include="Dialogs\RecommendDialog.cs" />
+    <Compile Include="Dialogs\ImDialog.cs" />
+    <Compile Include="Dialogs\GenderAgeDialog.cs" />
     <Compile Include="Dialogs\RootDialog.cs" />
     <Compile Include="Models\AreaTestCenterCountList.cs" />
     <Compile Include="Models\AreaTestCenterList.cs" />
@@ -169,6 +173,7 @@
     <Compile Include="Models\CarBranchInfo.cs" />
     <Compile Include="Models\CarBranchList.cs" />
     <Compile Include="Models\CarColorAreaList.cs" />
+    <Compile Include="Models\RecommendList.cs" />
     <Compile Include="Models\LinkHeroCard.cs" />
     <Compile Include="Models\LuisResult.cs" />
     <Compile Include="Models\CarQouteLuisResult.cs" />

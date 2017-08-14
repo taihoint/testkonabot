@@ -1808,5 +1808,162 @@ namespace Bot_Application1.DB
             }
             return result;
         }
+
+        public List<RecommendList> SelectRecommendList()
+        {
+            SqlDataReader rdr = null;
+            List<RecommendList> recommendList = new List<RecommendList>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT			                ";
+                cmd.CommandText += "TRIM_DETAIL,		            ";
+                cmd.CommandText += "ANSWER_1, ANSWER_2, ANSWER_3,   ";
+                cmd.CommandText += "OPTION_1, OPTION_1_IMG_URL,	    ";
+                cmd.CommandText += "OPTION_2, OPTION_2_IMG_URL,	    ";
+                cmd.CommandText += "OPTION_3, OPTION_3_IMG_URL,	    ";
+                cmd.CommandText += "OPTION_4, OPTION_4_IMG_URL,	    ";
+                cmd.CommandText += "OPTION_5, OPTION_5_IMG_URL,	    ";
+                cmd.CommandText += "OPTION_6, OPTION_6_IMG_URL,	    ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_1,		        ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_2,		        ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_3,		        ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_4,		        ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_5,		        ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_6,		        ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_7		        ";
+                cmd.CommandText += "FROM TBL_RECOMMEND_TRIM	    ";
+
+                /*cmd.Parameters.AddWithValue("@usage", usage);
+                cmd.Parameters.AddWithValue("@importance", importance);
+                cmd.Parameters.AddWithValue("@genderAge", genderAge);*/
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                while (rdr.Read())
+                {
+                    RecommendList dlg = new RecommendList();
+                    dlg.TRIM_DETAIL = rdr["TRIM_DETAIL"] as string;
+                    dlg.ANSWER_1 = rdr["ANSWER_1"] as string;
+                    dlg.ANSWER_2 = rdr["ANSWER_2"] as string;
+                    dlg.ANSWER_3 = rdr["ANSWER_3"] as string;
+                    dlg.OPTION_1 = rdr["OPTION_1"] as string;
+                    dlg.OPTION_1_IMG_URL = rdr["OPTION_1_IMG_URL"] as string;
+                    dlg.OPTION_2 = rdr["OPTION_2"] as string;
+                    dlg.OPTION_2_IMG_URL = rdr["OPTION_2_IMG_URL"] as string;
+                    dlg.OPTION_3 = rdr["OPTION_3"] as string;
+                    dlg.OPTION_3_IMG_URL = rdr["OPTION_3_IMG_URL"] as string;
+                    dlg.OPTION_4 = rdr["OPTION_4"] as string;
+                    dlg.OPTION_4_IMG_URL = rdr["OPTION_4_IMG_URL"] as string;
+                    dlg.OPTION_5 = rdr["OPTION_5"] as string;
+                    dlg.OPTION_5_IMG_URL = rdr["OPTION_5_IMG_URL"] as string;
+                    dlg.OPTION_6 = rdr["OPTION_6"] as string;
+                    dlg.OPTION_6_IMG_URL = rdr["OPTION_6_IMG_URL"] as string;
+                    dlg.MAIN_COLOR_VIEW_1 = rdr["MAIN_COLOR_VIEW_1"] as string;
+                    dlg.MAIN_COLOR_VIEW_2 = rdr["MAIN_COLOR_VIEW_2"] as string;
+                    dlg.MAIN_COLOR_VIEW_3 = rdr["MAIN_COLOR_VIEW_3"] as string;
+                    dlg.MAIN_COLOR_VIEW_4 = rdr["MAIN_COLOR_VIEW_4"] as string;
+                    dlg.MAIN_COLOR_VIEW_5 = rdr["MAIN_COLOR_VIEW_5"] as string;
+                    dlg.MAIN_COLOR_VIEW_6 = rdr["MAIN_COLOR_VIEW_6"] as string;
+                    dlg.MAIN_COLOR_VIEW_7 = rdr["MAIN_COLOR_VIEW_7"] as string;
+
+                    recommendList.Add(dlg);
+                }
+
+            }
+            return recommendList;
+        }
+
+        public List<RecommendList> SelectedRecommendList(string usage, string importance, string genderAge)
+        {
+            SqlDataReader rdr = null;
+            List<RecommendList> recommendList = new List<RecommendList>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += "SELECT TOP 1 RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, TRIM_DETAIL, TRIM_DETAIL_PRICE, OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
+                cmd.CommandText += "OPTION_6, OPTION_6_IMG_URL, MAIN_COLOR_VIEW_1, MAIN_COLOR_VIEW_2, MAIN_COLOR_VIEW_3, MAIN_COLOR_VIEW_4, MAIN_COLOR_VIEW_5, MAIN_COLOR_VIEW_6, MAIN_COLOR_VIEW_7 ";
+                cmd.CommandText += "FROM ";
+                cmd.CommandText += "    ( ";
+                cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
+                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
+                cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('(', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
+                cmd.CommandText += "              , OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
+                cmd.CommandText += "            OPTION_6, OPTION_6_IMG_URL,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_1,CHARINDEX('/',MAIN_COLOR_VIEW_1)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_1,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_2,CHARINDEX('/',MAIN_COLOR_VIEW_2)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_2,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_3,CHARINDEX('/',MAIN_COLOR_VIEW_3)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_3,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_4,CHARINDEX('/',MAIN_COLOR_VIEW_4)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_4,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_5,CHARINDEX('/',MAIN_COLOR_VIEW_5)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_5,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_6,CHARINDEX('/',MAIN_COLOR_VIEW_6)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_6,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_7,CHARINDEX('/',MAIN_COLOR_VIEW_7)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_7  ";
+                cmd.CommandText += "    FROM    TBL_RECOMMEND_TRIM ";
+                cmd.CommandText += "    WHERE   ANSWER_1 = @usage ";
+                cmd.CommandText += "    AND     ANSWER_2 = @importance ";
+                cmd.CommandText += "    AND     ANSWER_3 = @genderAge ";
+                cmd.CommandText += "    UNION ALL ";
+                cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
+                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
+                cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('(', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
+                cmd.CommandText += "              , OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
+                cmd.CommandText += "            OPTION_6, OPTION_6_IMG_URL,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_1,CHARINDEX('/',MAIN_COLOR_VIEW_1)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_1,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_2,CHARINDEX('/',MAIN_COLOR_VIEW_2)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_2,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_3,CHARINDEX('/',MAIN_COLOR_VIEW_3)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_3,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_4,CHARINDEX('/',MAIN_COLOR_VIEW_4)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_4,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_5,CHARINDEX('/',MAIN_COLOR_VIEW_5)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_5,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_6,CHARINDEX('/',MAIN_COLOR_VIEW_6)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_6,  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_7,CHARINDEX('/',MAIN_COLOR_VIEW_7)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_7  ";
+                cmd.CommandText += "    FROM    TBL_RECOMMEND_TRIM ";
+                cmd.CommandText += "    WHERE   ANSWER_1 = '기타' ";
+                cmd.CommandText += "    ) A ";
+
+                cmd.Parameters.AddWithValue("@usage", usage);
+                cmd.Parameters.AddWithValue("@importance", importance);
+                cmd.Parameters.AddWithValue("@genderAge", genderAge);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                while (rdr.Read())
+                {
+                    RecommendList dlg = new RecommendList();
+                    dlg.RECOMMEND_TITLE = rdr["RECOMMEND_TITLE"] as string;
+                    dlg.TRIM_DETAIL = rdr["TRIM_DETAIL"] as string;
+                    dlg.TRIM_DETAIL_PRICE = rdr["TRIM_DETAIL_PRICE"] as string;
+                    dlg.ANSWER_1 = rdr["ANSWER_1"] as string;
+                    dlg.ANSWER_2 = rdr["ANSWER_2"] as string;
+                    dlg.ANSWER_3 = rdr["ANSWER_3"] as string;
+                    dlg.OPTION_1 = rdr["OPTION_1"] as string;
+                    dlg.OPTION_1_IMG_URL = rdr["OPTION_1_IMG_URL"] as string;
+                    dlg.OPTION_2 = rdr["OPTION_2"] as string;
+                    dlg.OPTION_2_IMG_URL = rdr["OPTION_2_IMG_URL"] as string;
+                    dlg.OPTION_3 = rdr["OPTION_3"] as string;
+                    dlg.OPTION_3_IMG_URL = rdr["OPTION_3_IMG_URL"] as string;
+                    dlg.OPTION_4 = rdr["OPTION_4"] as string;
+                    dlg.OPTION_4_IMG_URL = rdr["OPTION_4_IMG_URL"] as string;
+                    dlg.OPTION_5 = rdr["OPTION_5"] as string;
+                    dlg.OPTION_5_IMG_URL = rdr["OPTION_5_IMG_URL"] as string;
+                    dlg.OPTION_6 = rdr["OPTION_6"] as string;
+                    dlg.OPTION_6_IMG_URL = rdr["OPTION_6_IMG_URL"] as string;
+                    dlg.MAIN_COLOR_VIEW_1 = rdr["MAIN_COLOR_VIEW_1"] as string;
+                    dlg.MAIN_COLOR_VIEW_2 = rdr["MAIN_COLOR_VIEW_2"] as string;
+                    dlg.MAIN_COLOR_VIEW_3 = rdr["MAIN_COLOR_VIEW_3"] as string;
+                    dlg.MAIN_COLOR_VIEW_4 = rdr["MAIN_COLOR_VIEW_4"] as string;
+                    dlg.MAIN_COLOR_VIEW_5 = rdr["MAIN_COLOR_VIEW_5"] as string;
+                    dlg.MAIN_COLOR_VIEW_6 = rdr["MAIN_COLOR_VIEW_6"] as string;
+                    dlg.MAIN_COLOR_VIEW_7 = rdr["MAIN_COLOR_VIEW_7"] as string;
+
+                    recommendList.Add(dlg);
+                }
+
+            }
+            return recommendList;
+        }
     }
 }
