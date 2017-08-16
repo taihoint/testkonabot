@@ -1,124 +1,216 @@
-﻿namespace BasicMultiDialogBot.Dialogs
+﻿
+namespace BasicMultiDialogBot.Dialogs
 {
+    using Microsoft.Bot.Builder.Dialogs;
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Connector;
-    using System.Diagnostics;
-    using System.Net;
-    using System.IO;
-    using System.Text;
-    using Newtonsoft.Json;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using Bot_Application1.Models;
+    using Bot_Application1.DB;
 
-#pragma warning disable 1998
 
     [Serializable]
-    public class RecommendDialog : IDialog<object>
+    public class GenderAgeDialog : IDialog<string>
     {
-        public static int sorryMessageCnt = 0;
-        public static string newUserID = "";
-        public static string beforeUserID = "";
-        private string luis_intent;
-        private string entitiesStr;
-        private DateTime startTime;
-        public static string beforeMessgaeText = "";
-        public static string messgaeText = "";
-        private string orgKRMent;
-        private string orgENGMent;
         private string usage;
         private string importance;
         private string genderAge;
 
-        public RecommendDialog(string luis_intent, string entitiesStr, DateTime startTime, string orgKRMent, string orgENGMent)
-        {
-            this.luis_intent = luis_intent;
-            this.entitiesStr = entitiesStr;
-            this.startTime = startTime;
-            this.orgKRMent = orgKRMent;
-            this.orgENGMent = orgENGMent;
 
+        public GenderAgeDialog(string usage, string importance)
+        {
+            this.usage = usage;
+            this.importance = importance;
         }
 
         public async Task StartAsync(IDialogContext context)
         {
-            /* Wait until the first message is received from the conversation and call MessageReceviedAsync 
-             *  to process that message. */
+            await context.PostAsync("Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요 ?");
+
             context.Wait(this.MessageReceivedAsync);
         }
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
-            /* When MessageReceivedAsync is called, it's passed an IAwaitable<IMessageActivity>. To get the message,
-             *  await the result. */
             var message = await result;
-            await this.SendWelcomeMessageAsync(context);
+            this.genderAge = message.Text;
+            var reply = context.MakeMessage();
+            var reply1 = context.MakeMessage();
+            var reply2 = context.MakeMessage();
+
+            reply.Attachments.Add(
+            GetHeroCard_button(
+            "",
+            "",
+            "고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
+            new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "다시 선택 하기"),
+            new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
+            )
+            );
+
+            await context.PostAsync(reply);
+
+            context.Done(message.Text);
+
+
+            // Db
+            DbConnect db = new DbConnect();
+            //List<RecommendList> RecommendList = db.SelectRecommendList();
+            List<RecommendList> RecommendList = db.SelectedRecommendList(usage, importance, genderAge);
+            RecommendList recommend = new RecommendList();
+
+            //입력받은 단어들로 3가지 질문에 모두 일치 하는 항목이 있을 경우의 값을 리스트에 담고 Break
+            for (var i = 0; i < RecommendList.Count; i++)
+            {
+                //첫번쌔 이미지
+                List<CardImage> cardImages = new List<CardImage>();
+                reply1.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+                reply1.Attachments = new List<Attachment>();
+
+                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_1))
+                {
+                    reply1.Attachments.Add(
+                    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg"),
+                        new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                        new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                        new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                        new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                        new CardImage(url: RecommendList[i].OPTION_5_IMG_URL),
+                        new CardAction(ActionTypes.ImBack, RecommendList[i].MAIN_COLOR_VIEW_NM, value: RecommendList[i].MAIN_COLOR_VIEW_NM),
+                        new CardAction(ActionTypes.ImBack, RecommendList[i].OPTION_5, value: RecommendList[i].OPTION_5),
+                        new CardAction(ActionTypes.ImBack, RecommendList[i].OPTION_1, value: RecommendList[i].OPTION_1),
+                        new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?carcode=RV104"))
+                    );
+
+                }
+
+                //if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_2))
+                //{
+                //    reply1.Attachments.Add(
+                //    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_2 + "/00001.jpg"),
+                //    new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_5_IMG_URL))
+                //   );
+                //}
+
+                //if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_3))
+                //{
+                //    reply1.Attachments.Add(
+                //    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_3 + "/00001.jpg"),
+                //    new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_5_IMG_URL))
+                //   );
+                //}
+
+                //if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_4))
+                //{
+                //    reply1.Attachments.Add(
+                //    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_4 + "/00001.jpg"),
+                //    new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_5_IMG_URL))
+                //   );
+                //}
+
+                //if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_5))
+                //{
+                //    reply1.Attachments.Add(
+                //    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_5 + "/00001.jpg"),
+                //    new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_5_IMG_URL))
+                //   );
+                //}
+
+                //if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_6))
+                //{
+                //    reply1.Attachments.Add(
+                //    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_6 + "/00001.jpg"),
+                //    new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_5_IMG_URL))
+                //   );
+                //}
+
+                //if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_7))
+                //{
+                //    reply1.Attachments.Add(
+                //    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                //    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_7 + "/00001.jpg"),
+                //    new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                //    new CardImage(url: RecommendList[i].OPTION_5_IMG_URL))
+                //   );
+                //}
+
+                await context.PostAsync(reply1);
+            }
+
+            //모바일에서만 출력 부분
+            //reply2.Attachments.Add(
+            //GetHeroCard_button(
+            //"",            
+            //"",
+            //"",
+            //new CardAction(ActionTypes.ImBack, "라이프스타일 추천", value: "라이프스타일 추천"),
+            //new CardAction(ActionTypes.ImBack, "Kona의 가격 보기", value: "Kona의 가격 보기")
+            //)
+            //);
+
+
+            //await context.PostAsync(reply2);
+
+            //context.Done(message.Text);
+
         }
 
-        private async Task SendWelcomeMessageAsync(IDialogContext context)
+        private static Attachment GetHeroCard(string title, string subtitle, string text, CardImage cardImage1, CardImage cardImage2, CardImage cardImage3, CardImage cardImage4, CardImage cardImage5, CardImage cardImage6, CardAction cardAction1, CardAction cardAction2, CardAction cardAction3, CardAction cardAction4)
         {
-            //await context.PostAsync("코나 추천을 시작합니다.");
+            var heroCard = new UserHeroCard
+            {
+                Title = title,
+                Subtitle = subtitle,
+                Text = text,
+                Images = new List<CardImage>() { cardImage1, cardImage2, cardImage3, cardImage4, cardImage5, cardImage6 },
+                Buttons = new List<CardAction>() { cardAction1, cardAction2, cardAction3, cardAction4 },
 
-            context.Call(new UsageDialog(), this.UsageDialogResumeAfter);
+            };
+            return heroCard.ToAttachment();
         }
 
-        private async Task UsageDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
+        private static Attachment GetHeroCard_button(string title, string subtitle, string text, CardAction cardAction1, CardAction cardAction2)
         {
-            try
+            var heroCard = new UserHeroCard
             {
-                this.usage = await result;
+                Title = title,
+                Subtitle = subtitle,
+                Text = text,
+                Buttons = new List<CardAction>() { cardAction1, cardAction2 },
 
-                context.Call(new ImDialog(), this.ImDialogResumeAfter);
-            }
-            catch (TooManyAttemptsException)
-            {
-                /*await context.PostAsync("I'm sorry, I'm having issues understanding you. Let's try again.");
-
-                await this.SendWelcomeMessageAsync(context);*/
-            }
+            };
+            return heroCard.ToAttachment();
         }
-
-        private async Task ImDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
-        {
-            try
-            {
-                this.importance = await result;
-
-                context.Call(new GenderAgeDialog(usage, importance), this.GenderAgeDialogResumeAfter);
-            }
-            catch (TooManyAttemptsException)
-            {
-                /*await context.PostAsync("I'm sorry, I'm having issues understanding you. Let's try again.");*/
-            }
-
-        }
-
-        private async Task GenderAgeDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
-        {
-            try
-            {
-                this.genderAge = await result;
-
-            }
-            catch (TooManyAttemptsException)
-            {
-                /*await context.PostAsync("I'm sorry, I'm having issues understanding you. Let's try again.");
-
-                await this.SendWelcomeMessageAsync(context);*/
-            }
-        }
-
-        private async Task SearchDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
-        {
-            try
-            {
-
-            }
-            catch (TooManyAttemptsException)
-            {
-
-            }
-        }
-
     }
 }

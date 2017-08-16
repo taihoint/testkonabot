@@ -1078,6 +1078,46 @@ namespace Bot_Application1.DB
             return carExColorList;
         }
 
+        public List<CarExColorList> SelectCarExColorSelectList(string color)
+        {
+            SqlDataReader rdr = null;
+            List<CarExColorList> carExColorList = new List<CarExColorList>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += " SELECT TRIMCOLOR_NM	";
+                cmd.CommandText += "       ,LEFT(TRIMCOLOR_CD,CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD	";
+                cmd.CommandText += "  	  ,TRIMCOLOR_PRICE	";
+                cmd.CommandText += "   FROM TBL_TRIMCOLOR2	";
+                cmd.CommandText += "   WHERE TRIMCOLOR_NM NOT LIKE '%)'	";
+                cmd.CommandText += "   AND TRIMCOLOR_CD LIKE '%"+ color + "%'	";
+                cmd.CommandText += "   GROUP BY TRIMCOLOR_NM, TRIMCOLOR_CD, TRIMCOLOR_PRICE	";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    string trimColorNm = rdr["TRIMCOLOR_NM"] as string;
+                    string trimColorCd = rdr["TRIMCOLOR_CD"] as string;
+                    int exColorPrice = Convert.ToInt32(rdr["TRIMCOLOR_PRICE"]);
+                    //string model = rdr["MODEL_NAME"] as string;
+
+                    CarExColorList exColor = new CarExColorList();
+                    exColor.trimColorNm = trimColorNm;
+                    exColor.trimColorCd = trimColorCd;
+                    exColor.exColorPrice = exColorPrice;
+                    //exColor.model = model;
+
+                    carExColorList.Add(exColor);
+                }
+            }
+            return carExColorList;
+        }
+
 
         public List<CarInColorList> SelectCarInColorAllList()
         {
@@ -1629,7 +1669,7 @@ namespace Bot_Application1.DB
                 cmd.Parameters.AddWithValue("@car_priceWhere", car_priceWhere);
                 cmd.Parameters.AddWithValue("@car_option", car_option);
 
-
+                
                 dbResult = cmd.ExecuteNonQuery();
             }
             return dbResult;
@@ -1888,8 +1928,8 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
 
-                cmd.CommandText += "SELECT TOP 1 RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, TRIM_DETAIL, TRIM_DETAIL_PRICE, OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
-                cmd.CommandText += "OPTION_6, OPTION_6_IMG_URL, MAIN_COLOR_VIEW_1, MAIN_COLOR_VIEW_2, MAIN_COLOR_VIEW_3, MAIN_COLOR_VIEW_4, MAIN_COLOR_VIEW_5, MAIN_COLOR_VIEW_6, MAIN_COLOR_VIEW_7 ";
+                cmd.CommandText += "SELECT TOP 1 RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, TRIM_DETAIL, TRIM_DETAIL_PRICE, LEFT(OPTION_1,CHARINDEX('추가',OPTION_1)-2) AS OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
+                cmd.CommandText += "OPTION_6, OPTION_6_IMG_URL, MAIN_COLOR_VIEW_1, MAIN_COLOR_VIEW_2, MAIN_COLOR_VIEW_3, MAIN_COLOR_VIEW_4, MAIN_COLOR_VIEW_5, MAIN_COLOR_VIEW_6, MAIN_COLOR_VIEW_7, MAIN_COLOR_VIEW_NM ";
                 cmd.CommandText += "FROM ";
                 cmd.CommandText += "    ( ";
                 cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
@@ -1903,7 +1943,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_4,CHARINDEX('/',MAIN_COLOR_VIEW_4)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_4,  ";
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_5,CHARINDEX('/',MAIN_COLOR_VIEW_5)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_5,  ";
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_6,CHARINDEX('/',MAIN_COLOR_VIEW_6)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_6,  ";
-                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_7,CHARINDEX('/',MAIN_COLOR_VIEW_7)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_7  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_7,CHARINDEX('/',MAIN_COLOR_VIEW_7)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_7,  ";
+                cmd.CommandText += "            LEFT(MAIN_COLOR_VIEW_1, CHARINDEX('/', MAIN_COLOR_VIEW_1) - 1) AS MAIN_COLOR_VIEW_NM ";
                 cmd.CommandText += "    FROM    TBL_RECOMMEND_TRIM ";
                 cmd.CommandText += "    WHERE   ANSWER_1 = @usage ";
                 cmd.CommandText += "    AND     ANSWER_2 = @importance ";
@@ -1920,7 +1961,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_4,CHARINDEX('/',MAIN_COLOR_VIEW_4)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_4,  ";
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_5,CHARINDEX('/',MAIN_COLOR_VIEW_5)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_5,  ";
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_6,CHARINDEX('/',MAIN_COLOR_VIEW_6)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_6,  ";
-                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_7,CHARINDEX('/',MAIN_COLOR_VIEW_7)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_7  ";
+                cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_7,CHARINDEX('/',MAIN_COLOR_VIEW_7)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_7,  ";
+                cmd.CommandText += "            LEFT(MAIN_COLOR_VIEW_1, CHARINDEX('/', MAIN_COLOR_VIEW_1) - 1) AS MAIN_COLOR_VIEW_NM ";
                 cmd.CommandText += "    FROM    TBL_RECOMMEND_TRIM ";
                 cmd.CommandText += "    WHERE   ANSWER_1 = '기타' ";
                 cmd.CommandText += "    ) A ";
@@ -1958,6 +2000,7 @@ namespace Bot_Application1.DB
                     dlg.MAIN_COLOR_VIEW_5 = rdr["MAIN_COLOR_VIEW_5"] as string;
                     dlg.MAIN_COLOR_VIEW_6 = rdr["MAIN_COLOR_VIEW_6"] as string;
                     dlg.MAIN_COLOR_VIEW_7 = rdr["MAIN_COLOR_VIEW_7"] as string;
+                    dlg.MAIN_COLOR_VIEW_NM = rdr["MAIN_COLOR_VIEW_NM"] as string;
 
                     recommendList.Add(dlg);
                 }

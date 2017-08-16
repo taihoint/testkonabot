@@ -33,5 +33,6 @@ namespace Bot_Application1.Models
         public string MAIN_COLOR_VIEW_5 { get; set; }
         public string MAIN_COLOR_VIEW_6 { get; set; }
         public string MAIN_COLOR_VIEW_7 { get; set; }
+        public string MAIN_COLOR_VIEW_NM { get; set; }
     }
 }
