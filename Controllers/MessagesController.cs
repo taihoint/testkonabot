@@ -996,7 +996,7 @@ namespace Bot_Application1
                                 //현재위치사용승인
                                 if (entitiesStr.Contains("current location"))
                                 {
-                                    if (!testDriveWhereStr.Contains(':'))
+                                    if (!orgMent.Contains(':'))
                                     {
                                         //첫번쨰 메세지 출력 x
                                         response = Request.CreateResponse(HttpStatusCode.OK);
@@ -1008,8 +1008,8 @@ namespace Bot_Application1
                                         try
                                         {
                                             string regionStr = "";
-                                            string location = activity.Text;
-                                            location = location.Replace("current location=current location,query=current location:", "");
+                                            string location = orgMent;
+                                            //location = location.Replace("current location=current location,query=current location:", "");
                                             //테스트용
                                             //string location = "129.0929788:35.2686635";
                                             string[] location_result = location.Split(':');
