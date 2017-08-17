@@ -8,6 +8,9 @@
     [Serializable]
     public class UsageDialog : IDialog<string>
     {
+        private string normal_reply = "(N)";
+        private string exit_reply = "(X)";
+        private string origin_message;
 
         public async Task StartAsync(IDialogContext context)
         {
@@ -19,27 +22,40 @@
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
             var message = await result;
+            var PromptOptions = new string[] { "예", "아니오" };
 
             if ((message.Text != null) && (message.Text.Trim().Length > 0))
             {
-
-                context.Done(message.Text);
+                origin_message = message.Text;
+                if (message.Text.Contains("출퇴근") || message.Text.Contains("출근") || message.Text.Contains("퇴근") || message.Text.Contains("장거리") || message.Text.Contains("통학")) {
+                    //1번질문 파라메터를 입력된 값으로 세팅
+                    //정상값이 입력되었을때 구분자를 붙여서 리턴
+                    context.Done(normal_reply + origin_message);
+                } else {
+                    PromptDialog.Choice(
+                        context,
+                        AfterConfirmAsync,
+                        PromptOptions,
+                        "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
+                        promptStyle: PromptStyle.Auto);
+                }
             }
-
-            /*else
+        }
+        private async Task AfterConfirmAsync(IDialogContext context, IAwaitable<string> argument)
+        {
+            string optionSelected = await argument;
+            switch (optionSelected)
             {
-                --attempts;
-                if (attempts > 0)
-                {
-                    await context.PostAsync("I'm sorry, I don't understand your reply. What is your name (e.g. 'Bill', 'Melinda')?");
-
-                    context.Wait(this.MessageReceivedAsync);
-                }
-                else
-                {
-                    context.Fail(new TooManyAttemptsException("Message was not a string or was an empty string."));
-                }
-            }*/
+                case "예":
+                    //1번질문 파라메터를 기타로 처리
+                    context.Done(normal_reply + origin_message);
+                    break;
+                default:
+                    //추천로직에서 나가려는 유저이기때문에 입력된 쿼리를 일반질문으로 이전
+                    context.Done(exit_reply + origin_message);
+                    break;
+            }
+            
         }
     }
 }

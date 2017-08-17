@@ -162,6 +162,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\Geolocation.cs" />
     <Compile Include="Controllers\NaverLocation.cs" />
+    <Compile Include="Dialogs\RecommendResult.cs" />
     <Compile Include="Dialogs\UsageDialog.cs" />
     <Compile Include="Dialogs\RecommendDialog.cs" />
     <Compile Include="Dialogs\ImDialog.cs" />

@@ -47,22 +47,6 @@ namespace BasicMultiDialogBot.Dialogs
             }
         }
 
-		private async Task AfterConfirmAsync(IDialogContext context, IAwaitable<string> argument)
-        {
-            string optionSelected = await argument;
-            switch (optionSelected)
-            {
-                case "예":
-                    //1번질문 파라메터를 기타로 처리
-                    context.Done(normal_reply + origin_message);
-                    break;
-                default:
-                    //추천로직에서 나가려는 유저이기때문에 입력된 쿼리를 일반질문으로 이전
-                    context.Done(exit_reply + origin_message);
-                    break;
-            }
-        }
-
         private static Attachment GetHeroCard(string title, string subtitle, string text, CardImage cardImage1, CardImage cardImage2, CardImage cardImage3, CardImage cardImage4, CardImage cardImage5, CardImage cardImage6, CardAction cardAction1, CardAction cardAction2, CardAction cardAction3, CardAction cardAction4)
         {
             var heroCard = new UserHeroCard

@@ -11,7 +11,6 @@ namespace BasicMultiDialogBot.Dialogs
     using System.Text;
     using Newtonsoft.Json;
     using System.Collections.Generic;
-    using Bot_Application1.Models;
 
 #pragma warning disable 1998
 
@@ -31,10 +30,6 @@ namespace BasicMultiDialogBot.Dialogs
         private string usage;
         private string importance;
         private string genderAge;
-        private string normal_reply = "(N)";
-        private string exit_reply = "(X)";
-
-        
 
         public RecommendDialog(string luis_intent, string entitiesStr, DateTime startTime, string orgKRMent, string orgENGMent)
         {
@@ -72,20 +67,9 @@ namespace BasicMultiDialogBot.Dialogs
         {
             try
             {
-                String temp_message = await result;
-                String message_header = temp_message.Substring(0,3);
-                String message_body = temp_message.Substring(3);
+                this.usage = await result;
 
-                switch (message_header)
-                {
-                    case "(N)":
-                        this.usage = message_body;
-                        context.Call(new ImDialog(), this.ImDialogResumeAfter);
-                        break;
-                    default:
-                        context.Done(message_body);
-                        break;
-                }
+                context.Call(new ImDialog(), this.ImDialogResumeAfter);
             }
             catch (TooManyAttemptsException)
             {
@@ -99,20 +83,9 @@ namespace BasicMultiDialogBot.Dialogs
         {
             try
             {
-                String temp_message = await result;
-                String message_header = temp_message.Substring(0,3);
-                String message_body = temp_message.Substring(3);
+                this.importance = await result;
 
-                switch (message_header)
-                {
-                    case "(N)":
-                        this.importance = message_body;
-                        context.Call(new GenderAgeDialog(), this.GenderAgeDialogResumeAfter);
-                        break;
-                    default:
-                        context.Done(message_body);
-                        break;
-                }
+                context.Call(new GenderAgeDialog(usage, importance), this.GenderAgeDialogResumeAfter);
             }
             catch (TooManyAttemptsException)
             {
@@ -125,27 +98,26 @@ namespace BasicMultiDialogBot.Dialogs
         {
             try
             {
-                //확인 질문에서 아니오일 경우 Done
-                String temp_message = await result;
-                String message_header = temp_message.Substring(0,3);
-                String message_body = temp_message.Substring(3);
+                this.genderAge = await result;
 
-                switch (message_header)
-                {
-                    case "(N)":
-                        this.genderAge = message_body;
-                        context.Call(new RecommendResult(usage, importance, genderAge), null);
-                        break;
-                    default:
-                        context.Done(message_body);
-                        break;
-                }
             }
             catch (TooManyAttemptsException)
             {
                 /*await context.PostAsync("I'm sorry, I'm having issues understanding you. Let's try again.");
 
                 await this.SendWelcomeMessageAsync(context);*/
+            }
+        }
+
+        private async Task SearchDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+
+            }
+            catch (TooManyAttemptsException)
+            {
+
             }
         }
 
