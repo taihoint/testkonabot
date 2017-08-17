@@ -688,7 +688,8 @@ namespace Bot_Application1
                             //추천 메뉴 이외의 ANSWER
                             else
                             {
-                                recommendChk = false;
+                                //recommendChk = false;
+                                diffMent = true;
                             }
                         }
 
@@ -1551,91 +1552,161 @@ namespace Bot_Application1
                                                     }
                                                 }
                                             }
-
-                                            
-                                            
                                         }
+                                        
                                         else if (entitiesStr.Equals("car color.exterior color"))
                                         {
                                             HistoryLog("외장 전체 색상 질문");
                                             Debug.WriteLine("외장 전체 색상 질문");
 
-                                            
-
-                                            List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
-                                            HistoryLog("exteriorexteriorexteriorexterior");
-                                            Debug.WriteLine("exteriorexteriorexteriorexterior");
-                                            //데이터가 없을 때 예외 처리 
-                                            if (CarExColorList.Count == 0)
+                                            if(priceWhereStr.Contains("car color=color"))
                                             {
-                                                //await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
-                                                //response = Request.CreateResponse(HttpStatusCode.OK);
-                                                //return response;
-
-                                                Activity reply_ment = activity.CreateReply();
-                                                reply_ment.Recipient = activity.From;
-                                                reply_ment.Type = "message";
-                                                reply_ment.Text = "Kona의 가격은 1,895만원부터 시작돼요, 상세 견적이 필요하시면 엔진과 구동 방식을 선택해 주세요";
-                                                var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
-
-                                                string mainModelTitle = "";
-                                                List<CarModelList> CarModelList = db.SelectCarModelList();
-
-                                                for (int td = 0; td < CarModelList.Count; td++)
+                                                List<CarExColorList> CarExColorList = db.SelectCarExColorAllList();
+                                                HistoryLog("exteriorexteriorexteriorexterior");
+                                                Debug.WriteLine("exteriorexteriorexteriorexterior");
+                                                //데이터가 없을 때 예외 처리 
+                                                if (CarExColorList.Count == 0)
                                                 {
-                                                    mainModelTitle = CarModelList[td].carModelNm;
-                                                    HistoryLog("mainModelTitle : " + mainModelTitle);
-                                                    Debug.WriteLine("mainModelTitle : " + mainModelTitle);
-                                                    if (mainModelTitle.Contains("TUIX"))
-                                                    {
-                                                        mainModelTitle = mainModelTitle + " 2WD";
-                                                    }
-                                                    Debug.WriteLine("mainModelTitle 2 : " + mainModelTitle);
-                                                    HistoryLog("mainModelTitle 2 : " + mainModelTitle);
+                                                    //await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+                                                    //response = Request.CreateResponse(HttpStatusCode.OK);
+                                                    //return response;
 
-                                                    replyToConversation.Attachments.Add(
-                                                    GetHeroCard_show(
-                                                    mainModelTitle,
-                                                    "",
-                                                    "",
-                                                    new CardImage(url: PriceImageList.GetPriceImage(CarModelList[td].carModelNm)),
-                                                    new CardAction(ActionTypes.ImBack, mainModelTitle + " 가격", value: CarModelList[td].carModelNm + " 가격"), "", "")
-                                                    );
+                                                    Activity reply_ment = activity.CreateReply();
+                                                    reply_ment.Recipient = activity.From;
+                                                    reply_ment.Type = "message";
+                                                    reply_ment.Text = "Kona의 가격은 1,895만원부터 시작돼요, 상세 견적이 필요하시면 엔진과 구동 방식을 선택해 주세요";
+                                                    var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+                                                    string mainModelTitle = "";
+                                                    List<CarModelList> CarModelList = db.SelectCarModelList();
+
+                                                    for (int td = 0; td < CarModelList.Count; td++)
+                                                    {
+                                                        mainModelTitle = CarModelList[td].carModelNm;
+                                                        HistoryLog("mainModelTitle : " + mainModelTitle);
+                                                        Debug.WriteLine("mainModelTitle : " + mainModelTitle);
+                                                        if (mainModelTitle.Contains("TUIX"))
+                                                        {
+                                                            mainModelTitle = mainModelTitle + " 2WD";
+                                                        }
+                                                        Debug.WriteLine("mainModelTitle 2 : " + mainModelTitle);
+                                                        HistoryLog("mainModelTitle 2 : " + mainModelTitle);
+
+                                                        replyToConversation.Attachments.Add(
+                                                        GetHeroCard_show(
+                                                        mainModelTitle,
+                                                        "",
+                                                        "",
+                                                        new CardImage(url: PriceImageList.GetPriceImage(CarModelList[td].carModelNm)),
+                                                        new CardAction(ActionTypes.ImBack, mainModelTitle + " 가격", value: CarModelList[td].carModelNm + " 가격"), "", "")
+                                                        );
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    Activity reply_ment = activity.CreateReply();
+                                                    reply_ment.Recipient = activity.From;
+                                                    reply_ment.Type = "message";
+                                                    reply_ment.Text = "전체 외장색상을 보여드릴게요";
+                                                    var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
+
+
+                                                    for (int td = 0; td < CarExColorList.Count; td++)
+                                                    {
+                                                        Debug.WriteLine("exterior color : " + CarExColorList[td].trimColorCd);
+                                                        HistoryLog("exterior color : " + CarExColorList[td].trimColorCd);
+                                                        string trimNM = CarExColorList[td].trimColorNm;
+                                                        trimNM = trimNM.Replace("가솔린 ", "");
+                                                        trimNM = trimNM.Replace("디젤 ", "");
+                                                        trimNM = trimNM.Replace("2WD ", "");
+                                                        trimNM = trimNM.Replace("4WD ", "");
+                                                        trimNM = trimNM.Replace("코나 ", "");
+                                                        trimNM = trimNM.Replace("1.6 ", "");
+                                                        trimNM = trimNM.Replace("오토 ", "");
+                                                        trimNM = trimNM.Replace("오토", "");
+                                                        trimNM = trimNM.Replace("터보 ", "");
+
+                                                        replyToConversation.Attachments.Add(
+                                                        GetHeroCard_info(
+                                                        trimNM,
+                                                        "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
+                                                        "",
+                                                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                        );
+                                                    }
                                                 }
                                             }
                                             else
                                             {
+                                                HistoryLog("선택 색상 질문");
+                                                Debug.WriteLine("선택 색상 질문");
+                                                //car color=chalk white,exterior color=exterior color
                                                 Activity reply_ment = activity.CreateReply();
                                                 reply_ment.Recipient = activity.From;
                                                 reply_ment.Type = "message";
-                                                reply_ment.Text = "전체 외장색상을 보여드릴게요";
+                                                reply_ment.Text = "선택 색상을 보여드릴게요";
                                                 var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
 
+                                                string choiceColor = "";
 
-                                                for (int td = 0; td < CarExColorList.Count; td++)
+
+                                                choiceColor = priceWhereStr.Split('=')[1].ToString().Split(',')[0].ToString();
+
+                                                List<CarExColorList> CarExColorList = db.SelectCarExColorSelectList(choiceColor);
+                                                //데이터가 없을 때 예외 처리
+                                                if (CarExColorList.Count == 0)
                                                 {
-                                                    Debug.WriteLine("exterior color : " + CarExColorList[td].trimColorCd);
-                                                    HistoryLog("exterior color : " + CarExColorList[td].trimColorCd);
-                                                    string trimNM = CarExColorList[td].trimColorNm;
-                                                    trimNM = trimNM.Replace("가솔린 ", "");
-                                                    trimNM = trimNM.Replace("디젤 ", "");
-                                                    trimNM = trimNM.Replace("2WD ", "");
-                                                    trimNM = trimNM.Replace("4WD ", "");
-                                                    trimNM = trimNM.Replace("코나 ", "");
-                                                    trimNM = trimNM.Replace("1.6 ", "");
-                                                    trimNM = trimNM.Replace("오토 ", "");
-                                                    trimNM = trimNM.Replace("오토", "");
-                                                    trimNM = trimNM.Replace("터보 ", "");
+                                                    Activity reply_err = activity.CreateReply();
+                                                    reply_err.Recipient = activity.From;
+                                                    reply_err.Type = "message";
+                                                    reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
+                                                    await connector.Conversations.SendToConversationAsync(reply_err);
 
-                                                    replyToConversation.Attachments.Add(
-                                                    GetHeroCard_info(
-                                                    trimNM,
-                                                    "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
-                                                    "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
-                                                    );
+                                                    response = Request.CreateResponse(HttpStatusCode.OK);
+                                                    return response;
+                                                }
+                                                else
+                                                {
+                                                    if (dlg.Count > 0)
+                                                    {
+                                                        HistoryLog("dlg[0].dlgMent : [" + dlg[0].dlgMent + "]");
+                                                        HistoryLog("dlg[0].dlgMent : [" + string.IsNullOrEmpty(dlg[0].dlgMent) + "]");
+                                                        Debug.WriteLine("dlg[0].dlgMent : [" + dlg[0].dlgMent + "]");
+                                                        Debug.WriteLine("dlg[0].dlgMent : [" + string.IsNullOrEmpty(dlg[0].dlgMent) + "]");
+                                                        if (string.IsNullOrEmpty(dlg[0].dlgMent) != true)
+                                                        {
+                                                            Activity reply = activity.CreateReply(dlg[0].dlgMent.ToString());
+                                                            await connector.Conversations.ReplyToActivityAsync(reply);
+                                                        }
+                                                    }
+
+
+                                                    for (int td = 0; td < CarExColorList.Count; td++)
+                                                    {
+
+                                                        string trimNM = CarExColorList[td].trimColorNm;
+                                                        trimNM = trimNM.Replace("가솔린 ", "");
+                                                        trimNM = trimNM.Replace("디젤 ", "");
+                                                        trimNM = trimNM.Replace("2WD ", "");
+                                                        trimNM = trimNM.Replace("4WD ", "");
+                                                        trimNM = trimNM.Replace("코나 ", "");
+                                                        trimNM = trimNM.Replace("1.6 ", "");
+                                                        trimNM = trimNM.Replace("오토 ", "");
+                                                        trimNM = trimNM.Replace("오토", "");
+                                                        trimNM = trimNM.Replace("터보 ", "");
+
+                                                        replyToConversation.Attachments.Add(
+                                                        GetHeroCard_info(
+                                                        trimNM,
+                                                        "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
+                                                        "",
+                                                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                        );
+                                                    }
                                                 }
                                             }
+
+                                            
                                             
 
                                         }
