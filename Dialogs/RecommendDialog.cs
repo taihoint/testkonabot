@@ -34,7 +34,7 @@ namespace BasicMultiDialogBot.Dialogs
         private string normal_reply = "(N)";
         private string exit_reply = "(X)";
 
-        
+
 
         public RecommendDialog(string luis_intent, string entitiesStr, DateTime startTime, string orgKRMent, string orgENGMent)
         {
