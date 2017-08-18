@@ -36,6 +36,10 @@ namespace Bot_Application1
         public static string searchLuisIntent = "";
         public static string searchLuisEntities = "";
         public static bool recommendChk = false;
+        public static string orgMentBefore = "";
+        public static string firstRecommend = "";
+        public static string secondRecommend = "";
+        public static string thirdRecommend = "";
 
         public virtual async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
@@ -658,21 +662,16 @@ namespace Bot_Application1
                     orgKRMent = "";
                     orgENGMent = "";
 
-                    HistoryLog("orgMentorgMentorgMent : " + orgMent);
-					Debug.WriteLine("orgMentorgMentorgMent : " + orgMent);
-                    orgMent = orgMent.Replace("&#39;", "/'");
-                    HistoryLog("orgMent : " + orgMent);
-                    Debug.WriteLine("orgMent : " + orgMent);
-                    translateInfo = await getTranslate(orgMent);
-                    orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
-
-                    HistoryLog("[change msg end] ==>> userID :: [" + activity.Conversation.Id + "]");
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // 추천
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    
                     if (orgMent.Contains("코나 추천!") || recommendChk)
                     {
                         //bool diffMent = false;
+                        //string orgMentBefore =null;
+                       
+
                         List<RecommendList> RecommendAnswer = db.SelectRecommendList();
                         for (var i = 0; i < RecommendAnswer.Count; i++)
                         {
@@ -681,14 +680,46 @@ namespace Bot_Application1
                             //if (orgMent.Contains("코나 추천!") || orgMent.Contains("다시 선택 하기") ||  orgMent.Contains(RecommendAnswer[i].ANSWER_1) || orgMent.Contains(RecommendAnswer[i].ANSWER_2) || orgMent.Contains(RecommendAnswer[i].ANSWER_3))
                             {
                                 HistoryLog("orgMent2 ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
-                                await Conversation.SendAsync(activity, () => new RecommendDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
+                                await Conversation.SendAsync(activity, () => new RecommendDialog());
+                                recommendChk = true;
+
+                                if (RecommendAnswer[i].ANSWER_1 == orgMent)
+                                {
+                                    firstRecommend = orgMent;
+                                }
+                                if (RecommendAnswer[i].ANSWER_2 == orgMent)
+                                {
+                                    secondRecommend = orgMent;
+                                }
+                                if (RecommendAnswer[i].ANSWER_3 == orgMent)
+                                {
+                                    thirdRecommend = orgMent;
+                                    recommendChk = false;
+                                }
+
                                 if (orgMent.Equals("아니오"))
                                 {
+                                    if (!string.IsNullOrEmpty(firstRecommend))
+                                    {
+                                        firstRecommend = "기타";
+                                    }
+                                    else if (!string.IsNullOrEmpty(secondRecommend))
+                                    {
+                                        secondRecommend = "기타";
+                                    }
+                                    else if (!string.IsNullOrEmpty(thirdRecommend))
+                                    {
+                                        thirdRecommend = "기타";
+                                    }
+                                    //Debug.WriteLine("RecommendRecommendRecommend1 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
+                                    orgMent = orgMentBefore;
                                     recommendChk = false;
-
+                                    break;
                                 } else
-                                {
-                                    recommendChk = true;
+                                {   
+                                    //이전 대화 저장
+                                    orgMentBefore = orgMent;
+                                    //Debug.WriteLine("RecommendRecommendRecommend2 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
                                     response = Request.CreateResponse(HttpStatusCode.OK);
                                     return response;
                                 }
@@ -700,10 +731,23 @@ namespace Bot_Application1
                                 //diffMent = true;
                             }
                         }
-
-                        //코나 추천!으로 들어오게되면 다음 멘트 입력이 들어와도 TRUE값으로 조건을 탈 수 있게 진행
-                        //recommendChk = true;
+                        //Debug.WriteLine("RecommendRecommendRecommend : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend );
+                        
+                        //inserResult = db.insertHistory(activity.Conversation.Id, activity.Text, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", activity.ChannelId, ((endTime - startTime).Milliseconds));
                     }
+
+                    recommendChk = false;
+
+                    HistoryLog("orgMentorgMentorgMent : " + orgMent);
+					Debug.WriteLine("orgMentorgMentorgMent : " + orgMent);
+                    orgMent = orgMent.Replace("&#39;", "/'");
+                    HistoryLog("orgMent : " + orgMent);
+                    Debug.WriteLine("orgMent : " + orgMent);
+                    translateInfo = await getTranslate(orgMent);
+                    orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
+
+                    HistoryLog("[change msg end] ==>> userID :: [" + activity.Conversation.Id + "]");
+                    
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // 한글 , 영어 질문 cash table 체크

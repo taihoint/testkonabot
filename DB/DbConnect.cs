@@ -1933,8 +1933,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "FROM ";
                 cmd.CommandText += "    ( ";
                 cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
-                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
-                cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('(', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
+                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
+                cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('[', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
                 cmd.CommandText += "              , OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
                 cmd.CommandText += "            OPTION_6, OPTION_6_IMG_URL,  ";
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_1,CHARINDEX('/',MAIN_COLOR_VIEW_1)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_1,  ";
@@ -1951,8 +1951,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "    AND     ANSWER_3 = @genderAge ";
                 cmd.CommandText += "    UNION ALL ";
                 cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
-                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
-                cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('(', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('(', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
+                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
+                cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('[', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
                 cmd.CommandText += "              , OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
                 cmd.CommandText += "            OPTION_6, OPTION_6_IMG_URL,  ";
                 cmd.CommandText += "            (SELECT  LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1) AS TRIMCOLOR_CD FROM TBL_TRIMCOLOR2 WHERE TRIMCOLOR_NM = LEFT(MAIN_COLOR_VIEW_1,CHARINDEX('/',MAIN_COLOR_VIEW_1)-1) GROUP BY LEFT(TRIMCOLOR_CD, CHARINDEX(':',TRIMCOLOR_CD)-1)) AS MAIN_COLOR_VIEW_1,  ";

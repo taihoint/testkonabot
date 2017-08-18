@@ -29,9 +29,13 @@
 
         public async Task StartAsync(IDialogContext context)
         {
+            context.Wait(MessageReceivedAsync);
+        }
+        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
             var reply = context.MakeMessage();
             var reply1 = context.MakeMessage();
-            
+
             // Db
             DbConnect db = new DbConnect();
             //List<RecommendList> RecommendList = db.SelectRecommendList();
@@ -44,7 +48,7 @@
                 reply.Attachments.Add(
                 GetHeroCard_button(
                 "trim",
-                RecommendList[i].TRIM_DETAIL + "|" + "가격: " + RecommendList[i].TRIM_DETAIL_PRICE + "|" + 
+                RecommendList[i].TRIM_DETAIL + "|" + "가격: " + RecommendList[i].TRIM_DETAIL_PRICE + "|" +
                 "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "|" +
                 RecommendList[i].OPTION_1_IMG_URL + "|" +
                 RecommendList[i].OPTION_2_IMG_URL + "|" +
@@ -52,7 +56,7 @@
                 RecommendList[i].OPTION_4_IMG_URL + "|" +
                 RecommendList[i].OPTION_5_IMG_URL + "|" +
                 RecommendList[i].MAIN_COLOR_VIEW_NM
-                , 
+                ,
                 "고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
                 new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "다시 선택 하기"),
                 new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
@@ -86,12 +90,11 @@
 
                 //await context.PostAsync(reply1);
                 //exception 발생으로 MessageReceivedAsync 호출
-                context.Wait(MessageReceivedAsync);
+
             }
-            
-        }
-        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
-        {
+
+            //context.Done(this);
+            context.Wait(MessageReceivedAsync);
         }
 
         private static Attachment GetHeroCard(string title, string subtitle, string text, CardImage cardImage1, CardImage cardImage2, CardImage cardImage3, CardImage cardImage4, CardImage cardImage5, CardImage cardImage6, CardAction cardAction1, CardAction cardAction2, CardAction cardAction3, CardAction cardAction4)
