@@ -16,9 +16,6 @@
     [Serializable]
     public class RecommendResult : IDialog<string>
     {
-        private string normal_reply = "(N)";
-        private string exit_reply = "(X)";
-        private string origin_message;
         private string usage;
         private string importance;
         private string genderAge;
@@ -32,27 +29,9 @@
 
         public async Task StartAsync(IDialogContext context)
         {
-            //var message = await result;
-            //this.genderAge = message.Text;
             var reply = context.MakeMessage();
             var reply1 = context.MakeMessage();
-            //var reply2 = context.MakeMessage();
-
-            //reply.Attachments.Add(
-            //GetHeroCard_button(
-            //"",
-            //"",
-            //"고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
-            //new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "다시 선택 하기"),
-            //new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
-            //)
-            //);
-
-            //await context.PostAsync(reply);
-
-            //context.Done(message.Text);
-
-
+            
             // Db
             DbConnect db = new DbConnect();
             //List<RecommendList> RecommendList = db.SelectRecommendList();
@@ -82,33 +61,37 @@
 
                 await context.PostAsync(reply);
 
-                //첫번쌔 이미지
-                List<CardImage> cardImages = new List<CardImage>();
-                reply1.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-                reply1.Attachments = new List<Attachment>();
+                //botchat.js에서 출력
+                //List<CardImage> cardImages = new List<CardImage>();
+                //reply1.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+                //reply1.Attachments = new List<Attachment>();
 
-                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_1))
-                {
-                    reply1.Attachments.Add(
-                    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
-                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg"),
-                        new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
-                        new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
-                        new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
-                        new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
-                        new CardImage(url: RecommendList[i].OPTION_5_IMG_URL),
-                        new CardAction(ActionTypes.ImBack, RecommendList[i].MAIN_COLOR_VIEW_NM, value: RecommendList[i].MAIN_COLOR_VIEW_NM),
-                        new CardAction(ActionTypes.ImBack, RecommendList[i].OPTION_5, value: RecommendList[i].OPTION_5),
-                        new CardAction(ActionTypes.ImBack, RecommendList[i].OPTION_1, value: RecommendList[i].OPTION_1),
-                        new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?carcode=RV104"))
-                    );
+                //if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_1))
+                //{
+                //    reply1.Attachments.Add(
+                //    GetHeroCard(RecommendList[i].TRIM_DETAIL, "가격: " + RecommendList[i].TRIM_DETAIL_PRICE, "trim",
+                //        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg"),
+                //        new CardImage(url: RecommendList[i].OPTION_1_IMG_URL),
+                //        new CardImage(url: RecommendList[i].OPTION_2_IMG_URL),
+                //        new CardImage(url: RecommendList[i].OPTION_3_IMG_URL),
+                //        new CardImage(url: RecommendList[i].OPTION_4_IMG_URL),
+                //        new CardImage(url: RecommendList[i].OPTION_5_IMG_URL),
+                //        new CardAction(ActionTypes.ImBack, RecommendList[i].MAIN_COLOR_VIEW_NM, value: RecommendList[i].MAIN_COLOR_VIEW_NM),
+                //        new CardAction(ActionTypes.ImBack, RecommendList[i].OPTION_5, value: RecommendList[i].OPTION_5),
+                //        new CardAction(ActionTypes.ImBack, RecommendList[i].OPTION_1, value: RecommendList[i].OPTION_1),
+                //        new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?carcode=RV104"))
+                //    );
 
-                }
+                //}
 
-                await context.PostAsync(reply1);
-                context.Done("");
+                //await context.PostAsync(reply1);
+                //exception 발생으로 MessageReceivedAsync 호출
+                context.Wait(MessageReceivedAsync);
             }
             
+        }
+        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
         }
 
         private static Attachment GetHeroCard(string title, string subtitle, string text, CardImage cardImage1, CardImage cardImage2, CardImage cardImage3, CardImage cardImage4, CardImage cardImage5, CardImage cardImage6, CardAction cardAction1, CardAction cardAction2, CardAction cardAction3, CardAction cardAction4)

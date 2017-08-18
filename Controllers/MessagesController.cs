@@ -672,36 +672,37 @@ namespace Bot_Application1
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if (orgMent.Contains("코나 추천!") || recommendChk)
                     {
-                        bool diffMent = false;
+                        //bool diffMent = false;
                         List<RecommendList> RecommendAnswer = db.SelectRecommendList();
                         for (var i = 0; i < RecommendAnswer.Count; i++)
                         {
                             //추천 메뉴에 해당되는 ANSWER
-                            if (orgMent.Contains("코나 추천!") || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1 == orgMent || RecommendAnswer[i].ANSWER_2 == orgMent || RecommendAnswer[i].ANSWER_3 == orgMent)
+                            if (orgMent.Contains("코나 추천!") || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1 == orgMent || RecommendAnswer[i].ANSWER_2 == orgMent || RecommendAnswer[i].ANSWER_3 == orgMent || recommendChk)
                             //if (orgMent.Contains("코나 추천!") || orgMent.Contains("다시 선택 하기") ||  orgMent.Contains(RecommendAnswer[i].ANSWER_1) || orgMent.Contains(RecommendAnswer[i].ANSWER_2) || orgMent.Contains(RecommendAnswer[i].ANSWER_3))
                             {
                                 HistoryLog("orgMent2 ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
                                 await Conversation.SendAsync(activity, () => new RecommendDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
-                                recommendChk = true;
-                                response = Request.CreateResponse(HttpStatusCode.OK);
-                                return response;
+                                if (orgMent.Equals("아니오"))
+                                {
+                                    recommendChk = false;
+
+                                } else
+                                {
+                                    recommendChk = true;
+                                    response = Request.CreateResponse(HttpStatusCode.OK);
+                                    return response;
+                                }
                             }
                             //추천 메뉴 이외의 ANSWER
                             else
                             {
-                                //recommendChk = false;
-                                diffMent = true;
+                                recommendChk = false;
+                                //diffMent = true;
                             }
                         }
 
-                        //추천 메뉴 이외의 bool값이 True 일 경우 추천을 진행할 것인가 말것인가의 Dlg 표출
-                        if (diffMent)
-                        {
-                            HistoryLog("move now? ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
-                        }
-
                         //코나 추천!으로 들어오게되면 다음 멘트 입력이 들어와도 TRUE값으로 조건을 탈 수 있게 진행
-                        recommendChk = true;
+                        //recommendChk = true;
                     }
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
