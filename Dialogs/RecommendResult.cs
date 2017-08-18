@@ -38,17 +38,17 @@
             var reply1 = context.MakeMessage();
             //var reply2 = context.MakeMessage();
 
-            reply.Attachments.Add(
-            GetHeroCard_button(
-            "",
-            "",
-            "고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
-            new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "다시 선택 하기"),
-            new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
-            )
-            );
+            //reply.Attachments.Add(
+            //GetHeroCard_button(
+            //"",
+            //"",
+            //"고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
+            //new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "다시 선택 하기"),
+            //new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
+            //)
+            //);
 
-            await context.PostAsync(reply);
+            //await context.PostAsync(reply);
 
             //context.Done(message.Text);
 
@@ -62,6 +62,26 @@
             //입력받은 단어들로 3가지 질문에 모두 일치 하는 항목이 있을 경우의 값을 리스트에 담고 Break
             for (var i = 0; i < RecommendList.Count; i++)
             {
+                reply.Attachments.Add(
+                GetHeroCard_button(
+                "trim",
+                RecommendList[i].TRIM_DETAIL + "|" + "가격: " + RecommendList[i].TRIM_DETAIL_PRICE + "|" + 
+                "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "|" +
+                RecommendList[i].OPTION_1_IMG_URL + "|" +
+                RecommendList[i].OPTION_2_IMG_URL + "|" +
+                RecommendList[i].OPTION_3_IMG_URL + "|" +
+                RecommendList[i].OPTION_4_IMG_URL + "|" +
+                RecommendList[i].OPTION_5_IMG_URL + "|" +
+                RecommendList[i].MAIN_COLOR_VIEW_NM
+                , 
+                "고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
+                new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "다시 선택 하기"),
+                new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
+                )
+                );
+
+                await context.PostAsync(reply);
+
                 //첫번쌔 이미지
                 List<CardImage> cardImages = new List<CardImage>();
                 reply1.AttachmentLayout = AttachmentLayoutTypes.Carousel;
@@ -86,6 +106,7 @@
                 }
 
                 await context.PostAsync(reply1);
+                context.Done("");
             }
             
         }

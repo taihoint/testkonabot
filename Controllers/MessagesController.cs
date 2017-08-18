@@ -678,6 +678,7 @@ namespace Bot_Application1
                         {
                             //추천 메뉴에 해당되는 ANSWER
                             if (orgMent.Contains("코나 추천!") || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1 == orgMent || RecommendAnswer[i].ANSWER_2 == orgMent || RecommendAnswer[i].ANSWER_3 == orgMent)
+                            //if (orgMent.Contains("코나 추천!") || orgMent.Contains("다시 선택 하기") ||  orgMent.Contains(RecommendAnswer[i].ANSWER_1) || orgMent.Contains(RecommendAnswer[i].ANSWER_2) || orgMent.Contains(RecommendAnswer[i].ANSWER_3))
                             {
                                 HistoryLog("orgMent2 ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
                                 await Conversation.SendAsync(activity, () => new RecommendDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
