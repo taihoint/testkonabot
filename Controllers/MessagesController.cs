@@ -60,9 +60,11 @@ namespace Bot_Application1
                 //Debug.WriteLine("weatherInfo :  " + weatherInfo.list[0].weather[0].description);
                 //Debug.WriteLine("weatherInfo : " + string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.min, 1)));
                 //Debug.WriteLine("weatherInfo : " + string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.max, 1)));
-				//HistoryLog("weatherInfo :  " + weatherInfo.list[0].weather[0].description);
+                //HistoryLog("weatherInfo :  " + weatherInfo.list[0].weather[0].description);
                 //HistoryLog("weatherInfo : " + string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.min, 1)));
                 //HistoryLog("weatherInfo : " + string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.max, 1)));
+
+                
 
                 DateTime startTime = DateTime.Now;
 
@@ -202,7 +204,10 @@ namespace Bot_Application1
             }
             else if (activity.Type == ActivityTypes.Message)
             {
-				HistoryLog("[logic start] ==>> userID :: ["+ activity.Conversation.Id + "]" );
+                //TEST FACEBOOK
+                activity.ChannelId = "facebook";
+
+                HistoryLog("[logic start] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                 JObject Luis = new JObject();
                 string entitiesStr = "";
@@ -2392,11 +2397,12 @@ namespace Bot_Application1
 
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
-
+                                        
+                                        
                                         if (activity.ChannelId == "facebook" && cardButtons.Count < 1 && cardImages.Count < 1 && mediaURL1.Count < 1)
                                         {
-                                            Debug.WriteLine("facebook facebook facebook ");
-                                            HistoryLog("facebook facebook facebook ");
+                                            Debug.WriteLine("facebook only card Text");
+                                            HistoryLog("facebook only card Text ");
                                             Activity reply_facebook = activity.CreateReply();
                                             reply_facebook.Recipient = activity.From;
                                             reply_facebook.Type = "message";
@@ -2404,9 +2410,52 @@ namespace Bot_Application1
                                             reply_facebook.Text = card[i].cardText;
                                             var reply_ment_facebook = await connector.Conversations.SendToConversationAsync(reply_facebook);
                                         }
+                                        else if (activity.ChannelId == "facebook" && (cardButtons.Count >0 || cardImages.Count > 0 || mediaURL1.Count > 0 ))
+                                        {
+                                            Debug.WriteLine("facebook image media button card ");
+                                            HistoryLog("facebook image media button card ");
+                                            if (card[i].cardType == "herocard" && mediaURL1.Count < 1 )
+                                            {
+
+                                                string text = card[i].cardTitle;
+                                                //card.Count
+                                                plHeroCard[i] = new UserHeroCard()
+                                                {
+                                                    Title = card[i].cardTitle,
+                                                    Text = card[i].cardText,
+                                                    Subtitle = card[i].cardSubTitle,
+                                                    Images = cardImages,
+                                                    //Tap = tap,
+                                                    Buttons = cardButtons,
+                                                    Card_division = card[i].cardDivision,
+                                                    Card_value = card[i].cardValue,
+                                                    Card_cnt = card.Count
+                                                };
+
+                                                plAttachment[i] = plHeroCard[i].ToAttachment();
+                                                replyToConversation.Attachments.Add(plAttachment[i]);
+                                            }
+
+                                            else if (card[i].cardType == "herocard" && mediaURL1.Count > 0 )
+                                            {
+                                                plVideoCard[i] = new VideoCard()
+                                                {
+                                                    Title = card[i].cardTitle,
+                                                    Text = card[i].cardText,
+                                                    Subtitle = card[i].cardSubTitle,
+                                                    Image = null,
+                                                    Media = mediaURL1,
+                                                    Buttons = cardButtons,
+                                                    Autostart = true
+                                                };
+
+                                                plAttachment[i] = plVideoCard[i].ToAttachment();
+                                                replyToConversation.Attachments.Add(plAttachment[i]);
+                                            }
+                                        }
                                         else
                                         {
-                                            Debug.WriteLine("no  facebook facebook facebook ");
+                                            Debug.WriteLine("no  facebook ");
                                             if (card[i].cardType == "herocard")
                                             {
 
@@ -2566,10 +2615,13 @@ namespace Bot_Application1
 
                                         CardAction tap = new CardAction();
 
+                                        List<MediaUrl> mediaURL1 = new List<MediaUrl>();
+                                        MediaUrl[] plMediaUrl1 = new MediaUrl[media1.Count];
+
                                         ReceiptCard[] plReceiptCard = new ReceiptCard[card.Count];
                                         //HeroCard[] plHeroCard = new HeroCard[card.Count];
                                         UserHeroCard[] plHeroCard = new UserHeroCard[card.Count];
-                                        
+                                        VideoCard[] plVideoCard = new VideoCard[card.Count];
                                         Attachment[] plAttachment = new Attachment[card.Count];
 
                                         for (int l = 0; l < img.Count; l++)
@@ -2586,7 +2638,20 @@ namespace Bot_Application1
                                             }
                                         }
 
-                                        cardImages = new List<CardImage>(plImage);                                        
+                                        cardImages = new List<CardImage>(plImage);
+
+                                        //media
+                                        for (int l = 0; l < media1.Count; l++)
+                                        {
+                                            if (media1[l].mediaUrl != null)
+                                            {
+                                                plMediaUrl1[l] = new MediaUrl()
+                                                {
+                                                    Url = media1[l].mediaUrl
+                                                };
+                                            }
+                                        }
+                                        mediaURL1 = new List<MediaUrl>(plMediaUrl1);
 
                                         for (int m = 0; m < btn.Count; m++)
                                         {
@@ -2602,9 +2667,18 @@ namespace Bot_Application1
                                         }
                                         cardButtons = new List<CardAction>(plButton);
 
-                                        if (activity.ChannelId == "facebook" && cardButtons.Count < 1 && cardImages.Count < 1 )
+                                        Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
+                                        HistoryLog("CHANNEL ID : " + activity.ChannelId);
+                                        //TEST FACEBOOK
+                                        activity.ChannelId = "facebook";
+
+                                        Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
+                                        HistoryLog("CHANNEL ID : " + activity.ChannelId);
+
+                                        if (activity.ChannelId == "facebook" && cardButtons.Count < 1 && cardImages.Count < 1 && mediaURL1.Count < 1)
                                         {
-                                            HistoryLog("facebook facebook facebook ");
+                                            Debug.WriteLine("facebook only card Text");
+                                            HistoryLog("facebook only card Text ");
                                             Activity reply_facebook = activity.CreateReply();
                                             reply_facebook.Recipient = activity.From;
                                             reply_facebook.Type = "message";
@@ -2612,13 +2686,15 @@ namespace Bot_Application1
                                             reply_facebook.Text = card[i].cardText;
                                             var reply_ment_facebook = await connector.Conversations.SendToConversationAsync(reply_facebook);
                                         }
-                                        else
+                                        else if (activity.ChannelId == "facebook" && (cardButtons.Count > 0 || cardImages.Count > 0 || mediaURL1.Count > 0))
                                         {
-                                            if (card[i].cardType == "herocard")
+                                            Debug.WriteLine("facebook image media button card ");
+                                            HistoryLog("facebook image media button card ");
+                                            if (card[i].cardType == "herocard" && mediaURL1.Count < 1)
                                             {
 
                                                 string text = card[i].cardTitle;
-
+                                                //card.Count
                                                 plHeroCard[i] = new UserHeroCard()
                                                 {
                                                     Title = card[i].cardTitle,
@@ -2633,6 +2709,64 @@ namespace Bot_Application1
                                                 };
 
                                                 plAttachment[i] = plHeroCard[i].ToAttachment();
+                                                replyToConversation.Attachments.Add(plAttachment[i]);
+                                            }
+
+                                            else if (card[i].cardType == "herocard" && mediaURL1.Count > 0)
+                                            {
+                                                plVideoCard[i] = new VideoCard()
+                                                {
+                                                    Title = card[i].cardTitle,
+                                                    Text = card[i].cardText,
+                                                    Subtitle = card[i].cardSubTitle,
+                                                    Image = null,
+                                                    Media = mediaURL1,
+                                                    Buttons = cardButtons,
+                                                    Autostart = false
+                                                };
+
+                                                plAttachment[i] = plVideoCard[i].ToAttachment();
+                                                replyToConversation.Attachments.Add(plAttachment[i]);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine("no  facebook ");
+                                            if (card[i].cardType == "herocard")
+                                            {
+
+                                                string text = card[i].cardTitle;
+                                                //card.Count
+                                                plHeroCard[i] = new UserHeroCard()
+                                                {
+                                                    Title = card[i].cardTitle,
+                                                    Text = card[i].cardText,
+                                                    Subtitle = card[i].cardSubTitle,
+                                                    Images = cardImages,
+                                                    //Tap = tap,
+                                                    Buttons = cardButtons,
+                                                    Card_division = card[i].cardDivision,
+                                                    Card_value = card[i].cardValue,
+                                                    Card_cnt = card.Count
+                                                };
+
+                                                plAttachment[i] = plHeroCard[i].ToAttachment();
+                                                replyToConversation.Attachments.Add(plAttachment[i]);
+                                            }
+                                            else if (card[i].cardType == "videocard")
+                                            {
+                                                plVideoCard[i] = new VideoCard()
+                                                {
+                                                    Title = card[i].cardTitle,
+                                                    Text = card[i].cardText,
+                                                    Subtitle = card[i].cardSubTitle,
+                                                    Image = plThumnail,
+                                                    Media = mediaURL1,
+                                                    Buttons = cardButtons,
+                                                    Autostart = false
+                                                };
+
+                                                plAttachment[i] = plVideoCard[i].ToAttachment();
                                                 replyToConversation.Attachments.Add(plAttachment[i]);
                                             }
                                         }
