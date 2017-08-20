@@ -45,7 +45,8 @@ namespace BasicMultiDialogBot.Dialogs
                 this.genderAge = message.Text;
                 if (message.Text.Contains("남자") || message.Text.Contains("여자") || message.Text.Contains("남성") || message.Text.Contains("여성")) {
                     //3번질문 파라메터를 입력된 값으로 세팅
-                    this.genderAge = message.Text;
+                    
+                    //this.genderAge = message.Text;
 
                     var reply = context.MakeMessage();
                     var reply1 = context.MakeMessage();

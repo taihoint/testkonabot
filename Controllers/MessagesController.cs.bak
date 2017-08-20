@@ -41,8 +41,6 @@ namespace Bot_Application1
         public static string secondRecommend = "";
         public static string thirdRecommend = "";
 
-        public static int rotCnt = 0;
-
         public virtual async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
             newUserID = activity.Conversation.Id;
@@ -699,41 +697,21 @@ namespace Bot_Application1
                         }
                             
                     }
-                    
+
                     if (strIndex >= 0 || recommendChk)
                     //if (orgMent.Contains("코나 추천!") || recommendChk)
                     {
-                        //rotCnt++;
-
-
-                        if (orgMent.Contains("남자") || orgMent.ToLower().Contains("man") || orgMent.ToLower().Contains("male"))
-                        {
-                            orgMent = "남성";
-                        }
-                        else if (orgMent.Contains("여자") || orgMent.ToLower().Contains("woman") || orgMent.ToLower().Contains("female"))
-                        {
-                            orgMent = "여성";
-                        }
-
                         //bool diffMent = false;
                         List<RecommendList> RecommendAnswer = db.SelectRecommendList();
                         for (var i = 0; i < RecommendAnswer.Count; i++)
                         {
-
-                            
                             //추천 메뉴에 해당되는 ANSWER
-                            if (strIndex >= 0 || recommendChk || orgMent.Contains("다시 선택 하기") || orgMent.Equals("예") || orgMent.Equals("아니오"))
-                            //if (strIndex >= 0 || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1.Equals(orgMent) || RecommendAnswer[i].ANSWER_2.Equals(orgMent) || RecommendAnswer[i].ANSWER_3.Equals(orgMent) || orgMent.Equals("예") || orgMent.Equals("아니오"))
+                            if (strIndex >= 0 || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1 == orgMent || RecommendAnswer[i].ANSWER_2 == orgMent || RecommendAnswer[i].ANSWER_3 == orgMent || recommendChk)
+                            //if (orgMent.Contains("코나 추천!") || orgMent.Contains("다시 선택 하기") ||  orgMent.Contains(RecommendAnswer[i].ANSWER_1) || orgMent.Contains(RecommendAnswer[i].ANSWER_2) || orgMent.Contains(RecommendAnswer[i].ANSWER_3))
                             {
                                 HistoryLog("orgMent2 ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
                                 await Conversation.SendAsync(activity, () => new RecommendDialog());
                                 recommendChk = true;
-
-                                //if (rotCnt == 4)
-                                //{
-                                //    rotCnt = 0;
-                                //    recommendChk = false;
-                                //}
 
                                 if (RecommendAnswer[i].ANSWER_1 == orgMent)
                                 {
@@ -751,23 +729,20 @@ namespace Bot_Application1
 
                                 if (orgMent.Equals("아니오"))
                                 {
-                                    //if (!string.IsNullOrEmpty(firstRecommend))
-                                    //{
-                                    //    firstRecommend = "기타";
-                                    //}
-                                    //else if (!string.IsNullOrEmpty(secondRecommend))
-                                    //{
-                                    //    secondRecommend = "기타";
-                                    //}
-                                    //else if (!string.IsNullOrEmpty(thirdRecommend))
-                                    //{
-                                    //    thirdRecommend = "기타";
-                                    //}
+                                    if (!string.IsNullOrEmpty(firstRecommend))
+                                    {
+                                        firstRecommend = "기타";
+                                    }
+                                    else if (!string.IsNullOrEmpty(secondRecommend))
+                                    {
+                                        secondRecommend = "기타";
+                                    }
+                                    else if (!string.IsNullOrEmpty(thirdRecommend))
+                                    {
+                                        thirdRecommend = "기타";
+                                    }
                                     //Debug.WriteLine("RecommendRecommendRecommend1 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
                                     orgMent = orgMentBefore;
-                                    
-                                    orgKRMent = Regex.Replace(orgMentBefore, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
-                                    Debug.WriteLine("orgMentorgMentorgMentorgMentorgMent111 : " + orgKRMent);
                                     recommendChk = false;
                                     break;
                                 } else
@@ -785,7 +760,6 @@ namespace Bot_Application1
                                 recommendChk = false;
                                 //diffMent = true;
                             }
-                            
                         }
                         //Debug.WriteLine("RecommendRecommendRecommend : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend );
                         
@@ -793,7 +767,18 @@ namespace Bot_Application1
                     }
 
                     recommendChk = false;
-                    Debug.WriteLine(orgMent + "orgMentorgMentorgMentorgMentorgMent22 : " + orgKRMent);
+
+                    HistoryLog("orgMentorgMentorgMent : " + orgMent);
+					Debug.WriteLine("orgMentorgMentorgMent : " + orgMent);
+                    orgMent = orgMent.Replace("&#39;", "/'");
+                    HistoryLog("orgMent : " + orgMent);
+                    Debug.WriteLine("orgMent : " + orgMent);
+                    translateInfo = await getTranslate(orgMent);
+                    orgKRMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
+
+                    HistoryLog("[change msg end] ==>> userID :: [" + activity.Conversation.Id + "]");
+                    
+
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // 한글 , 영어 질문 cash table 체크
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -955,7 +940,7 @@ namespace Bot_Application1
                         //orgENGMent = translateInfo.data.translations[0].translatedText.Replace("&#39;", "'");
 
                         orgENGMent_history = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9ㄱ-힣-\s-&#39;]", "", RegexOptions.Singleline);
-                        orgENGMent_history = orgENGMent_history.Replace("&#39;", "'");
+
                         //string gubunVal = "";
                         //string entitiesValueStr = "";
                     }
@@ -981,8 +966,6 @@ namespace Bot_Application1
                         //orgENGMent = translateInfo.data.translations[0].translatedText.Replace("&#39;", "'");
 
                         orgENGMent_history = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9ㄱ-힣-\s-&#39;]", "", RegexOptions.Singleline);
-
-                        orgENGMent_history = orgENGMent_history.Replace("&#39;", "'");
 
                         //Luis = await GetIntentFromKonaBotLUIS(translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
                         Luis = await GetIntentFromKonaBotLUIS(orgENGMent_history);
@@ -2398,8 +2381,7 @@ namespace Bot_Application1
                                                     };
                                                 }
                                             }
-                                            //else if (card[i].cardType == "videocard")
-                                            if (activity.ChannelId == "facebook")
+                                            else if (card[i].cardType == "videocard")
                                             {
                                                 if (img[l].imgUrl != null)
                                                 {
@@ -2454,7 +2436,6 @@ namespace Bot_Application1
                                             var reply_ment_facebook = await connector.Conversations.SendToConversationAsync(reply_facebook);
                                         }
                                         else if (activity.ChannelId == "facebook" && (cardButtons.Count >0 || cardImages.Count > 0 || mediaURL1.Count > 0 ))
-                                        //else if ((activity.ChannelId == "facebook" && cardButtons.Count > 0) || (activity.ChannelId == "facebook" && cardImages.Count > 0) || (activity.ChannelId == "facebook" && mediaURL1.Count > 0 ))
                                         {
                                             Debug.WriteLine("facebook image media button card ");
                                             HistoryLog("facebook image media button card ");
@@ -2487,7 +2468,7 @@ namespace Bot_Application1
                                                     Title = card[i].cardTitle,
                                                     Text = card[i].cardText,
                                                     Subtitle = card[i].cardSubTitle,
-                                                    Image = plThumnail,
+                                                    Image = null,
                                                     Media = mediaURL1,
                                                     Buttons = cardButtons,
                                                     Autostart = true
@@ -2888,7 +2869,7 @@ namespace Bot_Application1
                         HistoryLog("CHANNEL_ID : " + activity.ChannelId);
                         HistoryLog("프로그램 수행시간 : {0}/ms" + ((endTime - startTime).Milliseconds));
 
-                        inserResult = db.insertHistory(activity.Conversation.Id, orgMent, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), dlg[0].dlgNm, activity.ChannelId, ((endTime - startTime).Milliseconds));
+                        inserResult = db.insertHistory(activity.Conversation.Id, activity.Text, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), dlg[0].dlgNm, activity.ChannelId, ((endTime - startTime).Milliseconds));
                         if (inserResult > 0)
                         {
                             Debug.WriteLine("HISTORY RESULT SUCCESS");
@@ -2941,7 +2922,7 @@ namespace Bot_Application1
                         HistoryLog("CHANNEL_ID : " + activity.ChannelId);
                         HistoryLog("프로그램 수행시간 : {0}/ms" + ((endTime - startTime).Milliseconds));
 
-                        inserResult = db.insertHistory(activity.Conversation.Id, orgMent, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "ERROR", activity.ChannelId, ((endTime - startTime).Milliseconds));
+                        inserResult = db.insertHistory(activity.Conversation.Id, activity.Text, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "ERROR", activity.ChannelId, ((endTime - startTime).Milliseconds));
                         if (inserResult > 0)
                         {
                             Debug.WriteLine("HISTORY RESULT SUCCESS");
