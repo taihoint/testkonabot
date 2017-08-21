@@ -706,10 +706,12 @@ namespace Bot_Application1
                     // 추천
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     StateClient sc = activity.GetStateClient();
+                    Debug.WriteLine("activity.ChannelId : " + activity.ChannelId);
                     BotData userData = sc.BotState.GetPrivateConversationData(activity.ChannelId, activity.Conversation.Id, activity.From.Id);
+                    Debug.WriteLine("activity.ChannelId  111 : " + activity.ChannelId);
                     int recommendState = userData.GetProperty<int>("recommendState");
                     //if (orgMent.Contains("코나 추천!") || recommendState > 0)
-                    if (strIndex >= 0 || recommendState > 0)                        
+                    if (strIndex >= 0 || recommendState > 0)
                     {
                         bool convRecommendPass = true;
                         bool recommendEnd = false;
@@ -2539,7 +2541,7 @@ namespace Bot_Application1
                             //other
                             else
                             {
-
+                                activity.ChannelId = "facebook";
                                 if (dlg.Count > 0)
                                 {
                                     Debug.WriteLine("dlg[0].dlgMent : [" + dlg[0].dlgMent + "]");
@@ -2618,7 +2620,8 @@ namespace Bot_Application1
                                         }
 
                                         cardImages = new List<CardImage>(plImage);
-
+                                        Debug.WriteLine("media1.Count : " + media1.Count);
+                                        HistoryLog("media1.Count : " + media1.Count);
                                         //media
                                         for (int l = 0; l < media1.Count; l++)
                                         {
@@ -2637,6 +2640,9 @@ namespace Bot_Application1
                                         {
                                             if (btn[m].btnTitle != null)
                                             {
+                                                Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
+                                                HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
+
                                                 plButton[m] = new CardAction()
                                                 {
                                                     Value = btn[m].btnContext,
@@ -2646,6 +2652,28 @@ namespace Bot_Application1
                                             }
                                         }
                                         cardButtons = new List<CardAction>(plButton);
+
+
+                                        if(activity.ChannelId == "facebook" && mediaURL1.Count > 0)
+                                        {
+                                            Debug.WriteLine("facebook media button111");
+                                            HistoryLog("facebook media button111");
+                                            //button
+                                            for (int m = 0; m < btn.Count; m++)
+                                            {
+                                                if (btn[m].btnTitle != null)
+                                                {
+                                                    plButton[m] = new CardAction()
+                                                    {
+                                                        Value = mediaURL1,
+                                                        Type = "OpenUrl",
+                                                        Title = "button"
+                                                    };
+                                                }
+                                            }
+                                            cardButtons = new List<CardAction>(plButton);
+                                        }
+
 
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
@@ -2691,6 +2719,15 @@ namespace Bot_Application1
 
                                             else if (card[i].cardType == "herocard" && mediaURL1.Count > 0 )
                                             {
+                                                Debug.WriteLine("비디오 카드1");
+                                                HistoryLog("비디오 카드1");
+
+                                                
+                                                Debug.WriteLine("비디오 버튼 : " + cardButtons);
+                                                HistoryLog("비디오 버튼 : " + cardButtons);
+                                                Debug.WriteLine("비디오 이미지 : " + plThumnail.Url);
+                                                HistoryLog("비디오 이미지 : " + plThumnail.Url);
+
                                                 plVideoCard[i] = new VideoCard()
                                                 {
                                                     Title = card[i].cardTitle,
@@ -2923,7 +2960,7 @@ namespace Bot_Application1
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
                                         //TEST FACEBOOK
-                                        activity.ChannelId = "facebook";
+                                        //activity.ChannelId = "facebook";
 
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
