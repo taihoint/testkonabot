@@ -240,7 +240,7 @@ namespace Bot_Application1
                     var reply1 = await connector.Conversations.ReplyToActivityAsync(reply);
 
                     //send to the share button dialog
-                    //await Conversation.SendAsync(activity, () => new ShareButtonDialog());
+                    await Conversation.SendAsync(activity, () => new ShareButtonDialog());
                     response = Request.CreateResponse(HttpStatusCode.OK);
                     return response;
                 }
