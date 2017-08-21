@@ -510,7 +510,8 @@ namespace Bot_Application1
                     Activity reply_ment = activity.CreateReply();
                     reply_ment.Recipient = activity.From;
                     reply_ment.Type = "message";
-                    reply_ment.Text = "코나 " + CarOptionList[0].model.Replace(" ", "") + "의 추가옵션을 보여드릴게요";
+                    reply_ment.Text = "코나 " + orgMent + "의 추가옵션을 보여드릴게요";
+                    //reply_ment.Text = "코나 " + CarOptionList[0].model.Replace(" ", "") + "의 추가옵션을 보여드릴게요";
                     var reply_ment_info = await connector.Conversations.SendToConversationAsync(reply_ment);
 
                     Activity reply_option = activity.CreateReply();

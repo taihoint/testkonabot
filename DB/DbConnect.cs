@@ -10,13 +10,19 @@ using System.Diagnostics;
 using Bot_Application1.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Configuration;
+using System.Web.Configuration;
 
 namespace Bot_Application1.DB
 {
 
     public class DbConnect
     {
-        string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoML;User ID=faxtime;Password=test2016!;";
+        static Configuration rootWebConfig = WebConfigurationManager.OpenWebConfiguration("/testkonabot");
+        const string CONSTRINGNAME = "conString";
+        ConnectionStringSettings connStr = rootWebConfig.ConnectionStrings.ConnectionStrings[CONSTRINGNAME];
+
+        //string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoML;User ID=faxtime;Password=test2016!;";
         //string connStr = "Data Source= hyundaidb.database.windows.net;Initial Catalog=taihoML;User ID=taihoinst;Password=taiho123@;";
         //string connStr = "Data Source=10.6.222.21,1433;Initial Catalog=konadb;User ID=konadb;Password=Didwoehd20-9!;";
         StringBuilder sb = new StringBuilder();
@@ -27,7 +33,7 @@ namespace Bot_Application1.DB
 
             try
             {
-                conn = new SqlConnection(connStr);
+                conn = new SqlConnection(connStr.ConnectionString);
                 conn.Open();
             }
             catch (Exception e)
@@ -49,7 +55,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<LuisList> luis = new List<LuisList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -83,7 +89,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<DialogList> dialog = new List<DialogList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -117,7 +123,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<DialogList> dialog = new List<DialogList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -152,7 +158,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CardList> dialogCard = new List<CardList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -195,7 +201,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<ButtonList> button = new List<ButtonList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -236,7 +242,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<ImagesList> image = new List<ImagesList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -272,7 +278,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<MediaList> media = new List<MediaList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -310,7 +316,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             string newMsg = "";
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -349,7 +355,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             string answerMsg = "";
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -384,7 +390,7 @@ namespace Bot_Application1.DB
         {
             //SqlDataReader rdr = null;
             int result;
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -415,7 +421,7 @@ namespace Bot_Application1.DB
 
             engTransferKor = EngTransferKor.GetEngTransferKor(entitiesStr);
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -477,7 +483,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<TestDriverColorList> dialog = new List<TestDriverColorList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -523,7 +529,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarColorList> dialog = new List<CarColorList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -575,7 +581,7 @@ namespace Bot_Application1.DB
 
             //str = EngTransferKor.GetEngTransferKor(str);
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -615,7 +621,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarBranchList> dialog = new List<CarBranchList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -659,7 +665,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarBranchInfo> dialog = new List<CarBranchInfo>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -737,7 +743,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<AreaTestCenterList> dialog = new List<AreaTestCenterList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -779,7 +785,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<AreaTestCenterCountList> dialog = new List<AreaTestCenterCountList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -871,7 +877,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarModelList> carModel = new List<CarModelList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -908,7 +914,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarTrimList> carTrimList = new List<CarTrimList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -992,7 +998,7 @@ namespace Bot_Application1.DB
 
             Debug.WriteLine("SelectCarTrimList1 : ");
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1044,7 +1050,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarExColorList> carExColorList = new List<CarExColorList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1083,7 +1089,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarExColorList> carExColorList = new List<CarExColorList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1124,7 +1130,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarInColorList> carInColorList = new List<CarInColorList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1165,7 +1171,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarExColorList> carExColorList = new List<CarExColorList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1216,7 +1222,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarInColorList> carInColorList = new List<CarInColorList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1274,7 +1280,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarOptionList> carOptionList = new List<CarOptionList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1317,7 +1323,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarOptionList> carOptionList = new List<CarOptionList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1364,7 +1370,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             string color = ""; string color1 = ""; string color2 = "";
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1409,7 +1415,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarQouteLuisResult> CarQouteLuisResult = new List<CarQouteLuisResult>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1443,7 +1449,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<CarQouteLuisResult> CarQouteLuisResult = new List<CarQouteLuisResult>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1477,7 +1483,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<LuisResult> LuisResult = new List<LuisResult>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1521,7 +1527,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             string result = ""; 
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1545,7 +1551,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             string result = "";
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1571,7 +1577,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             string result = "";
             arg = arg.Replace("'", "''");
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1609,7 +1615,7 @@ namespace Bot_Application1.DB
             JObject returnJson = JObject.Parse(json);
 
             SqlDataReader rdr = null;
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1639,7 +1645,7 @@ namespace Bot_Application1.DB
         public int insertUserQuery(string korQuery, string enQuery, string intentID, string entitiesIDS, string intentScore,int luisID, char result, string car_area, string car_colorArea, string car_priceWhere, string car_option)
         {
             int dbResult = 0;
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1681,7 +1687,7 @@ namespace Bot_Application1.DB
 
             List<TestDriveLuisResult> testDriveLuisResult = new List<TestDriveLuisResult>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1722,7 +1728,7 @@ namespace Bot_Application1.DB
 
             List<TestDriveList> testDriveList = new List<TestDriveList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1773,7 +1779,7 @@ namespace Bot_Application1.DB
 
             List<TestDriveListInit> testDriveList = new List<TestDriveListInit>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1822,7 +1828,7 @@ namespace Bot_Application1.DB
         {
             SqlDataReader rdr = null;
             string result = "";
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1854,7 +1860,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<RecommendList> recommendList = new List<RecommendList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1922,7 +1928,7 @@ namespace Bot_Application1.DB
             SqlDataReader rdr = null;
             List<RecommendList> recommendList = new List<RecommendList>();
 
-            using (SqlConnection conn = new SqlConnection(connStr))
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
@@ -1938,7 +1944,7 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "FROM ";
                 cmd.CommandText += "    ( ";
                 cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
-                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL) - 1) AS TRIM_DETAIL, ";
+                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
                 cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('[', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
                 cmd.CommandText += "              , OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
                 cmd.CommandText += "            OPTION_6, OPTION_6_IMG_URL,  ";
