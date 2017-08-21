@@ -18,7 +18,6 @@ using Microsoft.Bot.Builder.Dialogs;
 using Bot_Application1.Dialogs;
 using System.IO;
 using BasicMultiDialogBot.Dialogs;
-using System.Text;
 
 namespace Bot_Application1
 {
@@ -700,307 +699,98 @@ namespace Bot_Application1
                         }
                             
                     }
-
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    // 추천
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    StateClient sc = activity.GetStateClient();
-                    Debug.WriteLine("activity.ChannelId : " + activity.ChannelId);
-                    BotData userData = sc.BotState.GetPrivateConversationData(activity.ChannelId, activity.Conversation.Id, activity.From.Id);
-                    Debug.WriteLine("activity.ChannelId  111 : " + activity.ChannelId);
-                    int recommendState = userData.GetProperty<int>("recommendState");
-                    //if (orgMent.Contains("코나 추천!") || recommendState > 0)
-                    if (strIndex >= 0 || recommendState > 0)
+                    
+                    if (strIndex >= 0 || recommendChk)
+                    //if (orgMent.Contains("코나 추천!") || recommendChk)
                     {
-                        bool convRecommendPass = true;
-                        bool recommendEnd = false;
-                        StringBuilder strReplyMessage = new StringBuilder();
-                        switch (recommendState)
+                        //rotCnt++;
+
+
+                        if (orgMent.Contains("남자") || orgMent.ToLower().Contains("man") || orgMent.ToLower().Contains("male"))
                         {
-                            case 0:
-                                strReplyMessage.Append($"Kona를 주로 어떤 용도로 사용하실 계획이세요?\n\n(예) 출퇴근, 장거리 이동)");
-                                userData.SetProperty<int>("recommendState", 1);
-                                break;
-                            case 1:
-                                if (orgMent.Contains("출퇴근") || orgMent.Contains("출근") || orgMent.Contains("퇴근") || orgMent.Contains("장거리") || orgMent.Contains("통학"))
-                                {
-                                    strReplyMessage.Append($"가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?");
-                                    userData.SetProperty<int>("recommendState", 2);
-                                    userData.SetProperty<String>("usage", orgMent);
-                                }
-                                else
-                                {
-                                    strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                    userData.SetProperty<int>("recommendState", 3);
-                                    userData.SetProperty<String>("usage", orgMent);
-                                }
-                                break;
-                            case 2:
-                                if (orgMent.Contains("가성비") || orgMent.Contains("안전성") || orgMent.Contains("고급사양"))
-                                {
-                                    strReplyMessage.Append($"Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?");
-                                    userData.SetProperty<int>("recommendState", 4);
-                                    userData.SetProperty<String>("importance", orgMent);
-                                }
-                                else
-                                {
-                                    strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                    userData.SetProperty<int>("recommendState", 5);
-                                    userData.SetProperty<String>("importance", orgMent);
-                                }
-                                break;
-                            case 3:
-                                if (orgMent.Contains("예") || orgMent.Contains("네") || orgMent.Contains("엉") || orgMent.Contains("어") || orgMent.Contains("ㅇㅇ"))
-                                {
-                                    strReplyMessage.Append($"가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?");
-                                    userData.SetProperty<int>("recommendState", 2);
-                                }
-                                else
-                                {
-                                    userData.SetProperty<int>("recommendState", 0);
-                                    userData.SetProperty<String>("usage", "");
-                                    userData.SetProperty<String>("importance", "");
-                                    userData.SetProperty<String>("genderAge", "");
-                                    convRecommendPass = false;
-                                }
-                                break;
-                            case 4:
-                                if (orgMent.Contains("남자") || orgMent.Contains("여자") || orgMent.Contains("남성") || orgMent.Contains("여성"))
-                                {
-                                    userData.SetProperty<int>("recommendState", 0);
-                                    userData.SetProperty<String>("genderAge", orgMent);
-                                    recommendEnd = true;
-                                }
-                                else
-                                {
-                                    strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                    userData.SetProperty<int>("recommendState", 6);
-                                    userData.SetProperty<String>("genderAge", orgMent);
-                                }
-                                break;
-                            case 5:
-                                if (orgMent.Contains("예") || orgMent.Contains("네") || orgMent.Contains("엉") || orgMent.Contains("어") || orgMent.Contains("ㅇㅇ"))
-                                {
-                                    strReplyMessage.Append($"Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?");
-                                    userData.SetProperty<int>("recommendState", 4);
-                                }
-                                else
-                                {
-                                    userData.SetProperty<int>("recommendState", 0);
-                                    userData.SetProperty<String>("usage", "");
-                                    userData.SetProperty<String>("importance", "");
-                                    userData.SetProperty<String>("genderAge", "");
-                                    convRecommendPass = false;
-                                }
-                                break;
-                            case 6:
-                                if (orgMent.Contains("예") || orgMent.Contains("네") || orgMent.Contains("엉") || orgMent.Contains("어") || orgMent.Contains("ㅇㅇ"))
-                                {
-                                    recommendEnd = true;
-                                    userData.SetProperty<int>("recommendState", 0);
-                                }
-                                else
-                                {
-                                    userData.SetProperty<int>("recommendState", 0);
-                                    userData.SetProperty<String>("usage", "");
-                                    userData.SetProperty<String>("importance", "");
-                                    userData.SetProperty<String>("genderAge", "");
-                                    convRecommendPass = false;
-                                }
-                                break;
-                            default:
-                                break;
+                            orgMent = "남성";
+                        }
+                        else if (orgMent.Contains("여자") || orgMent.ToLower().Contains("woman") || orgMent.ToLower().Contains("female"))
+                        {
+                            orgMent = "여성";
                         }
 
-
-                        Activity replyToConversation = activity.CreateReply();
-                        if (recommendEnd)
+                        //bool diffMent = false;
+                        List<RecommendList> RecommendAnswer = db.SelectRecommendList();
+                        for (var i = 0; i < RecommendAnswer.Count; i++)
                         {
-                            List<RecommendList> RecommendList = db.SelectedRecommendList(userData.GetProperty<String>("usage"), userData.GetProperty<String>("importance"), userData.GetProperty<String>("genderAge"));
-                            RecommendList recommend = new RecommendList();
 
-                            //입력받은 단어들로 3가지 질문에 모두 일치 하는 항목이 있을 경우의 값을 리스트에 담고 Break
-                            for (var i = 0; i < RecommendList.Count; i++)
+                            
+                            //추천 메뉴에 해당되는 ANSWER
+                            if (strIndex >= 0 || recommendChk || orgMent.Contains("다시 선택 하기") || orgMent.Equals("예") || orgMent.Equals("아니오"))
+                            //if (strIndex >= 0 || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1.Equals(orgMent) || RecommendAnswer[i].ANSWER_2.Equals(orgMent) || RecommendAnswer[i].ANSWER_3.Equals(orgMent) || orgMent.Equals("예") || orgMent.Equals("아니오"))
                             {
-                                string main_color_view = "";
+                                HistoryLog("orgMent2 ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
+                                await Conversation.SendAsync(activity, () => new RecommendDialog());
+                                recommendChk = true;
 
-                                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_1))
+                                //if (rotCnt == 4)
+                                //{
+                                //    rotCnt = 0;
+                                //    recommendChk = false;
+                                //}
+
+                                if (RecommendAnswer[i].ANSWER_1 == orgMent)
                                 {
-                                    main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "@";
-                                };
-
-                                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_2))
+                                    firstRecommend = orgMent;
+                                }
+                                if (RecommendAnswer[i].ANSWER_2 == orgMent)
                                 {
-                                    main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_2 + "/00001.jpg" + "@";
-                                };
-
-                                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_3))
+                                    secondRecommend = orgMent;
+                                }
+                                if (RecommendAnswer[i].ANSWER_3 == orgMent)
                                 {
-                                    main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_3 + "/00001.jpg" + "@";
-                                };
+                                    thirdRecommend = orgMent;
+                                    recommendChk = false;
+                                }
 
-                                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_4))
+                                if (orgMent.Equals("아니오"))
                                 {
-                                    main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_4 + "/00001.jpg" + "@";
-                                };
-
-                                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_5))
-                                {
-                                    main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_5 + "/00001.jpg" + "@";
-                                };
-
-                                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_6))
-                                {
-                                    main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_6 + "/00001.jpg" + "@";
-                                };
-
-                                if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_7))
-                                {
-                                    main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_7 + "/00001.jpg";
-                                };
-
-                                main_color_view = main_color_view.TrimEnd('@');
-
-                                Debug.Write("main_color_view = " + main_color_view);
-
-                                replyToConversation.Attachments.Add(
-                                GetHeroCard_button(
-                                "trim",
-                                RecommendList[i].TRIM_DETAIL + "|" + "가격: " + RecommendList[i].TRIM_DETAIL_PRICE + "|" +
-                                //"https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "|" +
-                                main_color_view + "|" +
-                                RecommendList[i].OPTION_1_IMG_URL + "|" +
-                                RecommendList[i].OPTION_1 + "|" +
-                                RecommendList[i].OPTION_2_IMG_URL + "|" +
-                                RecommendList[i].OPTION_2 + "|" +
-                                RecommendList[i].OPTION_3_IMG_URL + "|" +
-                                RecommendList[i].OPTION_3 + "|" +
-                                RecommendList[i].OPTION_4_IMG_URL + "|" +
-                                RecommendList[i].OPTION_4 + "|" +
-                                RecommendList[i].OPTION_5_IMG_URL + "|" +
-                                RecommendList[i].OPTION_5 + "|" +
-                                RecommendList[i].MAIN_COLOR_VIEW_NM
-                                ,
-                                "고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
-                                new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "코나 추천!"),
-                                new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
-                                )
-                                );
-
+                                    //if (!string.IsNullOrEmpty(firstRecommend))
+                                    //{
+                                    //    firstRecommend = "기타";
+                                    //}
+                                    //else if (!string.IsNullOrEmpty(secondRecommend))
+                                    //{
+                                    //    secondRecommend = "기타";
+                                    //}
+                                    //else if (!string.IsNullOrEmpty(thirdRecommend))
+                                    //{
+                                    //    thirdRecommend = "기타";
+                                    //}
+                                    //Debug.WriteLine("RecommendRecommendRecommend1 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
+                                    orgMent = orgMentBefore;
+                                    
+                                    orgKRMent = Regex.Replace(orgMentBefore, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
+                                    Debug.WriteLine("orgMentorgMentorgMentorgMentorgMent111 : " + orgKRMent);
+                                    recommendChk = false;
+                                    break;
+                                } else
+                                {   
+                                    //이전 대화 저장
+                                    orgMentBefore = orgMent;
+                                    //Debug.WriteLine("RecommendRecommendRecommend2 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
+                                    response = Request.CreateResponse(HttpStatusCode.OK);
+                                    return response;
+                                }
                             }
-
-                            userData.SetProperty<int>("recommendState", 0);
-                            sc.BotState.SetPrivateConversationData(activity.ChannelId, activity.Conversation.Id, activity.From.Id, userData);
-                            await connector.Conversations.ReplyToActivityAsync(replyToConversation);
-                            response = Request.CreateResponse(HttpStatusCode.OK);
-                            return response;
+                            //추천 메뉴 이외의 ANSWER
+                            else
+                            {
+                                recommendChk = false;
+                                //diffMent = true;
+                            }
+                            
                         }
-                        else
-                        {
-                            replyToConversation = activity.CreateReply(strReplyMessage.ToString());
-                        }
-                        sc.BotState.SetPrivateConversationData(activity.ChannelId, activity.Conversation.Id, activity.From.Id, userData);
-
-                        await connector.Conversations.ReplyToActivityAsync(replyToConversation);
-
-                        if (convRecommendPass)
-                        {
-                            response = Request.CreateResponse(HttpStatusCode.OK);
-                            return response;
-                        }
+                        //Debug.WriteLine("RecommendRecommendRecommend : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend );
+                        
+                        //inserResult = db.insertHistory(activity.Conversation.Id, activity.Text, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", activity.ChannelId, ((endTime - startTime).Milliseconds));
                     }
-
-                    //if (strIndex >= 0 || recommendChk)
-                    ////if (orgMent.Contains("코나 추천!") || recommendChk)
-                    //{
-                    //    //rotCnt++;
-
-
-                    //    if (orgMent.Contains("남자") || orgMent.ToLower().Contains("man") || orgMent.ToLower().Contains("male"))
-                    //    {
-                    //        orgMent = "남성";
-                    //    }
-                    //    else if (orgMent.Contains("여자") || orgMent.ToLower().Contains("woman") || orgMent.ToLower().Contains("female"))
-                    //    {
-                    //        orgMent = "여성";
-                    //    }
-
-                    //    //bool diffMent = false;
-                    //    List<RecommendList> RecommendAnswer = db.SelectRecommendList();
-                    //    for (var i = 0; i < RecommendAnswer.Count; i++)
-                    //    {
-
-
-                    //        //추천 메뉴에 해당되는 ANSWER
-                    //        if (strIndex >= 0 || recommendChk || orgMent.Contains("다시 선택 하기") || orgMent.Equals("예") || orgMent.Equals("아니오"))
-                    //        //if (strIndex >= 0 || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1.Equals(orgMent) || RecommendAnswer[i].ANSWER_2.Equals(orgMent) || RecommendAnswer[i].ANSWER_3.Equals(orgMent) || orgMent.Equals("예") || orgMent.Equals("아니오"))
-                    //        {
-                    //            HistoryLog("orgMent2 ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
-                    //            await Conversation.SendAsync(activity, () => new RecommendDialog());
-                    //            recommendChk = true;
-
-                    //            //if (rotCnt == 4)
-                    //            //{
-                    //            //    rotCnt = 0;
-                    //            //    recommendChk = false;
-                    //            //}
-
-                    //            if (RecommendAnswer[i].ANSWER_1 == orgMent)
-                    //            {
-                    //                firstRecommend = orgMent;
-                    //            }
-                    //            if (RecommendAnswer[i].ANSWER_2 == orgMent)
-                    //            {
-                    //                secondRecommend = orgMent;
-                    //            }
-                    //            if (RecommendAnswer[i].ANSWER_3 == orgMent)
-                    //            {
-                    //                thirdRecommend = orgMent;
-                    //                recommendChk = false;
-                    //            }
-
-                    //            if (orgMent.Equals("아니오"))
-                    //            {
-                    //                //if (!string.IsNullOrEmpty(firstRecommend))
-                    //                //{
-                    //                //    firstRecommend = "기타";
-                    //                //}
-                    //                //else if (!string.IsNullOrEmpty(secondRecommend))
-                    //                //{
-                    //                //    secondRecommend = "기타";
-                    //                //}
-                    //                //else if (!string.IsNullOrEmpty(thirdRecommend))
-                    //                //{
-                    //                //    thirdRecommend = "기타";
-                    //                //}
-                    //                //Debug.WriteLine("RecommendRecommendRecommend1 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
-                    //                orgMent = orgMentBefore;
-
-                    //                orgKRMent = Regex.Replace(orgMentBefore, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
-                    //                Debug.WriteLine("orgMentorgMentorgMentorgMentorgMent111 : " + orgKRMent);
-                    //                recommendChk = false;
-                    //                break;
-                    //            } else
-                    //            {   
-                    //                //이전 대화 저장
-                    //                orgMentBefore = orgMent;
-                    //                //Debug.WriteLine("RecommendRecommendRecommend2 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
-                    //                response = Request.CreateResponse(HttpStatusCode.OK);
-                    //                return response;
-                    //            }
-                    //        }
-                    //        //추천 메뉴 이외의 ANSWER
-                    //        else
-                    //        {
-                    //            recommendChk = false;
-                    //            //diffMent = true;
-                    //        }
-
-                    //    }
-                    //    //Debug.WriteLine("RecommendRecommendRecommend : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend );
-
-                    //    //inserResult = db.insertHistory(activity.Conversation.Id, activity.Text, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", activity.ChannelId, ((endTime - startTime).Milliseconds));
-                    //}
 
                     recommendChk = false;
                     Debug.WriteLine(orgMent + "orgMentorgMentorgMentorgMentorgMent22 : " + orgKRMent);
@@ -2540,7 +2330,7 @@ namespace Bot_Application1
                             //other
                             else
                             {
-                                activity.ChannelId = "facebook";
+
                                 if (dlg.Count > 0)
                                 {
                                     Debug.WriteLine("dlg[0].dlgMent : [" + dlg[0].dlgMent + "]");
@@ -2619,8 +2409,7 @@ namespace Bot_Application1
                                         }
 
                                         cardImages = new List<CardImage>(plImage);
-                                        Debug.WriteLine("media1.Count : " + media1.Count);
-                                        HistoryLog("media1.Count : " + media1.Count);
+
                                         //media
                                         for (int l = 0; l < media1.Count; l++)
                                         {
@@ -2639,9 +2428,6 @@ namespace Bot_Application1
                                         {
                                             if (btn[m].btnTitle != null)
                                             {
-                                                Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
-                                                HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
-
                                                 plButton[m] = new CardAction()
                                                 {
                                                     Value = btn[m].btnContext,
@@ -2651,28 +2437,6 @@ namespace Bot_Application1
                                             }
                                         }
                                         cardButtons = new List<CardAction>(plButton);
-
-
-                                        if(activity.ChannelId == "facebook" && mediaURL1.Count > 0)
-                                        {
-                                            Debug.WriteLine("facebook media button111");
-                                            HistoryLog("facebook media button111");
-                                            //button
-                                            for (int m = 0; m < btn.Count; m++)
-                                            {
-                                                if (btn[m].btnTitle != null)
-                                                {
-                                                    plButton[m] = new CardAction()
-                                                    {
-                                                        Value = mediaURL1,
-                                                        Type = "OpenUrl",
-                                                        Title = "button"
-                                                    };
-                                                }
-                                            }
-                                            cardButtons = new List<CardAction>(plButton);
-                                        }
-
 
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
@@ -2718,15 +2482,6 @@ namespace Bot_Application1
 
                                             else if (card[i].cardType == "herocard" && mediaURL1.Count > 0 )
                                             {
-                                                Debug.WriteLine("비디오 카드1");
-                                                HistoryLog("비디오 카드1");
-
-                                                
-                                                Debug.WriteLine("비디오 버튼 : " + cardButtons);
-                                                HistoryLog("비디오 버튼 : " + cardButtons);
-                                                Debug.WriteLine("비디오 이미지 : " + plThumnail.Url);
-                                                HistoryLog("비디오 이미지 : " + plThumnail.Url);
-
                                                 plVideoCard[i] = new VideoCard()
                                                 {
                                                     Title = card[i].cardTitle,
@@ -2959,7 +2714,7 @@ namespace Bot_Application1
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
                                         //TEST FACEBOOK
-                                        //activity.ChannelId = "facebook";
+                                        activity.ChannelId = "facebook";
 
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
@@ -3599,19 +3354,6 @@ namespace Bot_Application1
                 Subtitle = subtitle,
                 Text = text,
                 Buttons = new List<CardAction>() { cardAction },
-            };
-            return heroCard.ToAttachment();
-        }
-
-        private static Attachment GetHeroCard_button(string title, string subtitle, string text, CardAction cardAction1, CardAction cardAction2)
-        {
-            var heroCard = new UserHeroCard
-            {
-                Title = title,
-                Subtitle = subtitle,
-                Text = text,
-                Buttons = new List<CardAction>() { cardAction1, cardAction2 },
-
             };
             return heroCard.ToAttachment();
         }

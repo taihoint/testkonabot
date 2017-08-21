@@ -16,7 +16,7 @@
         /// Initializes a new instance of the VideoCard class.
         /// </summary>
 
-        //public const string ContentType = "application/vnd.microsoft.card.video";
+        public const string ContentType = "application/vnd.microsoft.card.video";
 
         public VideoCard() { }
 

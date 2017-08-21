@@ -36,8 +36,8 @@ namespace Microsoft.Bot.Connector
         public const string ContentType = "application/vnd.microsoft.card.audio";
     }
 
-    public partial class VideoCard
-    {
-        public const string ContentType = "application/vnd.microsoft.card.video";
-    }
+    //public partial class VideoCard
+    //{
+    //    public const string ContentType = "application/vnd.microsoft.card.video";
+    //}
 }
