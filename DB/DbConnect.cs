@@ -1928,12 +1928,17 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
 
-                cmd.CommandText += "SELECT TOP 1 RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, TRIM_DETAIL, TRIM_DETAIL_PRICE, LEFT(OPTION_1,CHARINDEX('추가',OPTION_1)-2) AS OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
-                cmd.CommandText += "OPTION_6, OPTION_6_IMG_URL, MAIN_COLOR_VIEW_1, MAIN_COLOR_VIEW_2, MAIN_COLOR_VIEW_3, MAIN_COLOR_VIEW_4, MAIN_COLOR_VIEW_5, MAIN_COLOR_VIEW_6, MAIN_COLOR_VIEW_7, MAIN_COLOR_VIEW_NM ";
+                cmd.CommandText += "SELECT TOP 1 RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, TRIM_DETAIL, TRIM_DETAIL_PRICE, ";
+                cmd.CommandText += "REPLACE(OPTION_1,'추가','@추가') AS OPTION_1, OPTION_1_IMG_URL, ";
+                cmd.CommandText += "REPLACE(OPTION_2,'추가','@추가') AS OPTION_2, OPTION_2_IMG_URL, ";
+                cmd.CommandText += "REPLACE(OPTION_3,'추가','@추가') AS OPTION_3, OPTION_3_IMG_URL, ";
+                cmd.CommandText += "REPLACE(OPTION_4,'추가','@추가') AS OPTION_4, OPTION_4_IMG_URL, ";
+                cmd.CommandText += "OPTION_5, OPTION_5_IMG_URL, ";
+                cmd.CommandText += "MAIN_COLOR_VIEW_1, MAIN_COLOR_VIEW_2, MAIN_COLOR_VIEW_3, MAIN_COLOR_VIEW_4, MAIN_COLOR_VIEW_5, MAIN_COLOR_VIEW_6, MAIN_COLOR_VIEW_7, MAIN_COLOR_VIEW_NM ";
                 cmd.CommandText += "FROM ";
                 cmd.CommandText += "    ( ";
                 cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
-                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
+                cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL) - 1) AS TRIM_DETAIL, ";
                 cmd.CommandText += "               SUBSTRING(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL)+1, (CHARINDEX('/', TRIM_DETAIL)) - (CHARINDEX('[', TRIM_DETAIL) + 1)) AS TRIM_DETAIL_PRICE ";
                 cmd.CommandText += "              , OPTION_1, OPTION_1_IMG_URL, OPTION_2, OPTION_2_IMG_URL, OPTION_3, OPTION_3_IMG_URL, OPTION_4, OPTION_4_IMG_URL, OPTION_5, OPTION_5_IMG_URL, ";
                 cmd.CommandText += "            OPTION_6, OPTION_6_IMG_URL,  ";
@@ -1991,8 +1996,8 @@ namespace Bot_Application1.DB
                     dlg.OPTION_4_IMG_URL = rdr["OPTION_4_IMG_URL"] as string;
                     dlg.OPTION_5 = rdr["OPTION_5"] as string;
                     dlg.OPTION_5_IMG_URL = rdr["OPTION_5_IMG_URL"] as string;
-                    dlg.OPTION_6 = rdr["OPTION_6"] as string;
-                    dlg.OPTION_6_IMG_URL = rdr["OPTION_6_IMG_URL"] as string;
+                    //dlg.OPTION_6 = rdr["OPTION_6"] as string;
+                    //dlg.OPTION_6_IMG_URL = rdr["OPTION_6_IMG_URL"] as string;
                     dlg.MAIN_COLOR_VIEW_1 = rdr["MAIN_COLOR_VIEW_1"] as string;
                     dlg.MAIN_COLOR_VIEW_2 = rdr["MAIN_COLOR_VIEW_2"] as string;
                     dlg.MAIN_COLOR_VIEW_3 = rdr["MAIN_COLOR_VIEW_3"] as string;
