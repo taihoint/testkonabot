@@ -19,6 +19,7 @@ using Bot_Application1.Dialogs;
 using System.IO;
 using BasicMultiDialogBot.Dialogs;
 using System.Text;
+using System.Web;
 
 namespace Bot_Application1
 {
@@ -226,6 +227,26 @@ namespace Bot_Application1
 
 
                 int luisID = 0;
+                ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+                if (activity.ChannelId == "facebook")
+                {
+                    HistoryLog("facebook start start : " + activity.Text);
+                    
+                    //send acknowledgement
+                    Activity reply = activity.CreateReply();
+                    reply.Recipient = activity.From;
+                    reply.Type = "message";
+                    reply.Text = "Facebook Messenger message detected! Beep boop. [o o]";
+                    var reply1 = await connector.Conversations.ReplyToActivityAsync(reply);
+
+                    //send to the share button dialog
+                    //await Conversation.SendAsync(activity, () => new ShareButtonDialog());
+                    response = Request.CreateResponse(HttpStatusCode.OK);
+                    return response;
+                }
+
+
+                //activity.ChannelId = "facebook";
 
                 // Db
                 DbConnect db = new DbConnect();
@@ -241,7 +262,7 @@ namespace Bot_Application1
                 string orgENGMent_history = "";
                 DateTime startTime = DateTime.Now;
                 long unixTime = ((DateTimeOffset)startTime).ToUnixTimeSeconds();
-                ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+
                 orgMent = activity.Text;
 
                 string bannedAnswer = "";
@@ -414,7 +435,6 @@ namespace Bot_Application1
                     HistoryLog("orgMent : " + orgMent);
                     Debug.WriteLine("orgMent : " + orgMent);
 
-                    string inColor = "";
 
                     List<CarInColorList> CarInColorList = db.SelectCarInColorList(orgMent);
 
@@ -1226,9 +1246,9 @@ namespace Bot_Application1
 
                             
                         }
-                        catch (Exception ex)
+                        catch (Exception e)
                         {
-                           
+                            Debug.WriteLine(e.ToString());
                             await Conversation.SendAsync(activity, () => new RootDialog(luis_intent, entitiesStr, startTime, orgKRMent, orgENGMent));
                             response = Request.CreateResponse(HttpStatusCode.OK);
                             return response;
@@ -2431,10 +2451,8 @@ namespace Bot_Application1
                                         HistoryLog("트림, 엔진, 드라이브 휠, 칼라 패키지, 튜익스 가격 질문");
 
                                         string color = "";
-                                        string priceMent = "";
                                         //Debug.WriteLine("가격 질문 멘트 : " + orgMent.Replace("가격", ""));
                                         //HistoryLog("가격 질문 멘트 : " + orgMent.Replace("가격", ""));
-                                        int index = 0;
 
                                         //priceMent = activity.Text.Replace("price", "");
                                         
@@ -2541,7 +2559,7 @@ namespace Bot_Application1
                             //other
                             else
                             {
-                                activity.ChannelId = "facebook";
+                                //activity.ChannelId = "facebook";
                                 if (dlg.Count > 0)
                                 {
                                     Debug.WriteLine("dlg[0].dlgMent : [" + dlg[0].dlgMent + "]");
@@ -2609,11 +2627,12 @@ namespace Bot_Application1
                                                     };
                                                 }
                                             }
-                                            //else if (card[i].cardType == "videocard")
-                                            if (activity.ChannelId == "facebook")
+                                            else if (card[i].cardType == "videocard")
+                                            //if (activity.ChannelId == "facebook")
                                             {
                                                 if (img[l].imgUrl != null)
                                                 {
+                                                    plThumnail.Url = HttpUtility.UrlEncode(img[l].imgUrl).Replace("+", "%20");
                                                     plThumnail.Url = img[l].imgUrl;
                                                 }
                                             }
@@ -2656,8 +2675,8 @@ namespace Bot_Application1
 
                                         if(activity.ChannelId == "facebook" && mediaURL1.Count > 0)
                                         {
-                                            Debug.WriteLine("facebook media button111");
-                                            HistoryLog("facebook media button111");
+                                            Debug.WriteLine("facebook media button22");
+                                            HistoryLog("facebook media button22 : " + mediaURL1);
                                             //button
                                             for (int m = 0; m < btn.Count; m++)
                                             {
@@ -2666,7 +2685,7 @@ namespace Bot_Application1
                                                     plButton[m] = new CardAction()
                                                     {
                                                         Value = mediaURL1,
-                                                        Type = "OpenUrl",
+                                                        Type = ActionTypes.OpenUrl,
                                                         Title = "button"
                                                     };
                                                 }
@@ -2674,6 +2693,7 @@ namespace Bot_Application1
                                             cardButtons = new List<CardAction>(plButton);
                                         }
 
+                                        Debug.WriteLine("cardButtons Count : " + cardButtons.Count());
 
                                         Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
                                         HistoryLog("CHANNEL ID : " + activity.ChannelId);
@@ -2690,12 +2710,12 @@ namespace Bot_Application1
                                             reply_facebook.Text = card[i].cardText;
                                             var reply_ment_facebook = await connector.Conversations.SendToConversationAsync(reply_facebook);
                                         }
-                                        else if (activity.ChannelId == "facebook" && (cardButtons.Count >0 || cardImages.Count > 0 || mediaURL1.Count > 0 ))
+                                        else if (activity.ChannelId == "facebook" && (cardButtons.Count > 0 || cardImages.Count > 0 || mediaURL1.Count > 0))
                                         //else if ((activity.ChannelId == "facebook" && cardButtons.Count > 0) || (activity.ChannelId == "facebook" && cardImages.Count > 0) || (activity.ChannelId == "facebook" && mediaURL1.Count > 0 ))
                                         {
                                             Debug.WriteLine("facebook image media button card ");
                                             HistoryLog("facebook image media button card ");
-                                            if (card[i].cardType == "herocard" && mediaURL1.Count < 1 )
+                                            if (card[i].cardType == "herocard" && mediaURL1.Count < 1)
                                             {
 
                                                 string text = card[i].cardTitle;
@@ -2717,12 +2737,12 @@ namespace Bot_Application1
                                                 replyToConversation.Attachments.Add(plAttachment[i]);
                                             }
 
-                                            else if (card[i].cardType == "herocard" && mediaURL1.Count > 0 )
+                                            else if (card[i].cardType == "herocard" && mediaURL1.Count > 0)
                                             {
                                                 Debug.WriteLine("비디오 카드1");
                                                 HistoryLog("비디오 카드1");
 
-                                                
+
                                                 Debug.WriteLine("비디오 버튼 : " + cardButtons);
                                                 HistoryLog("비디오 버튼 : " + cardButtons);
                                                 Debug.WriteLine("비디오 이미지 : " + plThumnail.Url);
@@ -2733,7 +2753,7 @@ namespace Bot_Application1
                                                     Title = card[i].cardTitle,
                                                     Text = card[i].cardText,
                                                     Subtitle = card[i].cardSubTitle,
-                                                    Image = plThumnail,
+                                                    //Image = plThumnail,
                                                     Media = mediaURL1,
                                                     Buttons = cardButtons,
                                                     Autostart = true
@@ -2748,7 +2768,8 @@ namespace Bot_Application1
                                             Debug.WriteLine("no  facebook ");
                                             if (card[i].cardType == "herocard")
                                             {
-
+                                                Debug.WriteLine("비디오 버튼 : " + cardButtons.Count());
+                                                HistoryLog("비디오 버튼 : " + cardButtons.Count());
                                                 string text = card[i].cardTitle;
                                                 //card.Count
                                                 plHeroCard[i] = new UserHeroCard()
@@ -3153,6 +3174,7 @@ namespace Bot_Application1
                     {
 
                         Debug.WriteLine("EXCEPTIONEXCEPTIONEXCEPTIONEXCEPTION : " + e.ToString());
+                        HistoryLog("EXCEPTIONEXCEPTIONEXCEPTIONEXCEPTION : " + e.ToString());
 
                         //Regex.Replace(orgMent, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
                         if (luis_intent.Equals("Quote"))
