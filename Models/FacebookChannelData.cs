@@ -5,10 +5,6 @@
     public class FacebookChannelData
     {
         [JsonProperty("attachment")]
-        public FacebookAttachment Attachment
-        {
-            get;
-            internal set;
-        }
+        public FacebookAttachment Attachment { get; internal set; }
     }
 }

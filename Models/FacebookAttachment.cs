@@ -15,7 +15,6 @@
         [JsonProperty("payload")]
         public dynamic Payload { get; set; }
 
-        //make sure ToString converts the payload
         public override string ToString()
         {
             return this.Payload.ToString();

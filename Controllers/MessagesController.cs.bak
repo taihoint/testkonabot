@@ -228,37 +228,19 @@ namespace Bot_Application1
 
                 int luisID = 0;
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
-
-                //activity.ChannelId = "facebook";
-                try
+                if (activity.ChannelId == "facebook")
                 {
-                    if (activity.Text.Equals("엉"))
-                    {
-                        
-                        HistoryLog("facebook start start : " + activity.Text);
+                    HistoryLog("facebook start start : " + activity.Text);
+                    
+                    //send acknowledgement
+                    Activity reply = activity.CreateReply();
+                    reply.Recipient = activity.From;
+                    reply.Type = "message";
+                    reply.Text = "Facebook Messenger message detected! Beep boop. [o o]";
+                    var reply1 = await connector.Conversations.ReplyToActivityAsync(reply);
 
-                        //send acknowledgement
-                        Activity replydfd = activity.CreateReply();
-                        replydfd.ChannelData = getFBFunctionMenu(activity.Text);
-                        var replysssss = await connector.Conversations.ReplyToActivityAsync(replydfd);
-
-                        //send to the share button dialog
-                        //await Conversation.SendAsync(activity, () => new ShareButtonDialog());
-                        response = Request.CreateResponse(HttpStatusCode.OK);
-                        return response;
-
-                        
-                    }
-                        
-                }
-                catch (Exception ex)
-                {
-                    Activity replydfd = activity.CreateReply();
-                    replydfd.Recipient = activity.From;
-                    replydfd.Type = "message";
-                    HistoryLog("facebook start error : " + ex.Message);
-                    replydfd.Text = ex.Message;
-                    var replysssss = await connector.Conversations.SendToConversationAsync(replydfd);
+                    //send to the share button dialog
+                    await Conversation.SendAsync(activity, () => new ShareButtonDialog());
                     response = Request.CreateResponse(HttpStatusCode.OK);
                     return response;
                 }
@@ -2650,7 +2632,7 @@ namespace Bot_Application1
                                             {
                                                 if (img[l].imgUrl != null)
                                                 {
-                                                    //plThumnail.Url = HttpUtility.UrlEncode(img[l].imgUrl).Replace("+", "%20");
+                                                    plThumnail.Url = HttpUtility.UrlEncode(img[l].imgUrl).Replace("+", "%20");
                                                     plThumnail.Url = img[l].imgUrl;
                                                 }
                                             }
@@ -2691,25 +2673,25 @@ namespace Bot_Application1
                                         cardButtons = new List<CardAction>(plButton);
 
 
-                                        //if(activity.ChannelId == "facebook" && mediaURL1.Count > 0)
-                                        //{
-                                        //    Debug.WriteLine("facebook media button22");
-                                        //    HistoryLog("facebook media button22 : " + mediaURL1);
-                                        //    //button
-                                        //    for (int m = 0; m < btn.Count; m++)
-                                        //    {
-                                        //        if (btn[m].btnTitle != null)
-                                        //        {
-                                        //            plButton[m] = new CardAction()
-                                        //            {
-                                        //                Value = mediaURL1,
-                                        //                Type = ActionTypes.OpenUrl,
-                                        //                Title = "button"
-                                        //            };
-                                        //        }
-                                        //    }
-                                        //    cardButtons = new List<CardAction>(plButton);
-                                        //}
+                                        if(activity.ChannelId == "facebook" && mediaURL1.Count > 0)
+                                        {
+                                            Debug.WriteLine("facebook media button22");
+                                            HistoryLog("facebook media button22 : " + mediaURL1);
+                                            //button
+                                            for (int m = 0; m < btn.Count; m++)
+                                            {
+                                                if (btn[m].btnTitle != null)
+                                                {
+                                                    plButton[m] = new CardAction()
+                                                    {
+                                                        Value = mediaURL1,
+                                                        Type = ActionTypes.OpenUrl,
+                                                        Title = "button"
+                                                    };
+                                                }
+                                            }
+                                            cardButtons = new List<CardAction>(plButton);
+                                        }
 
                                         Debug.WriteLine("cardButtons Count : " + cardButtons.Count());
 
@@ -3690,27 +3672,6 @@ namespace Bot_Application1
 				Debug.WriteLine(e.Message);
             }
         }
-        public object getFBFunctionMenu(String query)
-        {
-            Models.Messenger fbmsg = new Models.Messenger();
-            fbmsg.ChannelData = new MessengerChannelData { notification_type = "NO_PUSH", attachment = new MessengerAttachment { payload = new MessengerPayload() } };
-            fbmsg.ChannelData.attachment.type = "template";
-            fbmsg.ChannelData.attachment.payload.template_type = "generic";
-            List<MessengerElement> e = new List<MessengerElement>();
-            List<MessengerButton> bs = new List<MessengerButton>();
-            bs.Add(new MessengerButton { type = "postback", title = "Facebook", payload = "http://www.facebook.com/" });
-            bs.Add(new MessengerButton { type = "postback", title = "Google", payload = "http://www.google.com/" });
-            bs.Add(new MessengerButton { type = "postback", title = "Amazon", payload = "http://www.amazon.com/" });
-            e.Add(new MessengerElement
-            {
-                title = query,
-                subtitle = "some descript",
-                //item_url = "http://localhost/",
-                //image_url = "http://loalhost/img.png",
-                buttons = bs.ToArray()
-            });
-            fbmsg.ChannelData.attachment.payload.elements = e.ToArray();
-            return fbmsg.ChannelData;
-        }
+
     }
 }
