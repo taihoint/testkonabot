@@ -19,6 +19,7 @@
     public class MessengerPayload
     {
         public string template_type { get; set; }
+        public string url { get; set; }
         public MessengerElement[] elements { get; set; }
     }
 
@@ -28,6 +29,7 @@
         public string subtitle { get; set; }
         public string item_url { get; set; }
         public string image_url { get; set; }
+        public string url { get; set; }
         public MessengerButton[] buttons { get; set; }
     }
 

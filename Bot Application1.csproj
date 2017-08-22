@@ -162,8 +162,11 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\Geolocation.cs" />
     <Compile Include="Controllers\NaverLocation.cs" />
+    <Compile Include="Dialogs\EchoChainDialog.cs" />
     <Compile Include="Dialogs\RecommendResult.cs" />
     <Compile Include="Dialogs\ShareButtonDialog.cs" />
+    <Compile Include="Dialogs\Stage0Dialog.cs" />
+    <Compile Include="Dialogs\StageDialog.cs" />
     <Compile Include="Dialogs\UsageDialog.cs" />
     <Compile Include="Dialogs\RecommendDialog.cs" />
     <Compile Include="Dialogs\ImDialog.cs" />
@@ -187,7 +190,6 @@
     <Compile Include="Models\FlightInfo.cs" />
     <Compile Include="Models\FlightSchedule.cs" />
     <Compile Include="Models\Messenger.cs" />
-    <Compile Include="Models\RecommendList.cs" />
     <Compile Include="Models\LinkHeroCard.cs" />
     <Compile Include="Models\LuisResult.cs" />
     <Compile Include="Models\CarQouteLuisResult.cs" />
@@ -200,6 +202,7 @@
     <Compile Include="Models\CarModelList.cs" />
     <Compile Include="Models\ColorTransfer.cs" />
     <Compile Include="Models\ContactMessage.cs" />
+    <Compile Include="Models\RecommendList.cs" />
     <Compile Include="Models\RootObject.cs" />
     <Compile Include="Models\Search.cs" />
     <Compile Include="Models\SorryMessageList.cs" />
@@ -229,9 +232,6 @@
     <Compile Include="Models\ItemsLust.cs" />
     <Compile Include="Models\LuisList.cs" />
     <Compile Include="Models\MediaList.cs" />
-    <Compile Include="Models\MediaUrl.cs" />
-    <Compile Include="Models\ThumbnailUrl.cs" />
-    <Compile Include="Models\VideoCard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -14,7 +14,8 @@ namespace BasicMultiDialogBot.Dialogs
     [Serializable]
     public class GenderAgeDialog : IDialog<string>
     {
-
+        private string normal_reply = "(N)";
+        private string exit_reply = "(X)";
         private string origin_message;
         private string usage;
         private string importance;

@@ -18,37 +18,67 @@
         {
             var message = await argument;
 
+            await context.PostAsync("This is a message after the Share Button template.");
             //create a reply message
-            var reply = context.MakeMessage();
             //create a channel data object to act as a facebook share button
-            reply.ChannelData = new FacebookChannelData()
+            var flightAttachment = GetFlightAttachment();
+
+            var reply = context.MakeMessage();
+
+            if (message.ChannelId != "facebook")
             {
-                Attachment = new FacebookAttachment()
+                reply.Text = flightAttachment.ToString();
+            }
+            else
+            {
+                reply.ChannelData = new FacebookChannelData()
                 {
-                    Payload = new FacebookGenericTemplate()
+                    Attachment = flightAttachment
+                };
+            }
+
+            await context.PostAsync(reply);
+            context.Wait(this.MessageReceivedAsync);
+        }
+        private static FacebookAttachment GetFlightAttachment()
+        {
+            return new FacebookAttachment()
+            {
+                Payload = new AirlineCheckIn()
+                {
+                    IntroMessage = "Check-in is available now",
+                    Locale = "en_US",
+                    PnrNumber = "ABCDEF",
+                    CheckInUrl = "http://www.airline.com/check_in",
+                    FlightInfo = new[]
                     {
-                        Elements = new object[]
+                        new FlightInfo()
                         {
-                            new FacebookGenericTemplateContent()
+                            FlightNumber = "F001",
+                            DepartureAirport = new Airport()
                             {
-                                Buttons = new[]
-                                {
-                                    new FacebookShareButton()
-                                }
+                                AirportCode = "SFO",
+                                City = "San Francisco",
+                                Terminal = "T4",
+                                Gate = "G8"
+                            },
+                            ArrivalAirport = new Airport()
+                            {
+                                AirportCode = "EZE",
+                                City = "Buenos Aires",
+                                Terminal = "C",
+                                Gate = "A2"
+                            },
+                            FlightSchedule = new FlightSchedule()
+                            {
+                                BoardingTime = DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTH:mm"),
+                                DepartureTime = DateTime.Now.AddDays(1).AddHours(1.5).ToString("yyy-MM-ddTH:mm"),
+                                ArrivalTime = DateTime.Now.AddDays(2).ToString("yyyy-MM-ddTH:mm")
                             }
                         }
                     }
                 }
             };
-
-            //send message
-            await context.PostAsync(reply);
-
-            var reply2 = context.MakeMessage();
-            reply2.Text = "This is a message after the Share Button template.";
-            await context.PostAsync(reply2);
-            //wait for more messages to be sent here
-            context.Wait(MessageReceivedAsync);
         }
     }
 }

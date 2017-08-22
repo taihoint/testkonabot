@@ -14,14 +14,14 @@ namespace BasicMultiDialogBot.Dialogs
     using Bot_Application1.Models;
     using Bot_Application1.DB;
 
-#pragma warning disable 1998
-
     [Serializable]
     public class RecommendDialog : IDialog<object>
     {
         public static int sorryMessageCnt = 0;
         public static string beforeMessgaeText = "";
         public static string messgaeText = "";
+        private string orgKRMent;
+        private string orgENGMent;
         private string usage;
         private string importance;
         private string genderAge;
@@ -29,7 +29,7 @@ namespace BasicMultiDialogBot.Dialogs
 
         public RecommendDialog()
         {
-            
+
         }
 
         public async Task StartAsync(IDialogContext context)
@@ -60,7 +60,7 @@ namespace BasicMultiDialogBot.Dialogs
             try
             {
                 String temp_message = await result;
-                String message_header = temp_message.Substring(0,3);
+                String message_header = temp_message.Substring(0, 3);
                 String message_body = temp_message.Substring(3);
 
                 switch (message_header)
@@ -90,7 +90,7 @@ namespace BasicMultiDialogBot.Dialogs
             try
             {
                 String temp_message = await result;
-                String message_header = temp_message.Substring(0,3);
+                String message_header = temp_message.Substring(0, 3);
                 String message_body = temp_message.Substring(3);
 
                 switch (message_header)
