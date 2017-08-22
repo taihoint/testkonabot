@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 using System.Configuration;
 using System.Web.Configuration;
 
-namespace Bot_Application1.DB
+namespace Bot_Application1.DB 
 {
 
     public class DbConnect
@@ -196,7 +196,7 @@ namespace Bot_Application1.DB
             return dialogCard;
         }
 
-        public List<ButtonList> SelectBtn(int dlgID, int cardID)
+        public List<ButtonList> SelectBtn(int dlgID, int cardID, string YN)
         {
             SqlDataReader rdr = null;
             List<ButtonList> button = new List<ButtonList>();
@@ -206,11 +206,22 @@ namespace Bot_Application1.DB
                 conn.Open();
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
-                cmd.CommandText = "SELECT DLG_ID, CARD_ID, BTN_ID, BTN_TYPE, BTN_TITLE, BTN_CONTEXT FROM TBL_DLG_BTN WHERE DLG_ID = @dlgID AND CARD_ID = @cardID AND USE_YN = 'Y' AND DLG_ID > 999";
+
+                if(YN == "Y")
+                {
+                    cmd.CommandText = "SELECT DLG_ID, CARD_ID, BTN_ID, BTN_TYPE, BTN_TITLE, BTN_CONTEXT FROM TBL_DLG_BTN WHERE DLG_ID = @dlgID AND CARD_ID = @cardID AND USE_YN = 'Y' AND DLG_ID > 999 AND FB_USE_YN = @YN";
+                }
+                else
+                {
+                    cmd.CommandText = "SELECT DLG_ID, CARD_ID, BTN_ID, BTN_TYPE, BTN_TITLE, BTN_CONTEXT FROM TBL_DLG_BTN WHERE DLG_ID = @dlgID AND CARD_ID = @cardID AND USE_YN = 'Y' AND DLG_ID > 999 ";
+                }
+
+                //cmd.CommandText = "SELECT DLG_ID, CARD_ID, BTN_ID, BTN_TYPE, BTN_TITLE, BTN_CONTEXT FROM TBL_DLG_BTN WHERE DLG_ID = @dlgID AND CARD_ID = @cardID AND USE_YN = 'Y' AND DLG_ID > 999 AND FB_USE_YN = @YN";
 
 
                 cmd.Parameters.AddWithValue("@dlgID", dlgID);
                 cmd.Parameters.AddWithValue("@cardID", cardID);
+                cmd.Parameters.AddWithValue("@YN", YN);
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
