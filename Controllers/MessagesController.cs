@@ -668,8 +668,8 @@ namespace Bot_Application1
                         new CardAction(ActionTypes.ImBack, "외장색상", value: orgMent + " 트림 외장색상"),
                         new CardAction(ActionTypes.ImBack, "내장색상", value: orgMent + " 트림 내장색상"),
                         new CardAction(ActionTypes.ImBack, "옵션보기", value: orgMent + " 트림 옵션보기"),
-                        new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?carcode=RV104"))
-                        //new CardAction(ActionTypes.ImBack, "견적 바로가기", value: "견적 사이트 이동"))
+                        //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://logon.hyundai.com/kr/quotation/main.do?carcode=RV104"))
+                        new CardAction(ActionTypes.ImBack, "견적 바로가기", value: "견적 바로가기"))
                     );
 
                     var reply1 = await connector.Conversations.SendToConversationAsync(reply_trim_only);
@@ -1528,6 +1528,22 @@ namespace Bot_Application1
                                     Debug.WriteLine("case 1");
                                     for (int td = 0; td < SelectTestDriveList.Count; td++)
                                     {
+                                        replyToConversation.Attachments.Add(
+                                            GetHeroCard_location(
+                                            SelectTestDriveList[td].dlgStr1 + " 시승센터",
+                                            "",
+                                            SelectTestDriveList[td].dlgStr2 + " 등 총 " + SelectTestDriveList[td].dlgStr3 + " 곳",
+                                            new CardAction(ActionTypes.ImBack, "정보보기", value: SelectTestDriveList[td].dlgStr1 + " 시승센터 "))
+                                            );
+                                    }
+                                }
+                                else if (SelectTestDriveList[0].dlgGubun.Equals("2"))
+                                {
+                                    // dlgStr1 = XRCL_CTY_NM, dlgStr2 = TRIMCOLOR_CD , dlgStr3 = CNT
+                                    HistoryLog("case 2");
+                                    Debug.WriteLine("case 2");
+                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
+                                    {
                                         if (activity.ChannelId == "facebook")
                                         {
                                             replyToConversation.Attachments.Add(
@@ -1554,25 +1570,6 @@ namespace Bot_Application1
                                             new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장"), "turn", SelectTestDriveList[td].dlgStr2)
                                             );
                                         }
-                                    }
-                                }
-                                else if (SelectTestDriveList[0].dlgGubun.Equals("2"))
-                                {
-                                    // dlgStr1 = XRCL_CTY_NM, dlgStr2 = TRIMCOLOR_CD , dlgStr3 = CNT
-                                    HistoryLog("case 2");
-                                    Debug.WriteLine("case 2");
-                                    for (int td = 0; td < SelectTestDriveList.Count; td++)
-                                    {
-                                        replyToConversation.Attachments.Add(
-                                        GetHeroCard_show(
-                                        "",
-                                        //CarColorListDialog[td].dlgXrclCtyNM,
-                                        SelectTestDriveList[td].dlgStr1,
-                                        SelectTestDriveList[td].dlgStr3 + "개 매장에 전시",
-                                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2.Replace(" ", "%20") + ".jpg"),
-                                        //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
-                                        new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장"), "", "")
-                                        );
                                     }
                                 }
                                 else if (SelectTestDriveList[0].dlgGubun.Equals("3"))
@@ -3353,8 +3350,8 @@ namespace Bot_Application1
             using (HttpClient client = new HttpClient())
             {
                 //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
-                //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query; // taiho azure
-                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/7f77d1c8-011d-402c-acd9-6a7188d368f7?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai luis
+                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query; // taiho azure
+                //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/7f77d1c8-011d-402c-acd9-6a7188d368f7?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai luis
 
 
                 //string RequestURI = "https://api.projectoxford.ai/luis/v1/application?id=fd9f899c-5a48-499e-9037-9ea589953684&subscription-key=7efb093087dd48918b903885b944740c&q=" + Query;
