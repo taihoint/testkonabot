@@ -2044,13 +2044,7 @@ namespace Bot_Application1.DB
                     dlg.MAIN_COLOR_VIEW_5 = rdr["MAIN_COLOR_VIEW_5"] as string;
                     dlg.MAIN_COLOR_VIEW_6 = rdr["MAIN_COLOR_VIEW_6"] as string;
                     dlg.MAIN_COLOR_VIEW_7 = rdr["MAIN_COLOR_VIEW_7"] as string;
-                    dlg.MAIN_COLOR_VIEW_NM1 = rdr["MAIN_COLOR_VIEW_NM1"] as string;
-                    dlg.MAIN_COLOR_VIEW_NM2 = rdr["MAIN_COLOR_VIEW_NM2"] as string;
-                    dlg.MAIN_COLOR_VIEW_NM3 = rdr["MAIN_COLOR_VIEW_NM3"] as string;
-                    dlg.MAIN_COLOR_VIEW_NM4 = rdr["MAIN_COLOR_VIEW_NM4"] as string;
-                    dlg.MAIN_COLOR_VIEW_NM5 = rdr["MAIN_COLOR_VIEW_NM5"] as string;
-                    dlg.MAIN_COLOR_VIEW_NM6 = rdr["MAIN_COLOR_VIEW_NM6"] as string;
-                    dlg.MAIN_COLOR_VIEW_NM7 = rdr["MAIN_COLOR_VIEW_NM7"] as string;
+                    dlg.MAIN_COLOR_VIEW_NM = rdr["MAIN_COLOR_VIEW_NM"] as string;
 
                     recommendList.Add(dlg);
                 }

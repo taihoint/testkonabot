@@ -22,7 +22,7 @@
     public class RootDialog : IDialog<object>
     {
 
-        public static int sorryMessageCnt = 0;
+        //public static int sorryMessageCnt = 0;
         public static string newUserID = "";
         public static string beforeUserID = "";
         private string luis_intent;
@@ -69,7 +69,7 @@
             if (beforeUserID != newUserID)
             {
                 beforeUserID = newUserID;
-                sorryMessageCnt = 0;
+                MessagesController.sorryMessageCnt = 0;
             }
             
             var message = await result;
@@ -277,19 +277,50 @@
             //await context.PostAsync("코나 추천을 시작합니다.");
             // Db
             DbConnect db = new DbConnect();
-
-            var reply_err = context.MakeMessage();
+            ++MessagesController.sorryMessageCnt;
+            //var reply_err = context.MakeMessage();
 
             //Activity reply_err = context.Activity.CreateReply();
+            //reply_err.Recipient = context.Activity.From;
+            //reply_err.Type = "message";
+            ////reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
+            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
+            //await context.PostAsync(reply_err);
+
+            var reply_err = context.MakeMessage();
             reply_err.Recipient = context.Activity.From;
             reply_err.Type = "message";
-            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
-            reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
+
+            Debug.WriteLine("sorry count : " + MessagesController.sorryMessageCnt);
+
+            if (MessagesController.sorryMessageCnt > 1)
+            {
+                reply_err.Attachments = new List<Attachment>();
+                reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+
+                reply_err.Attachments.Add(
+                MessagesController.GetHeroCard_sorry(
+                SorryMessageList.GetSorryMessage(MessagesController.sorryMessageCnt),
+                new CardAction(ActionTypes.OpenUrl, "현대자동차 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/"))
+                );
+            }
+            else
+            {
+                reply_err.Text = SorryMessageList.GetSorryMessage(MessagesController.sorryMessageCnt);
+            }
+
+            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
             await context.PostAsync(reply_err);
+
+            //response = Request.CreateResponse(HttpStatusCode.OK);
+            //return response;
+
+
+
 
             //Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
 
-            
+
 
             orgKRMent = Regex.Replace(beforeMessgaeText, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
 

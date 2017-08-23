@@ -20,8 +20,8 @@ namespace BasicMultiDialogBot.Dialogs
         public static int sorryMessageCnt = 0;
         public static string beforeMessgaeText = "";
         public static string messgaeText = "";
-        private string orgKRMent;
-        private string orgENGMent;
+        //private string orgKRMent;
+        //private string orgENGMent;
         private string usage;
         private string importance;
         private string genderAge;
