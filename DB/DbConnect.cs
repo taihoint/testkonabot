@@ -1970,7 +1970,9 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "    FROM    TBL_RECOMMEND_TRIM ";
                 cmd.CommandText += "    WHERE   ANSWER_1 = @usage ";
                 cmd.CommandText += "    AND     ANSWER_2 = @importance ";
-                cmd.CommandText += "    AND     ANSWER_3 = @genderAge ";
+                cmd.CommandText += "    AND     ANSWER_3 = CASE WHEN CHARINDEX('여성', @genderAge) > 0 OR CHARINDEX('여자', @genderAge) > 0 THEN '여성' ";
+                cmd.CommandText += "                            WHEN CHARINDEX('남성', @genderAge) > 0 OR CHARINDEX('남자', @genderAge) > 0 THEN '남성' ";
+                cmd.CommandText += "                            ELSE '기타' END ";
                 cmd.CommandText += "    UNION ALL ";
                 cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
                 cmd.CommandText += "             LEFT(TRIM_DETAIL, CHARINDEX('[', TRIM_DETAIL) - 2) AS TRIM_DETAIL, ";
