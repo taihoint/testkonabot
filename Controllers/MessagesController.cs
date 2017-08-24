@@ -1961,7 +1961,7 @@ namespace Bot_Application1
                                                         replyToConversation.Attachments.Add(
                                                         GetHeroCard_sorry(
                                                         SorryMessageList.GetSorryMessage(sorryMessageCnt),
-                                                        new CardAction(ActionTypes.OpenUrl, "현대자동차 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/"))
+                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/"))
                                                         );
                                                     }
                                                     else
@@ -2075,7 +2075,7 @@ namespace Bot_Application1
                                                         replyToConversation.Attachments.Add(
                                                         GetHeroCard_sorry(
                                                         SorryMessageList.GetSorryMessage(sorryMessageCnt),
-                                                        new CardAction(ActionTypes.OpenUrl, "현대자동차 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/"))
+                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/현대자동차-코나-257306221447719/"))
                                                         );
                                                     }
                                                     else
@@ -2298,7 +2298,7 @@ namespace Bot_Application1
                                                         replyToConversation.Attachments.Add(
                                                         GetHeroCard_sorry(
                                                         SorryMessageList.GetSorryMessage(sorryMessageCnt),
-                                                        new CardAction(ActionTypes.OpenUrl, "현대자동차 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/"))
+                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/현대자동차-코나-257306221447719/"))
                                                         );
                                                     }
                                                     else
@@ -3612,7 +3612,8 @@ namespace Bot_Application1
             {
                 //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
                 //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query; // taiho azure
-                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/7f77d1c8-011d-402c-acd9-6a7188d368f7?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai luis
+                //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/7f77d1c8-011d-402c-acd9-6a7188d368f7?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai luis
+                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/e6badb41-a62c-4357-af03-4e4c54610afa?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai 운영 luis
 
 
                 //string RequestURI = "https://api.projectoxford.ai/luis/v1/application?id=fd9f899c-5a48-499e-9037-9ea589953684&subscription-key=7efb093087dd48918b903885b944740c&q=" + Query;

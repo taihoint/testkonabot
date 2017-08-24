@@ -74,16 +74,34 @@
             
             var message = await result;
             beforeMessgaeText = message.Text;
-            if (message.Text.StartsWith("코나") == true)
+            if (message.Text.Contains("코나") == true)
             {
                 messgaeText = message.Text;
+                if(messgaeText.Contains("현대자동차") != true|| messgaeText.Contains("현대 자동차") != true)
+                {
+                    //messgaeText = messgaeText;
+                    messgaeText = "현대자동차 " + messgaeText;
+                }
+                //else
+                //{
+                //    messgaeText = "현대자동차 "+message.Text;
+                //}
             }
             else
             {
                 messgaeText = "코나 " + message.Text;
+                if (messgaeText.Contains("현대자동차") != true || messgaeText.Contains("현대 자동차") != true)
+                {
+                    //messgaeText = messgaeText;
+                    messgaeText = "현대자동차 " + messgaeText;
+                }
+                //else
+                //{
+                //    messgaeText = "현대자동차 " + messgaeText;
+                //}
             }
 
-            if (messgaeText.StartsWith("코나") == true)
+            if (messgaeText.Contains("코나") == true && (messgaeText.Contains("현대자동차") == true || messgaeText.Contains("현대 자동차") == true))
             //if (message.Text != "")
             {
                 //context.Call(new SearchDialog(), this.SearchDialogResumeAfter);
@@ -301,7 +319,7 @@
                 reply_err.Attachments.Add(
                 MessagesController.GetHeroCard_sorry(
                 SorryMessageList.GetSorryMessage(MessagesController.sorryMessageCnt),
-                new CardAction(ActionTypes.OpenUrl, "현대자동차 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/"))
+                new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/현대자동차-코나-257306221447719/"))
                 );
             }
             else
