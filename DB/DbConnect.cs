@@ -1544,6 +1544,29 @@ namespace Bot_Application1.DB
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = conn;
 
+                cmd.CommandText += "SELECT KR_QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '" + arg + "'";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = rdr["KR_QUERY"] as string;
+                }
+            }
+            return result;
+        }
+
+        public string SelectKoreanCashCheck1(string arg)
+        {
+            SqlDataReader rdr = null;
+            string result = "";
+
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
                 cmd.CommandText += "SELECT QUERY FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = '" + arg + "'";
 
                 rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
@@ -1648,6 +1671,45 @@ namespace Bot_Application1.DB
             }
             return returnJson;
         }
+
+
+
+        public JObject SelectQueryAnalysisKor(string query)
+        {
+            String json = @"{
+                'entities':'',
+                'intents':[{'intent':''}],
+                'intent_score':'',
+                'test_driveWhere':'',
+                'car_priceWhere':'',
+                'car_option':''
+            }";
+            JObject returnJson = JObject.Parse(json);
+
+            SqlDataReader rdr = null;
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                //cmd.CommandText = "SELECT TOP 1 INTENT_ID, ENTITIES_IDS, ISNULL(CAR_COLOR,'') AS CAR_COLOR, ISNULL(CAR_AREA,'') AS CAR_AREA  ,ISNULL(CAR_PRICEWHERE,'') AS CAR_PRICEWHERE  ,ISNULL(CAR_OPTION,'') AS CAR_OPTION FROM TBL_QUERY_ANALYSIS_RESULT2 WHERE QUERY = @query AND RESULT = 'H'";
+                cmd.CommandText = "SELECT TOP 1 INTENT_ID, ENTITIES_IDS, ISNULL(INTENT_SCORE,'') AS INTENT_SCORE, ISNULL(CAR_COLOR,'') AS CAR_COLOR, ISNULL(CAR_AREA,'') AS CAR_AREA  ,ISNULL(CAR_PRICEWHERE,'') AS CAR_PRICEWHERE  ,ISNULL(CAR_OPTION,'') AS CAR_OPTION FROM TBL_QUERY_ANALYSIS_RESULT WHERE KR_QUERY = @query AND RESULT = 'H'";
+                cmd.Parameters.AddWithValue("@query", query.Trim().ToLower());
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    returnJson["entities"] = rdr["ENTITIES_IDS"] as string;
+                    returnJson["intents"][0]["intent"] = rdr["INTENT_ID"] as string;
+                    returnJson["intent_score"] = rdr["INTENT_SCORE"] as string;
+                    returnJson["test_driveWhere"] = rdr["CAR_AREA"] as string;
+                    returnJson["car_priceWhere"] = rdr["CAR_PRICEWHERE"] as string;
+                    returnJson["car_option"] = rdr["car_option"] as string;
+                }
+            }
+            return returnJson;
+        }
+
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Query Analysis
@@ -2058,5 +2120,42 @@ namespace Bot_Application1.DB
             }
             return recommendList;
         }
+
+
+        public int SelectUserQueryErrorMessageCheck(string userID)
+        {
+            SqlDataReader rdr = null;
+            int result = 0;
+            //userID = arg.Replace("'", "''");
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText += " SELECT TOP 1 A.CHATBOT_COMMENT_CODE ";
+                cmd.CommandText += " FROM ( ";
+                cmd.CommandText += " 	SELECT  ";
+                cmd.CommandText += " 		SID, ";
+                cmd.CommandText += " 		CASE  CHATBOT_COMMENT_CODE  ";
+                cmd.CommandText += " 			WHEN 'SEARCH' THEN '1' ";
+                cmd.CommandText += " 			WHEN 'ERROR' THEN '1' ";
+                cmd.CommandText += " 			ELSE '0' ";
+                cmd.CommandText += " 		END CHATBOT_COMMENT_CODE ";
+                cmd.CommandText += " 	FROM TBL_HISTORY_QUERY WHERE USER_NUMBER = '"+ userID + "'  ";
+                cmd.CommandText += " ) A ";
+                cmd.CommandText += " ORDER BY A.SID DESC ";
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    result = Convert.ToInt32(rdr["CHATBOT_COMMENT_CODE"]);
+                }
+            }
+            return result;
+        }
+
+
     }
 }

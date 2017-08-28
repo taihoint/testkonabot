@@ -20,6 +20,8 @@ using System.IO;
 using BasicMultiDialogBot.Dialogs;
 using System.Text;
 using System.Web;
+using System.Configuration;
+using System.Web.Configuration;
 
 namespace Bot_Application1
 {
@@ -48,6 +50,15 @@ namespace Bot_Application1
 
         public static int rotCnt = 0;
 
+        public static Configuration rootWebConfig = WebConfigurationManager.OpenWebConfiguration("/testkonabot");
+        const string redirectEventPageURLstr = "redirectPageURL";
+        const string domainURLstr = "domainURL";
+        const string luisURLstr = "luisURL";
+        string eventURL  = rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURLstr].ToString();
+        string domainURL = rootWebConfig.ConnectionStrings.ConnectionStrings[domainURLstr].ToString();
+        public static string luisURL = rootWebConfig.ConnectionStrings.ConnectionStrings[luisURLstr].ToString();
+
+
         public virtual async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
             newUserID = activity.Conversation.Id;
@@ -63,6 +74,8 @@ namespace Bot_Application1
             if (activity.Type == ActivityTypes.ConversationUpdate && activity.MembersAdded.Any(m => m.Id == activity.Recipient.Id))
             {
 
+                HistoryLog("WELCOME MESSAGE START START START ");
+                
                 //WeatherInfo weatherInfo = await GetWeatherInfo();
                 //Debug.WriteLine("weatherInfo :  " + weatherInfo.list[0].weather[0].description);
                 //Debug.WriteLine("weatherInfo : " + string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.min, 1)));
@@ -71,7 +84,7 @@ namespace Bot_Application1
                 //HistoryLog("weatherInfo : " + string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.min, 1)));
                 //HistoryLog("weatherInfo : " + string.Format("{0}°С", Math.Round(weatherInfo.list[0].temp.max, 1)));
 
-                
+
 
                 DateTime startTime = DateTime.Now;
 
@@ -222,7 +235,7 @@ namespace Bot_Application1
             {
                 //TEST FACEBOOK
                 //activity.ChannelId = "facebook";
-
+                Debug.WriteLine("eventURL : " + eventURL);
                 HistoryLog("[logic start] ==>> userID :: ["+ activity.Conversation.Id + "]" );
 
                 JObject Luis = new JObject();
@@ -368,7 +381,9 @@ namespace Bot_Application1
                         trimNM = trimNM.Replace("1.6 ", "");
                         trimNM = trimNM.Replace("터보 ", "");
                         trimNM = trimNM.Replace("오토 ", "");
-                        Debug.WriteLine("URL : " + "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg");
+                        //trimNM = trimNM.Replace("7단 ", "");
+                        //trimNM = trimNM.Replace("DCT ", "");
+                        Debug.WriteLine("URL : " + domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg");
 
                         if (activity.ChannelId != "facebook")
                         {
@@ -380,8 +395,8 @@ namespace Bot_Application1
                                 //CarExColorList[td].trimColorNm,
                                 "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                 "",
-                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)//,
-                                //new CardImage(url: HttpUtility.UrlEncode("https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg").Replace("+", "%20")), "turn", CarExColorList[td].trimColorCd)//,
+                                new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)//,
+                                //new CardImage(url: HttpUtility.UrlEncode(domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg").Replace("+", "%20")), "turn", CarExColorList[td].trimColorCd)//,
                             );
                         }
                         else
@@ -389,7 +404,7 @@ namespace Bot_Application1
                             Debug.WriteLine("외장 색상 FACEBOOK");
                             HistoryLog("외장 색상 FACEBOOK");
 
-                            string exImgUrl = "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
+                            string exImgUrl = domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
 
                             HistoryLog("URL : " + HttpUtility.UrlEncode(exImgUrl).Replace("+", "%20"));
                             
@@ -399,8 +414,8 @@ namespace Bot_Application1
                                 //CarExColorList[td].trimColorNm,
                                 "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                 "",
-                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)//,
-                                //new CardImage(url: HttpUtility.UrlEncode("https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg").Replace("+", "%20")), "turn", CarExColorList[td].trimColorCd)//,
+                                new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)//,
+                                //new CardImage(url: HttpUtility.UrlEncode(domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg").Replace("+", "%20")), "turn", CarExColorList[td].trimColorCd)//,
                                 //new CardImage(url: HttpUtility.UrlEncode(exImgUrl).Replace("+", "%20")), "turn", CarExColorList[td].trimColorCd)//,
                             );
                         }
@@ -476,6 +491,8 @@ namespace Bot_Application1
                         trimNM = trimNM.Replace("1.6 ", "");
                         trimNM = trimNM.Replace("터보 ", "");
                         trimNM = trimNM.Replace("오토 ", "");
+                        //trimNM = trimNM.Replace("7단 ", "");
+                        //trimNM = trimNM.Replace("DCT ", "");
 
                         if (trimNM.Equals("애시드 옐로우"))
                         {
@@ -493,8 +510,8 @@ namespace Bot_Application1
                             "추가 금액 : " + string.Format("{0}", CarInColorList[td].inColorPrice.ToString("n0")) + "원",
                             "",
                             //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\interior\\" + CarInColorList[td].internalColorCd + ".jpg"),
-                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "img", "")//,
-                                                                                                                                                                     //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "", "")
+                            new CardImage(url: domainURL+"/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "img", "")//,
+                                                                                                                                                                     //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: domainURL+"/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "", "")
                         );
                     }
 
@@ -567,6 +584,8 @@ namespace Bot_Application1
                         trimNM = trimNM.Replace("1.6 ", "");
                         trimNM = trimNM.Replace("터보 ", "");
                         trimNM = trimNM.Replace("오토 ", "");
+                        //trimNM = trimNM.Replace("7단 ", "");
+                        //trimNM = trimNM.Replace("DCT ", "");
 
                         //HistoryLog("CarOptionList[td].optNm : " + CarOptionList[td].optNm);
 
@@ -581,8 +600,8 @@ namespace Bot_Application1
                             "추가 금액 : " + string.Format("{0}", CarOptionList[td].optPrice.ToString("n0")) + "원",
                             "",
                             //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\option\\" + translateInfo.data.translations[0].translatedText + ".jpg"),
-                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + translateInfo.data.translations[0].translatedText.Replace(" ", "_") + ".jpg"), "img", "")
-                        //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: "https://bottest.hyundai.com/assets/images/price/option/" + translateInfo.data.translations[0].translatedText.Replace(" ", "_") + ".jpg"), "", "")
+                            new CardImage(url: domainURL+"/assets/images/price/option/" + translateInfo.data.translations[0].translatedText.Replace(" ", "_") + ".jpg"), "img", "")
+                        //new CardAction(ActionTypes.OpenUrl, "견적 바로가기", value: domainURL+"/assets/images/price/option/" + translateInfo.data.translations[0].translatedText.Replace(" ", "_") + ".jpg"), "", "")
                         );
                     }
 
@@ -638,6 +657,8 @@ namespace Bot_Application1
                     trimNM = trimNM.Replace("1.6 ", "");
                     trimNM = trimNM.Replace("터보 ", "");
                     trimNM = trimNM.Replace("오토 ", "");
+                    //trimNM = trimNM.Replace("7단 ", "");
+                    //trimNM = trimNM.Replace("DCT ", "");
 
 
                     Activity reply_ment = activity.CreateReply();
@@ -662,7 +683,7 @@ namespace Bot_Application1
                         "",
                         "",
                         //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\trim\\" + color.Replace(" ", "") + ".jpg"),
-                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                        new CardImage(url: domainURL+"/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
                         new CardAction(ActionTypes.ImBack, "외장색상", value: orgMent + " 트림 외장색상"),
                         new CardAction(ActionTypes.ImBack, "내장색상", value: orgMent + " 트림 내장색상"),
                         new CardAction(ActionTypes.ImBack, "옵션보기", value: orgMent + " 트림 옵션보기"),
@@ -905,43 +926,43 @@ namespace Bot_Application1
 
                                     if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_1))
                                     {
-                                        main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "@";
+                                        main_color_view += domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "@";
                                         main_color_view_nm += RecommendList[i].MAIN_COLOR_VIEW_NM1 + "@";
                                     };
 
                                     if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_2))
                                     {
-                                        main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_2 + "/00001.jpg" + "@";
+                                        main_color_view += domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_2 + "/00001.jpg" + "@";
                                         main_color_view_nm += RecommendList[i].MAIN_COLOR_VIEW_NM2 + "@";
                                     };
 
                                     if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_3))
                                     {
-                                        main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_3 + "/00001.jpg" + "@";
+                                        main_color_view += domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_3 + "/00001.jpg" + "@";
                                         main_color_view_nm += RecommendList[i].MAIN_COLOR_VIEW_NM3 + "@";
                                     };
 
                                     if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_4))
                                     {
-                                        main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_4 + "/00001.jpg" + "@";
+                                        main_color_view += domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_4 + "/00001.jpg" + "@";
                                         main_color_view_nm += RecommendList[i].MAIN_COLOR_VIEW_NM4 + "@";
                                     };
 
                                     if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_5))
                                     {
-                                        main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_5 + "/00001.jpg" + "@";
+                                        main_color_view += domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_5 + "/00001.jpg" + "@";
                                         main_color_view_nm += RecommendList[i].MAIN_COLOR_VIEW_NM5 + "@";
                                     };
 
                                     if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_6))
                                     {
-                                        main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_6 + "/00001.jpg" + "@";
+                                        main_color_view += domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_6 + "/00001.jpg" + "@";
                                         main_color_view_nm += RecommendList[i].MAIN_COLOR_VIEW_NM6 + "@";
                                     };
 
                                     if (!string.IsNullOrEmpty(RecommendList[i].MAIN_COLOR_VIEW_7))
                                     {
-                                        main_color_view += "https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_7 + "/00001.jpg";
+                                        main_color_view += domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_7 + "/00001.jpg";
                                         main_color_view_nm += RecommendList[i].MAIN_COLOR_VIEW_NM7 + "@";
                                     };
 
@@ -955,7 +976,7 @@ namespace Bot_Application1
                                     GetHeroCard_button(
                                     "trim",
                                     RecommendList[i].TRIM_DETAIL + "|" + "가격: " + RecommendList[i].TRIM_DETAIL_PRICE + "|" +
-                                    //"https://bottest.hyundai.com/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "|" +
+                                    //domainURL+"/assets/images/price/360/" + RecommendList[i].MAIN_COLOR_VIEW_1 + "/00001.jpg" + "|" +
                                     main_color_view + "|" +
                                     RecommendList[i].OPTION_1_IMG_URL + "|" +
                                     RecommendList[i].OPTION_1 + "|" +
@@ -970,7 +991,7 @@ namespace Bot_Application1
                                     main_color_view_nm
                                     ,
                                     "고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
-                                    new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "코나 추천!"),
+                                    new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "나에게 맞는 모델을 추천해줘"),
                                     new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
                                     )
                                     );
@@ -1105,7 +1126,7 @@ namespace Bot_Application1
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     // 한글 , 영어 질문 cash table 체크
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //한글 쿼리 없을경우
+                    //등록된 쿼리 없을경우
                     if (db.SelectKoreanCashCheck(orgKRMent).Length == 0)
                     {
 
@@ -1117,6 +1138,7 @@ namespace Bot_Application1
                                 orgMent = orgMent.Replace(Regex.Split(orgMent, " ")[n], chgMsg);
                             }
                         }
+
 
 
                         orgKRMent1 = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣-\s]", "", RegexOptions.Singleline);
@@ -1177,6 +1199,7 @@ namespace Bot_Application1
                         else
                         {
                             //translateInfo = await getTranslate(orgMent);
+                            Debug.WriteLine("111111111111111111111111111111");
                             Debug.WriteLine("!!!!!!!!!!!!!! : " + translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"));
 
                             for (int n = 0; n < Regex.Split(orgMent, " ").Length; n++)
@@ -1202,7 +1225,17 @@ namespace Bot_Application1
                             luisID = 0;
                             // Try to find dialogue from log history first before checking LUIS
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            
+
+                            //if (string.IsNullOrEmpty(orgENGMent))
+                            //{
+                            //    Luis = db.SelectQueryAnalysisKor(orgKRMent);
+                            //}
+                            //else
+                            //{
+                            //    Luis = db.SelectQueryAnalysis(orgENGMent);
+                            //}
+
+
                             Luis = db.SelectQueryAnalysis(orgENGMent);
                             entitiesStr = (string)Luis["entities"];
 
@@ -1232,9 +1265,18 @@ namespace Bot_Application1
                         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         
 
-                        orgENGMent = db.SelectKoreanCashCheck(orgKRMent);
+                        orgENGMent = db.SelectKoreanCashCheck1(orgKRMent);
 
-                        Luis = db.SelectQueryAnalysis(orgENGMent);
+                        if (string.IsNullOrEmpty(orgENGMent))
+                        {
+                            Luis = db.SelectQueryAnalysisKor(orgKRMent);
+                        }
+                        else
+                        {
+                            Luis = db.SelectQueryAnalysis(orgENGMent);
+                        }
+
+                        //Luis = db.SelectQueryAnalysis(orgENGMent);
                         entitiesStr = (string)Luis["entities"];
 
                         testDriveWhereStr = (string)Luis["test_driveWhere"];
@@ -1376,6 +1418,13 @@ namespace Bot_Application1
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                             // 시승 로직
                             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            var entitiesStrOld = "";
+                            if (entitiesStr.Equals("branch info.near"))
+                            {
+                                entitiesStrOld = "branch info.near";
+                                entitiesStr = "branch info.color-specific";
+                            }
+
                             if ((gubunVal.Equals("Test drive") )
                                 && entitiesStr != "test drive" && !entitiesStr.Contains("reservation") && !entitiesStr.Contains("near")
                                 && k < 1 )
@@ -1399,34 +1448,39 @@ namespace Bot_Application1
                                 //현재위치사용승인
                                 if (entitiesStr.Contains("current location"))
                                 {
-                                    if (!orgMent.Contains(':'))
+                                    if(activity.ChannelId == "facebook")
                                     {
-                                        //첫번쨰 메세지 출력 x
-                                        response = Request.CreateResponse(HttpStatusCode.OK);
-                                        return response;
+                                        testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
                                     }
                                     else
-                                    {                                        
-                                        //위도경도에 따른 값 출력
-                                        try
+                                    {
+                                        if (!orgMent.Contains(':'))
                                         {
-                                            string regionStr = "";
-                                            string location = orgMent;
-                                            //location = location.Replace("current location=current location,query=current location:", "");
-                                            //테스트용
-                                            //string location = "129.0929788:35.2686635";
-                                            string[] location_result = location.Split(':');
-                                            regionStr = db.LocationValue(location_result[1], location_result[2]);
-
-                                            testDriveWhereStr = "test drive center region=" + regionStr + ",current location=current location,query=Approve your current location";
+                                            //첫번쨰 메세지 출력 x
+                                            response = Request.CreateResponse(HttpStatusCode.OK);
+                                            return response;
                                         }
-                                        catch
+                                        else
                                         {
-                                            testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
-                                        }
+                                            //위도경도에 따른 값 출력
+                                            try
+                                            {
+                                                string regionStr = "";
+                                                string location = orgMent;
+                                                //location = location.Replace("current location=current location,query=current location:", "");
+                                                //테스트용
+                                                //string location = "129.0929788:35.2686635";
+                                                string[] location_result = location.Split(':');
+                                                regionStr = db.LocationValue(location_result[1], location_result[2]);
 
+                                                testDriveWhereStr = "test drive center region=" + regionStr + ",current location=current location,query=Approve your current location";
+                                            }
+                                            catch
+                                            {
+                                                testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
+                                            }
+                                        }
                                     }
-                                        
                                 }
 
                                 List<TestDriveList> SelectTestDriveList = db.SelectTestDriveList(testDriveWhereStr);
@@ -1479,6 +1533,11 @@ namespace Bot_Application1
                                             break;
                                     }
 
+                                    if (entitiesStrOld.Equals("branch info.near"))
+                                    {
+                                        entitiesStr = entitiesStrOld;
+                                    }
+                                    
                                     List<TestDriveListInit> SelectTestDriveListInit = db.SelectTestDriveListInit(testDriveWhereStr);
 
                                     if (SelectTestDriveListInit[0].dlgGubun == "1") {
@@ -1504,7 +1563,7 @@ namespace Bot_Application1
                                                 //CarColorListDialog[td].dlgXrclCtyNM,
                                                 SelectTestDriveListInit[td].dlgStr1,
                                                 SelectTestDriveListInit[td].dlgStr3 + "개 매장에 전시",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveListInit[td].dlgStr2.Replace(" ", "%20") + ".jpg"),
+                                                new CardImage(url: domainURL+"/assets/images/price/exterior/" + SelectTestDriveListInit[td].dlgStr2.Replace(" ", "%20") + ".jpg"),
                                                 //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
                                                 new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveListInit[td].dlgStr1 + " 컬러가 있는 매장"), "", "")
                                                 );
@@ -1517,7 +1576,7 @@ namespace Bot_Application1
                                                 //CarColorListDialog[td].dlgXrclCtyNM,
                                                 SelectTestDriveListInit[td].dlgStr1,
                                                 SelectTestDriveListInit[td].dlgStr3 + "개 매장에 전시",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveListInit[td].dlgStr2 + ".jpg"),
+                                                new CardImage(url: domainURL+"/assets/images/price/exterior/" + SelectTestDriveListInit[td].dlgStr2 + ".jpg"),
                                                 //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
                                                 new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveListInit[td].dlgStr1 + " 컬러가 있는 매장"), "turn", SelectTestDriveListInit[td].dlgStr2)
                                                 );
@@ -1598,7 +1657,7 @@ namespace Bot_Application1
                                             //CarColorListDialog[td].dlgXrclCtyNM,
                                             SelectTestDriveList[td].dlgStr1,
                                             SelectTestDriveList[td].dlgStr3 + "개 매장에 전시",
-                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2.Replace(" ", "%20") + ".jpg"),
+                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2.Replace(" ", "%20") + ".jpg"),
                                             //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
                                             new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장"), "", "")
                                             );
@@ -1611,7 +1670,7 @@ namespace Bot_Application1
                                             //CarColorListDialog[td].dlgXrclCtyNM,
                                             SelectTestDriveList[td].dlgStr1,
                                             SelectTestDriveList[td].dlgStr3 + "개 매장에 전시",
-                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2 + ".jpg"),
+                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr2 + ".jpg"),
                                             //new CardAction(ActionTypes.ImBack, "전시 차량 보기", value: CarColorListDialog[td].dlgXrclCtyNM + " 컬러가 있는 매장을 알려줘"))
                                             new CardAction(ActionTypes.ImBack, "전시 매장 보기", value: SelectTestDriveList[td].dlgStr1 + " 컬러가 있는 매장"), "turn", SelectTestDriveList[td].dlgStr2)
                                             );
@@ -1642,8 +1701,8 @@ namespace Bot_Application1
                                                 SelectTestDriveList[td].dlgStr1 + " 시승센터",
                                                 "TEL." + SelectTestDriveList[td].dlgStr3,
                                                 "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
-                                                //new CardImage(url: "https:///bottest.hyundai.com/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
-                                                new CardImage(url: "https://bottest.hyundai.com/map/" + SelectTestDriveList[td].dlgStr4 + "%2C" + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                                //new CardImage(url: "https:///bot.hyundai.com/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
+                                                new CardImage(url: domainURL+"/map/" + SelectTestDriveList[td].dlgStr4 + "%2C" + SelectTestDriveList[td].dlgStr5 + ".png"),
                                                 SelectTestDriveList[td].dlgStr4,
                                                 SelectTestDriveList[td].dlgStr5));
                                             }
@@ -1654,8 +1713,8 @@ namespace Bot_Application1
                                                 SelectTestDriveList[td].dlgStr1 + " 시승센터",
                                                 "TEL." + SelectTestDriveList[td].dlgStr3,
                                                 "(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
-                                                //new CardImage(url: "https:///bottest.hyundai.com/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
-                                                new CardImage(url: "https://bottest.hyundai.com/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                                //new CardImage(url: "https:///bot.hyundai.com/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
+                                                new CardImage(url: domainURL+"/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
                                                 SelectTestDriveList[td].dlgStr4,
                                                 SelectTestDriveList[td].dlgStr5));
                                             }
@@ -1665,8 +1724,8 @@ namespace Bot_Application1
                                             //SelectTestDriveList[td].dlgStr1 + " 시승센터",
                                             //"TEL." + SelectTestDriveList[td].dlgStr3,
                                             //"(연중무휴)10-16시까지 예약 가능" + " " + SelectTestDriveList[td].dlgStr2,
-                                            ////new CardImage(url: "https:///bottest.hyundai.com/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
-                                            //new CardImage(url: "https://bottest.hyundai.com/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                            ////new CardImage(url: "https:///bot.hyundai.com/map/" + APIExamMapGeocode.ll.lat.ToString() + "," + APIExamMapGeocode.ll.lon.ToString() + ".png"),
+                                            //new CardImage(url: domainURL+"/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
                                             //SelectTestDriveList[td].dlgStr4,
                                             //SelectTestDriveList[td].dlgStr5));
                                         }
@@ -1683,7 +1742,7 @@ namespace Bot_Application1
                                                 SelectTestDriveList[td].dlgStr4,
                                                 SelectTestDriveList[td].dlgStr7,
                                                 "",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8.Replace(" ","%20") + ".jpg"), "", "")
+                                                new CardImage(url: domainURL+"/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8.Replace(" ","%20") + ".jpg"), "", "")
                                                 );
                                             }
                                             else
@@ -1693,7 +1752,7 @@ namespace Bot_Application1
                                                 SelectTestDriveList[td].dlgStr4,
                                                 SelectTestDriveList[td].dlgStr7,
                                                 "",
-                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8 + ".jpg"), "", "")
+                                                new CardImage(url: domainURL+"/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8 + ".jpg"), "", "")
                                                 );
                                             }
 
@@ -1702,7 +1761,7 @@ namespace Bot_Application1
                                             //SelectTestDriveList[td].dlgStr4,
                                             //SelectTestDriveList[td].dlgStr7,
                                             //"",
-                                            //new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8 + ".jpg"), "", "")
+                                            //new CardImage(url: domainURL+"/assets/images/price/exterior/" + SelectTestDriveList[td].dlgStr8 + ".jpg"), "", "")
                                             //);
                                         }
                                     }
@@ -1832,7 +1891,7 @@ namespace Bot_Application1
                                                 SelectTestDriveList[td].dlgStr1,
                                                 "TEL." + SelectTestDriveList[td].dlgStr3,
                                                 SelectTestDriveList[td].dlgStr2,
-                                                new CardImage(url: "https://bottest.hyundai.com/map/" + SelectTestDriveList[td].dlgStr4 + "%2C" + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                                new CardImage(url: domainURL+"/map/" + SelectTestDriveList[td].dlgStr4 + "%2C" + SelectTestDriveList[td].dlgStr5 + ".png"),
                                                 SelectTestDriveList[td].dlgStr4,
                                                 SelectTestDriveList[td].dlgStr5)
                                                 );
@@ -1844,7 +1903,7 @@ namespace Bot_Application1
                                                 SelectTestDriveList[td].dlgStr1,
                                                 "TEL." + SelectTestDriveList[td].dlgStr3,
                                                 SelectTestDriveList[td].dlgStr2,
-                                                new CardImage(url: "https://bottest.hyundai.com/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                                new CardImage(url: domainURL+"/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
                                                 SelectTestDriveList[td].dlgStr4,
                                                 SelectTestDriveList[td].dlgStr5)
                                                 );
@@ -1855,7 +1914,7 @@ namespace Bot_Application1
                                             //SelectTestDriveList[td].dlgStr1,
                                             //"TEL." + SelectTestDriveList[td].dlgStr3,
                                             //SelectTestDriveList[td].dlgStr2,
-                                            //new CardImage(url: "https://bottest.hyundai.com/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
+                                            //new CardImage(url: domainURL+"/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png"),
                                             //SelectTestDriveList[td].dlgStr4,
                                             //SelectTestDriveList[td].dlgStr5)
                                             //);
@@ -1951,22 +2010,27 @@ namespace Bot_Application1
                                                     reply_err.Recipient = activity.From;
                                                     reply_err.Type = "message";
 
-                                                    sorryMessageCnt++;
+                                                    //sorryMessageCnt++;
+                                                    int sorryMessageCheck = db.SelectUserQueryErrorMessageCheck(activity.Conversation.Id);
 
-                                                    if (sorryMessageCnt > 1)
+                                                    //if (sorryMessageCnt > 1)
+                                                    if (sorryMessageCheck == 1)
                                                     {
                                                         reply_err.Attachments = new List<Attachment>();
                                                         reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
+                                                        HistoryLog(" sorryMessageCnt : " + sorryMessageCnt );
                                                         replyToConversation.Attachments.Add(
                                                         GetHeroCard_sorry(
-                                                        SorryMessageList.GetSorryMessage(sorryMessageCnt),
-                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/"))
-                                                        );
+                                                        SorryMessageList.GetSorryMessage(sorryMessageCheck),
+                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL)
+                                                        //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL]))
+                                                        //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL)
+                                                    )
+                                                    );
                                                     }
                                                     else
                                                     {
-                                                        reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCnt);
+                                                        reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCheck);
                                                     }
                                                     
                                                     //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
@@ -2004,29 +2068,31 @@ namespace Bot_Application1
                                                         trimNM = trimNM.Replace("오토 ", "");
                                                         trimNM = trimNM.Replace("오토", "");
                                                         trimNM = trimNM.Replace("터보 ", "");
+                                                        //trimNM = trimNM.Replace("7단 ", "");
+                                                        //trimNM = trimNM.Replace("DCT ", "");
 
 
-                                                        if(activity.ChannelId != "facebook")
+                                                        if (activity.ChannelId != "facebook")
                                                         {
                                                             replyToConversation.Attachments.Add(
                                                             GetHeroCard_info(
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
                                                         else
                                                         {
 
-                                                            string exImgUrl = "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
+                                                            string exImgUrl = domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
 
                                                             replyToConversation.Attachments.Add(
                                                             GetHeroCard_info(
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
 
@@ -2066,21 +2132,27 @@ namespace Bot_Application1
                                                     reply_err.Recipient = activity.From;
                                                     reply_err.Type = "message";
 
-                                                    sorryMessageCnt++;
-                                                    if (sorryMessageCnt > 1)
+                                                    //sorryMessageCnt++;
+                                                    int sorryMessageCheck = db.SelectUserQueryErrorMessageCheck(activity.Conversation.Id);
+
+                                                    //if (sorryMessageCnt > 1)
+                                                    if (sorryMessageCheck == 1)
                                                     {
                                                         reply_err.Attachments = new List<Attachment>();
                                                         reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
+                                                        HistoryLog(" sorryMessageCnt : " + sorryMessageCnt);
                                                         replyToConversation.Attachments.Add(
                                                         GetHeroCard_sorry(
-                                                        SorryMessageList.GetSorryMessage(sorryMessageCnt),
-                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/현대자동차-코나-257306221447719/"))
-                                                        );
+                                                        SorryMessageList.GetSorryMessage(sorryMessageCheck),
+                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL)
+                                                        //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL]))
+                                                        //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL)
+                                                    )
+                                                    );
                                                     }
                                                     else
                                                     {
-                                                        reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCnt);
+                                                        reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCheck);
                                                     }
 
                                                     //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
@@ -2120,6 +2192,8 @@ namespace Bot_Application1
                                                         trimNM = trimNM.Replace("오토 ", "");
                                                         trimNM = trimNM.Replace("오토", "");
                                                         trimNM = trimNM.Replace("터보 ", "");
+                                                        //trimNM = trimNM.Replace("7단 ", "");
+                                                        //trimNM = trimNM.Replace("DCT ", "");
 
 
                                                         if (activity.ChannelId != "facebook")
@@ -2129,20 +2203,20 @@ namespace Bot_Application1
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
                                                         else
                                                         {
 
-                                                            string exImgUrl = "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
+                                                            string exImgUrl = domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
 
                                                             replyToConversation.Attachments.Add(
                                                             GetHeroCard_info(
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
 
@@ -2152,7 +2226,7 @@ namespace Bot_Application1
                                                         //trimNM,
                                                         //"추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                         //"",
-                                                        //new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                        //new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                         //);
                                                     }
                                                 }
@@ -2230,13 +2304,15 @@ namespace Bot_Application1
                                                         trimNM = trimNM.Replace("오토 ", "");
                                                         trimNM = trimNM.Replace("오토", "");
                                                         trimNM = trimNM.Replace("터보 ", "");
+                                                        //trimNM = trimNM.Replace("7단 ", "");
+                                                        //trimNM = trimNM.Replace("DCT ", "");
 
                                                         //replyToConversation.Attachments.Add(
                                                         //GetHeroCard_info(
                                                         //trimNM,
                                                         //"추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                         //"",
-                                                        //new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                        //new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                         //);
 
                                                         if (activity.ChannelId != "facebook")
@@ -2246,20 +2322,20 @@ namespace Bot_Application1
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
                                                         else
                                                         {
 
-                                                            string exImgUrl = "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
+                                                            string exImgUrl = domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
 
                                                             replyToConversation.Attachments.Add(
                                                             GetHeroCard_info(
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
                                                     }
@@ -2289,21 +2365,27 @@ namespace Bot_Application1
                                                     reply_err.Recipient = activity.From;
                                                     reply_err.Type = "message";
 
-                                                    sorryMessageCnt++;
-                                                    if (sorryMessageCnt > 1)
+                                                    //sorryMessageCnt++;
+                                                    int sorryMessageCheck = db.SelectUserQueryErrorMessageCheck(activity.Conversation.Id);
+
+                                                    //if (sorryMessageCnt > 1)
+                                                    if (sorryMessageCheck == 1)
                                                     {
                                                         reply_err.Attachments = new List<Attachment>();
                                                         reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
+                                                        HistoryLog(" sorryMessageCnt : " + sorryMessageCnt);
                                                         replyToConversation.Attachments.Add(
                                                         GetHeroCard_sorry(
-                                                        SorryMessageList.GetSorryMessage(sorryMessageCnt),
-                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/현대자동차-코나-257306221447719/"))
-                                                        );
+                                                        SorryMessageList.GetSorryMessage(sorryMessageCheck),
+                                                        new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL)
+                                                        //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL]))
+                                                        //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL)
+                                                    )
+                                                    );
                                                     }
                                                     else
                                                     {
-                                                        reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCnt);
+                                                        reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCheck);
                                                     }
 
                                                     //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
@@ -2341,13 +2423,15 @@ namespace Bot_Application1
                                                         trimNM = trimNM.Replace("오토 ", "");
                                                         trimNM = trimNM.Replace("오토", "");
                                                         trimNM = trimNM.Replace("터보 ", "");
+                                                        //trimNM = trimNM.Replace("7단 ", "");
+                                                        //trimNM = trimNM.Replace("DCT ", "");
 
                                                         //replyToConversation.Attachments.Add(
                                                         //GetHeroCard_info(
                                                         //trimNM,
                                                         //"추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                         //"",
-                                                        //new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                        //new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                         //);
 
                                                         if (activity.ChannelId != "facebook")
@@ -2357,20 +2441,20 @@ namespace Bot_Application1
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
                                                         else
                                                         {
 
-                                                            string exImgUrl = "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
+                                                            string exImgUrl = domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
 
                                                             replyToConversation.Attachments.Add(
                                                             GetHeroCard_info(
                                                             trimNM,
                                                             "추가 금액 : " + string.Format("{0}", CarExColorList[td].exColorPrice.ToString("n0")) + "원",
                                                             "",
-                                                            new CardImage(url: "https://bottest.hyundai.com/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
+                                                            new CardImage(url: domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "%20") + ".jpg"), "turn", CarExColorList[td].trimColorCd)
                                                             );
                                                         }
 
@@ -2451,13 +2535,15 @@ namespace Bot_Application1
                                                     trimNM = trimNM.Replace("오토 ", "");
                                                     trimNM = trimNM.Replace("오토", "");
                                                     trimNM = trimNM.Replace("터보 ", "");
+                                                    //trimNM = trimNM.Replace("7단 ", "");
+                                                    //trimNM = trimNM.Replace("DCT ", "");
 
                                                     replyToConversation.Attachments.Add(
                                                     GetHeroCard_info(
                                                     trimNM,
                                                     "추가 금액 : " + string.Format("{0}", CarInColorList[td].inColorPrice.ToString("n0")) + "원",
                                                     "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "img", "")
+                                                    new CardImage(url: domainURL+"/assets/images/price/interior/" + CarInColorList[td].internalColorCd + ".jpg"), "img", "")
                                                     );
                                                 }
                                             }
@@ -2506,6 +2592,8 @@ namespace Bot_Application1
                                                 trimNM = trimNM.Replace("오토 ", "");
                                                 trimNM = trimNM.Replace("오토", "");
                                                 trimNM = trimNM.Replace("터보 ", "");
+                                                //trimNM = trimNM.Replace("7단 ", "");
+                                                //trimNM = trimNM.Replace("DCT ", "");
 
                                                 if (!CarPriceList[i].saleCD.Contains("X"))
                                                 {
@@ -2522,7 +2610,7 @@ namespace Bot_Application1
                                                                 trimNM.Replace(" 1.6", ""),
                                                                 "",
                                                                 "",
-                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                                new CardImage(url: domainURL+"/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
                                                                 new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 트림 외장색상"), "", "")
                                                             );
                                                         }
@@ -2535,7 +2623,7 @@ namespace Bot_Application1
                                                                 trimNM,
                                                                 "",
                                                                 "",
-                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                                new CardImage(url: domainURL+"/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
                                                                 new CardAction(ActionTypes.ImBack, "내장색상", value: trimNM.Replace(" 1.6", "") + " 트림 내장색상"), "", "")
                                                             );
                                                         }
@@ -2548,7 +2636,7 @@ namespace Bot_Application1
                                                                 trimNM.Replace(" 1.6", ""),
                                                                 "",
                                                                 "",
-                                                                new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                                new CardImage(url: domainURL+"/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
                                                                 new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 트림 외장색상"), "", "")
                                                             );
                                                         }
@@ -2625,7 +2713,7 @@ namespace Bot_Application1
                                                     carOptionList[td].optNm,
                                                     "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
                                                     "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "img", "")
+                                                    new CardImage(url: domainURL+"/assets/images/price/option/" + (translateInfo.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "img", "")
                                                     );
                                                 }
                                             }
@@ -2694,7 +2782,7 @@ namespace Bot_Application1
                                                     carOptionList[td].optNm,
                                                     "추가 금액 : " + string.Format("{0}", carOptionList[td].optPrice.ToString("n0")) + "원",
                                                     "",
-                                                    new CardImage(url: "https://bottest.hyundai.com/assets/images/price/option/" + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "img", "")
+                                                    new CardImage(url: domainURL+"/assets/images/price/option/" + (translateInfo1.data.translations[0].translatedText).Replace(" ", "_") + ".jpg"), "img", "")
                                                     );
                                                 }
                                             }
@@ -2824,6 +2912,8 @@ namespace Bot_Application1
                                                     trimNM = trimNM.Replace("오토 ", "");
                                                     trimNM = trimNM.Replace("오토", "");
                                                     trimNM = trimNM.Replace("터보 ", "");
+                                                    //trimNM = trimNM.Replace("7단 ", "");
+                                                    //trimNM = trimNM.Replace("DCT ", "");
 
                                                     if (!CarTrimList[td].saleCD.Contains("XX"))
                                                     {
@@ -2835,7 +2925,7 @@ namespace Bot_Application1
                                                         trimNM,
                                                         string.Format("{0}", CarTrimList[td].salePrice.ToString("n0")) + "원",
                                                         "",
-                                                        new CardImage(url: "https://bottest.hyundai.com/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                                                        new CardImage(url: domainURL+"/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
                                                         new CardAction(ActionTypes.ImBack, "트림 자세히 보기", value: trimNM + " 트림"), "", "")
                                                         );
                                                     }
@@ -2892,8 +2982,8 @@ namespace Bot_Application1
                                     mediaTitle_FB = new List<string>();
                                     for (int i = 0; i < card.Count; i++)
                                     {
-                                        Debug.WriteLine(card[i].dlgId +"@@"+ card[i].cardId);
-                                        HistoryLog(card[i].dlgId + "@@" + card[i].cardId);
+                                        //Debug.WriteLine(card[i].dlgId +"@@"+ card[i].cardId);
+                                        //HistoryLog(card[i].dlgId + "@@" + card[i].cardId);
                                         List<ButtonList> btn = new List<ButtonList>();
                                         if (activity.ChannelId == "facebook")
                                         {
@@ -2925,8 +3015,8 @@ namespace Bot_Application1
                                         Attachment[] plAttachment = new Attachment[card.Count];
 
                                         
-                                        Debug.WriteLine("media1.Count : " + media1.Count);
-                                        HistoryLog("media1.Count : " + media1.Count);
+                                       // Debug.WriteLine("media1.Count : " + media1.Count);
+                                        //HistoryLog("media1.Count : " + media1.Count);
                                         //media
                                         for (int l = 0; l < media1.Count; l++)
                                         {
@@ -2947,8 +3037,8 @@ namespace Bot_Application1
                                         {
                                             if (btn[m].btnTitle != null)
                                             {
-                                                Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
-                                                HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
+                                                //Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
+                                                //HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
 
                                                 plButton[m] = new CardAction()
                                                 {
@@ -2977,11 +3067,11 @@ namespace Bot_Application1
 
                                         cardImages = new List<CardImage>(plImage);
 
-                                        Debug.WriteLine("cardButtons Count : " + cardButtons.Count());
-                                        HistoryLog("cardButtons Count : " + cardButtons.Count());
+                                        //Debug.WriteLine("cardButtons Count : " + cardButtons.Count());
+                                        //HistoryLog("cardButtons Count : " + cardButtons.Count());
 
-                                        Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
-                                        HistoryLog("CHANNEL ID : " + activity.ChannelId);
+                                        //Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
+                                        //HistoryLog("CHANNEL ID : " + activity.ChannelId);
                                         
                                         
                                         if (activity.ChannelId == "facebook" && cardButtons.Count < 1 && cardImages.Count < 1 && mediaURL1.Count < 1)
@@ -3010,11 +3100,11 @@ namespace Bot_Application1
                                                     Media = mediaURL1
                                                     //Buttons = cardButtons
                                                 };
-                                                HistoryLog("facebook video card - 1");
+                                                //HistoryLog("facebook video card - 1");
                                                 plAttachment[i] = plVideoCard[i].ToAttachment();
-                                                HistoryLog("facebook video card - 2 : " + plAttachment.Count());
+                                                //HistoryLog("facebook video card - 2 : " + plAttachment.Count());
                                                 replyToConversation.Attachments.Add(plAttachment[i]);
-                                                HistoryLog("facebook video card - 3");
+                                                //HistoryLog("facebook video card - 3");
                                                 mediaTitle_FB.Add(card[i].cardTitle);
                                             }
                                             //if (card[i].cardType == "herocard")
@@ -3092,7 +3182,7 @@ namespace Bot_Application1
                                                         Card_value = card[i].cardValue,
                                                         Card_cnt = card.Count
                                                     };
-                                                    HistoryLog("herocard card - 3");
+                                                    //HistoryLog("herocard card - 3");
                                                     plAttachment[i] = plHeroCard[i].ToAttachment();
                                                     replyToConversation.Attachments.Add(plAttachment[i]);
                                                 //}
@@ -3109,7 +3199,7 @@ namespace Bot_Application1
                                     return response;
                                 }
                             }
-                            HistoryLog("before reply : "+ replyToConversation.Attachments.Count());
+                            //HistoryLog("before reply : "+ replyToConversation.Attachments.Count());
 
                             if (replyToConversation.Attachments.Count > 0)
                             {
@@ -3140,7 +3230,7 @@ namespace Bot_Application1
                                     //HistoryLog("2222222222222222222222222" + mediaURL_FB.Count());
                                     for (int i = 0; i < mediaURL_FB.Count(); i++)
                                     {
-                                        HistoryLog("mediaURL_FB[i].ToString() : " + mediaURL_FB[i].Url.ToString());
+                                        //HistoryLog("mediaURL_FB[i].ToString() : " + mediaURL_FB[i].Url.ToString());
                                         
                                         //replyToConversation.ChannelData = getFBFunctionMenu("고효주", "http://www.smartsend.co.kr/assets/videos/tOs7xECRdxY.mp4");
                                         replyToConversation.ChannelData = getFBFunctionMenu("고효주", mediaURL_FB[i].Url.ToString());
@@ -3294,14 +3384,14 @@ namespace Bot_Application1
                                         Attachment[] plAttachment = new Attachment[card.Count];
 
 
-                                        Debug.WriteLine("media1.Count : " + media1.Count);
-                                        HistoryLog("media1.Count : " + media1.Count);
+                                        //Debug.WriteLine("media1.Count : " + media1.Count);
+                                        //HistoryLog("media1.Count : " + media1.Count);
                                         //media
                                         for (int l = 0; l < media1.Count; l++)
                                         {
                                             if (media1[l].mediaUrl != null)
                                             {
-                                                Debug.WriteLine("mediaUrl : " + media1[l].mediaUrl);
+                                                //Debug.WriteLine("mediaUrl : " + media1[l].mediaUrl);
 
                                                 plMediaUrl1[l] = new MediaUrl()
                                                 {
@@ -3316,8 +3406,8 @@ namespace Bot_Application1
                                         {
                                             if (btn[m].btnTitle != null)
                                             {
-                                                Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
-                                                HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
+                                                //Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
+                                                //HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
 
                                                 plButton[m] = new CardAction()
                                                 {
@@ -3334,7 +3424,7 @@ namespace Bot_Application1
                                         for (int l = 0; l < img.Count; l++)
                                         {
 
-                                            HistoryLog("plImageplImageplImage");
+                                            //HistoryLog("plImageplImageplImage");
                                             if (img[l].imgUrl != null)
                                             {
                                                 plImage[l] = new CardImage()
@@ -3347,11 +3437,11 @@ namespace Bot_Application1
 
                                         cardImages = new List<CardImage>(plImage);
 
-                                        Debug.WriteLine("cardButtons Count : " + cardButtons.Count());
-                                        HistoryLog("cardButtons Count : " + cardButtons.Count());
+                                        //Debug.WriteLine("cardButtons Count : " + cardButtons.Count());
+                                        //HistoryLog("cardButtons Count : " + cardButtons.Count());
 
-                                        Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
-                                        HistoryLog("CHANNEL ID : " + activity.ChannelId);
+                                        //Debug.WriteLine("CHANNEL ID : " + activity.ChannelId);
+                                        //HistoryLog("CHANNEL ID : " + activity.ChannelId);
 
 
                                         if (activity.ChannelId == "facebook" && cardButtons.Count < 1 && cardImages.Count < 1 && mediaURL1.Count < 1)
@@ -3380,11 +3470,11 @@ namespace Bot_Application1
                                                     Media = mediaURL1
                                                     //Buttons = cardButtons
                                                 };
-                                                HistoryLog("facebook video card - 1");
+                                                //HistoryLog("facebook video card - 1");
                                                 plAttachment[i] = plVideoCard[i].ToAttachment();
-                                                HistoryLog("facebook video card - 2 : " + plAttachment.Count());
+                                                //HistoryLog("facebook video card - 2 : " + plAttachment.Count());
                                                 replyToConversation.Attachments.Add(plAttachment[i]);
-                                                HistoryLog("facebook video card - 3");
+                                                //HistoryLog("facebook video card - 3");
                                             }
                                             //if (card[i].cardType == "herocard")
                                             else
@@ -3414,7 +3504,7 @@ namespace Bot_Application1
                                                     Card_value = card[i].cardValue,
                                                     Card_cnt = card.Count
                                                 };
-                                                HistoryLog("herocard card - 1");
+                                                //HistoryLog("herocard card - 1");
                                                 plAttachment[i] = plHeroCard[i].ToAttachment();
                                                 replyToConversation.Attachments.Add(plAttachment[i]);
                                             }
@@ -3613,7 +3703,8 @@ namespace Bot_Application1
                 //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/fd9f899c-5a48-499e-9037-9ea589953684?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query;
                 //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/04259452-27fe-4f72-9441-c4100b835c52?subscription-key=7efb093087dd48918b903885b944740c&timezoneOffset=0&verbose=true&q=" + Query; // taiho azure
                 //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/7f77d1c8-011d-402c-acd9-6a7188d368f7?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai luis
-                string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/e6badb41-a62c-4357-af03-4e4c54610afa?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai 운영 luis
+                //string RequestURI = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/e6badb41-a62c-4357-af03-4e4c54610afa?subscription-key=4da995f76bbc4ffb90ce2caf22265f9d&timezoneOffset=0&verbose=true&q=" + Query; // hyundai 운영 luis
+                string RequestURI = luisURL + "&timezoneOffset=0&verbose=true&q=" + Query; // hyundai 운영 luis
 
 
                 //string RequestURI = "https://api.projectoxford.ai/luis/v1/application?id=fd9f899c-5a48-499e-9037-9ea589953684&subscription-key=7efb093087dd48918b903885b944740c&q=" + Query;

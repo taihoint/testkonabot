@@ -6,13 +6,19 @@ using System.Diagnostics;
 using System.Xml;
 using System.Web;
 using Bot_Application1.Models;
+using System.Configuration;
+using System.Web.Configuration;
 
 public class PriceImageList
 {
+    public static Configuration rootWebConfig = WebConfigurationManager.OpenWebConfiguration("/testkonabot");
+    const string domainURLstr = "domainURL";
+    
     public static string GetPriceImage(string model)
     {
-
+        
         String modelURL = "";
+        string domainURL = rootWebConfig.ConnectionStrings.ConnectionStrings[domainURLstr].ToString();
 
         switch (model)
         {
@@ -33,19 +39,19 @@ public class PriceImageList
             //    break;
 
             case "가솔린 2WD":
-                modelURL = "https://bottest.hyundai.com/assets/images/price/engine/gasoline.jpg";
+                modelURL = domainURL +"/assets/images/price/engine/gasoline.jpg";
                 break;
             case "가솔린 4WD":
-                modelURL = "https://bottest.hyundai.com/assets/images/price/engine/gasoline.jpg";
+                modelURL = domainURL + "/assets/images/price/engine/gasoline.jpg";
                 break;
             case "디젤 2WD":
-                modelURL = "https://bottest.hyundai.com/assets/images/price/engine/diesel.jpg";
+                modelURL = domainURL + "/assets/images/price/engine/diesel.jpg";
                 break;
             case "TUIX 가솔린":
-                modelURL = "https://bottest.hyundai.com/assets/images/price/engine/tuix_gasoline.jpg";
+                modelURL = domainURL + "/assets/images/price/engine/tuix_gasoline.jpg";
                 break;
             case "TUIX 디젤":
-                modelURL = "https://bottest.hyundai.com/assets/images/price/engine/tuix_diesel.jpg";
+                modelURL = domainURL + "/assets/images/price/engine/tuix_diesel.jpg";
                 break;
 
             default:

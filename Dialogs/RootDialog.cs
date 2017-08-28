@@ -15,6 +15,8 @@
     using Bot_Application1.Models;
     using System.Text.RegularExpressions;
     using Bot_Application1.DB;
+    using System.Configuration;
+    using System.Web.Configuration;
 
 #pragma warning disable 1998
 
@@ -33,6 +35,10 @@
         private string orgKRMent;
         private string orgENGMent;
 
+        public static Configuration rootWebConfig = WebConfigurationManager.OpenWebConfiguration("/testkonabot");
+        const string redirectEventPageURL = "redirectPageURL";
+        //ConnectionStringSettings eventURL = rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL];
+        string eventURL = rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL].ToString();
 
         public RootDialog(string luis_intent, string entitiesStr, DateTime startTime, string orgKRMent, string orgENGMent)
         {
@@ -295,6 +301,13 @@
             //await context.PostAsync("코나 추천을 시작합니다.");
             // Db
             DbConnect db = new DbConnect();
+
+            Debug.WriteLine("root before sorry count : " + MessagesController.sorryMessageCnt);
+            HistoryLog("root before sorry count : " + MessagesController.sorryMessageCnt);
+
+
+            int sorryMessageCheck = db.SelectUserQueryErrorMessageCheck(context.Activity.Conversation.Id);
+
             ++MessagesController.sorryMessageCnt;
             //var reply_err = context.MakeMessage();
 
@@ -309,22 +322,29 @@
             reply_err.Recipient = context.Activity.From;
             reply_err.Type = "message";
 
-            Debug.WriteLine("sorry count : " + MessagesController.sorryMessageCnt);
+            Debug.WriteLine("root after sorry count : " + MessagesController.sorryMessageCnt);
+            HistoryLog("root after sorry count : " + MessagesController.sorryMessageCnt);
 
-            if (MessagesController.sorryMessageCnt > 1)
+            if (sorryMessageCheck == 1)
+            //if (MessagesController.sorryMessageCnt > 1)
             {
                 reply_err.Attachments = new List<Attachment>();
                 reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
 
+                
+
                 reply_err.Attachments.Add(
                 MessagesController.GetHeroCard_sorry(
-                SorryMessageList.GetSorryMessage(MessagesController.sorryMessageCnt),
-                new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/현대자동차-코나-257306221447719/"))
+                SorryMessageList.GetSorryMessage(sorryMessageCheck),
+                //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/")
+                //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL]))
+                new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL))
+                
                 );
             }
             else
             {
-                reply_err.Text = SorryMessageList.GetSorryMessage(MessagesController.sorryMessageCnt);
+                reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCheck);
             }
 
             //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
