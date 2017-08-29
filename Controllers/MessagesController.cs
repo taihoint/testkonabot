@@ -593,7 +593,7 @@ namespace Bot_Application1
                         translateInfo = await getTranslate(CarOptionList[td].optNm);
 
                         //HistoryLog("CarOptionList[td].optNm : translate " + translateInfo.data.translations[0].translatedText);
-
+                        
                         reply_option.Attachments.Add(
                         GetHeroCard_info(
                             trimNM,
