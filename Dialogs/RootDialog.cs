@@ -140,9 +140,11 @@
 
                         Debug.WriteLine("serarchList : " + serarchList);
                         //description
-
+                        
                         if (serarchList.display == 1)
                         {
+                            Debug.WriteLine("SERARCH : " + Regex.Replace(serarchList.items[0].title, @"[^<:-:>-<b>-</b>]", "", RegexOptions.Singleline));
+
                             if (serarchList.items[0].title.Contains("코나"))
                             {
                                 //Only One item
@@ -150,11 +152,27 @@
                                 CardImage img = new CardImage();
                                 img.Url = "";
                                 cardImages.Add(img);
+
+                                string searchTitle = "";
+                                string searchText = "";
+
+                                searchTitle = serarchList.items[0].title;
+                                searchText = serarchList.items[0].description;
+
+                                
+
+                                if(context.Activity.ChannelId == "facebook")
+                                {
+                                    searchTitle = Regex.Replace(searchTitle, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline).Replace("\n", "").Replace("<:", "").Replace(":>", "");
+                                    searchText = Regex.Replace(searchText, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline).Replace("\n", "").Replace("<:", "").Replace(":>", "");
+                                }
+                                
+
                                 LinkHeroCard card = new LinkHeroCard()
                                 {
-                                    Title = serarchList.items[0].title,
+                                    Title = searchTitle,
                                     Subtitle = null,
-                                    Text = serarchList.items[0].description,
+                                    Text = searchText,
                                     Images = cardImages,
                                     Buttons = null,
                                     Link = Regex.Replace( serarchList.items[0].link,"amp;", "")
@@ -167,10 +185,27 @@
                         }
                         else
                         {
+                            //string test = "[낭중지추]금호타이어, <b>현대</b>차 <b>코나</b>行 \n 초대장 :> 못받은 <: 사연";
+                            //Debug.WriteLine("SERARCH : " + Regex.Replace(test, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline));
+                            //Debug.WriteLine("SERARCH : " + Regex.Replace(test, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline));
+                            //Debug.WriteLine("SERARCH : " + Regex.Replace(test, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline).Replace("\n","").Replace("<:","").Replace(":>", ""));
+
                             reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
                             reply.Attachments = new List<Attachment>();
                             for (int i = 0; i < serarchList.display; i++)
                             {
+                                string searchTitle = "";
+                                string searchText = "";
+
+                                searchTitle = serarchList.items[i].title;
+                                searchText = serarchList.items[i].description;
+
+                                if (context.Activity.ChannelId == "facebook")
+                                {
+                                    searchTitle = Regex.Replace(searchTitle, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline).Replace("\n", "").Replace("<:", "").Replace(":>", "");
+                                    searchText = Regex.Replace(searchText, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline).Replace("\n", "").Replace("<:", "").Replace(":>", "");
+                                }
+
                                 if (serarchList.items[i].title.Contains("코나"))
                                 {
                                     List<CardImage> cardImages = new List<CardImage>();
@@ -179,9 +214,9 @@
                                     cardImages.Add(img);
                                     LinkHeroCard card = new LinkHeroCard()
                                     {
-                                        Title = serarchList.items[i].title,
+                                        Title = searchTitle,
                                         Subtitle = null,
-                                        Text = serarchList.items[i].description,
+                                        Text = searchText,
                                         Images = cardImages,
                                         Buttons = null,
                                         Link = Regex.Replace(serarchList.items[i].link, "amp;", "")
