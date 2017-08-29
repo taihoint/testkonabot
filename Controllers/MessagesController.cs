@@ -22,6 +22,7 @@ using System.Text;
 using System.Web;
 using System.Configuration;
 using System.Web.Configuration;
+using Microsoft.Bot.Builder.ConnectorEx;
 
 namespace Bot_Application1
 {
@@ -236,7 +237,7 @@ namespace Bot_Application1
                 //TEST FACEBOOK
                 //activity.ChannelId = "facebook";
                 Debug.WriteLine("eventURL : " + eventURL);
-                HistoryLog("[logic start] ==>> userID :: ["+ activity.Conversation.Id + "]" );
+                HistoryLog("[logic start] ==>> userID :: [" + activity.Conversation.Id + "]");
 
                 JObject Luis = new JObject();
                 string entitiesStr = "";
@@ -269,7 +270,7 @@ namespace Bot_Application1
                 long unixTime = ((DateTimeOffset)startTime).ToUnixTimeSeconds();
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
                 orgMent = activity.Text;
-
+                
                 string bannedAnswer = "";
 
                 bannedAnswer = db.SelectBannedWordAnswerMsg(orgMent);
@@ -744,34 +745,11 @@ namespace Bot_Application1
                     // 추천
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     if(activity.ChannelId != "facebook")
-                    { 
-                        string[] recommendQueryArray = {    "30대여성에게가장추천하는색상이있나요","가족을위한차량추천","나에게맞는모델을추천해줘","나한테맞는차량을추천해줘","내라이프스타일로추천해줘","네가추천한번해줘","니가추천한번해줘","대리점좀추천해줘",
-                        "라이스트일별추천","라이프스타일추천","라이프스타일추천해줘","라이프스타일로추천해줄수있냐","라이프스타일로추천해줄수있어","라이프스타일로추천해줘","라이프스타일차량추천","라이프스타일로추천","라이프스타일별차량추천",
-                        "라이프스타일별추천","라이프스타일별vehicle추천","라이프스타일에맞는차를추천","라이프스타일에맞는차를추천해줘","마이라이프스타일로추천해줘","모델추천","본인에게적합한구동방식추천","본인에게적합한엔진추천",
-                        "본인에게적합한옵션추천","본인에게적합한컬러추천","본인에게적합한트림추천","싼거좀추천해조","아니면가장30대여성에게가장추천하는색상이있나요 ","주말여행코스를추천해줘","주말캠핑족을위한코나추천","주말캠핑족을위한kona추천",
-                        "차추천","차량추천","차량추천좀","차량추천해줘","차량을추천해주세요","차량을추천해줄래","최적의옵션추천","추천","추천색상알려줘","추천영맨","추천좀해봐","추천좀해줘","추천트림","추천해주세요",
-                        "추천해줄래","추천해줘","출퇴근차량추천","캠핑을위한추천차량","코나추천","하이프스타일추천해줘","kona추천"   };
-                        int strIndex = -1;
-                        for (int i = 0; i < recommendQueryArray.Length; i++)
-                        {
-                            if (recommendQueryArray[i].Equals(orgKRMent))
-                            {
-                                strIndex = 1;
-                            }
-                            else
-                            {
-                                strIndex = -1;
-                            }
+                    {
+                        //초기 추천 멘트 확인
+                        translateInfo = await getTranslate(orgMent);
+                        int strIndex = db.SelectedRecommendCheck(1, orgKRMent, translateInfo.data.translations[0].translatedText);
 
-                            if (strIndex >= 0)
-                            {
-                                Debug.WriteLine(strIndex + " recommendQuery : " + recommendQueryArray[i].ToString());
-                                break;
-                            }
-
-                        }
-
-                        
                         StateClient sc = activity.GetStateClient();
                         Debug.WriteLine("activity.ChannelId : " + activity.ChannelId);
                         BotData userData = sc.BotState.GetPrivateConversationData(activity.ChannelId, activity.Conversation.Id, activity.From.Id);
@@ -785,14 +763,14 @@ namespace Bot_Application1
                         replyToConversation.Attachments = new List<Attachment>();
                         replyToConversation.AttachmentLayout = AttachmentLayoutTypes.Carousel;
 
-                        if (strIndex >= 0 || recommendState > 0)
+                        if (strIndex > 0 || recommendState > 0)
                         {
                             bool convRecommendPass = true;
                             bool recommendEnd = false;
                             StringBuilder strReplyMessage = new StringBuilder();
 
                             //orgMent = Regex.Replace(orgMent, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
-
+                            
                             switch (recommendState)
                             {
                                 case 0:
@@ -801,7 +779,9 @@ namespace Bot_Application1
                                     userData.SetProperty<int>("recommendState", 1);
                                     break;
                                 case 1:
-                                    if (orgKRMent.Contains("출퇴근") || orgKRMent.Contains("출근") || orgKRMent.Contains("퇴근") || orgKRMent.Contains("통학") || orgKRMent.Contains("주말") || orgKRMent.Contains("레저"))
+                                    //조건1 추천 멘트 확인
+                                    strIndex = db.SelectedRecommendCheck(2, orgKRMent, translateInfo.data.translations[0].translatedText);
+                                    if (strIndex > 0)
                                     {
                                         //strReplyMessage.Append($"가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?");
                                         replyToConversation.Text = "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?";
@@ -820,9 +800,12 @@ namespace Bot_Application1
                                         userData.SetProperty<int>("recommendState", 3);
                                         userData.SetProperty<String>("usage", orgMent);
                                     }
+                                    
                                     break;
                                 case 2:
-                                    if (orgKRMent.Contains("가성비") || orgKRMent.Contains("안전성") || orgKRMent.Contains("고급사양"))
+                                    //조건2 추천 멘트 확인
+                                    strIndex = db.SelectedRecommendCheck(3, orgKRMent, translateInfo.data.translations[0].translatedText);
+                                    if (strIndex > 0)
                                     {
                                         //strReplyMessage.Append($"Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?");
                                         replyToConversation.Text = "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?";
@@ -841,9 +824,10 @@ namespace Bot_Application1
                                         userData.SetProperty<int>("recommendState", 5);
                                         userData.SetProperty<String>("importance", orgMent);
                                     }
+                                    
                                     break;
                                 case 3:
-                                    if (orgKRMent.Contains("예") || orgKRMent.Contains("네") || orgKRMent.Contains("엉") || orgKRMent.Contains("어") || orgKRMent.Contains("ㅇㅇ"))
+                                    if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
                                     {
                                         //strReplyMessage.Append($"가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?");
                                         replyToConversation.Text = "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?";
@@ -859,7 +843,9 @@ namespace Bot_Application1
                                     }
                                     break;
                                 case 4:
-                                    if (orgKRMent.Contains("남자") || orgKRMent.Contains("여자") || orgKRMent.Contains("남성") || orgKRMent.Contains("여성"))
+                                    //조건3 추천 멘트 확인
+                                    strIndex = db.SelectedRecommendCheck(4, orgKRMent, translateInfo.data.translations[0].translatedText);
+                                    if (strIndex > 0)
                                     {
                                         userData.SetProperty<int>("recommendState", 0);
                                         userData.SetProperty<String>("genderAge", orgMent);
@@ -867,8 +853,6 @@ namespace Bot_Application1
                                     }
                                     else
                                     {
-                                        //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                        //replyToConversation.Text = "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?";
                                         replyToConversation.Attachments.Add(GetHeroCard_button(
                                             "", "",
                                             "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
@@ -880,7 +864,7 @@ namespace Bot_Application1
                                     }
                                     break;
                                 case 5:
-                                    if (orgKRMent.Contains("예") || orgKRMent.Contains("네") || orgKRMent.Contains("엉") || orgKRMent.Contains("어") || orgKRMent.Contains("ㅇㅇ"))
+                                    if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
                                     {
                                         //strReplyMessage.Append($"Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?");
                                         replyToConversation.Text = "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?";
@@ -896,7 +880,7 @@ namespace Bot_Application1
                                     }
                                     break;
                                 case 6:
-                                    if (orgKRMent.Contains("예") || orgKRMent.Contains("네") || orgKRMent.Contains("엉") || orgKRMent.Contains("어") || orgKRMent.Contains("ㅇㅇ"))
+                                    if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
                                     {
                                         recommendEnd = true;
                                         userData.SetProperty<int>("recommendState", 0);
@@ -912,6 +896,20 @@ namespace Bot_Application1
                                     break;
                                 default:
                                     break;
+                            }
+                            DateTime endTime = DateTime.Now;
+                            if (strIndex == 0)
+                            {
+                                if (orgKRMent.Contains("예") || orgKRMent.Contains("네") || orgKRMent.Contains("아니오"))
+                                {
+                                    inserResult = db.insertHistory(activity.Conversation.Id, orgKRMent, "", "recommend", activity.ChannelId, ((endTime - startTime).Milliseconds));
+                                } else
+                                {
+                                    inserResult = db.insertHistory(activity.Conversation.Id, "기타", "", "recommend", activity.ChannelId, ((endTime - startTime).Milliseconds));
+                                }
+                            }else
+                            {
+                                inserResult = db.insertHistory(activity.Conversation.Id, orgMent, "", "recommend", activity.ChannelId, ((endTime - startTime).Milliseconds));
                             }
 
                             if (recommendEnd)
@@ -1028,98 +1026,6 @@ namespace Bot_Application1
                             }
                         }
                     }
-
-                    //if (strIndex >= 0 || recommendChk)
-                    ////if (orgMent.Contains("코나 추천!") || recommendChk)
-                    //{
-                    //    //rotCnt++;
-
-
-                    //    if (orgMent.Contains("남자") || orgMent.ToLower().Contains("man") || orgMent.ToLower().Contains("male"))
-                    //    {
-                    //        orgMent = "남성";
-                    //    }
-                    //    else if (orgMent.Contains("여자") || orgMent.ToLower().Contains("woman") || orgMent.ToLower().Contains("female"))
-                    //    {
-                    //        orgMent = "여성";
-                    //    }
-
-                    //    //bool diffMent = false;
-                    //    List<RecommendList> RecommendAnswer = db.SelectRecommendList();
-                    //    for (var i = 0; i < RecommendAnswer.Count; i++)
-                    //    {
-
-
-                    //        //추천 메뉴에 해당되는 ANSWER
-                    //        if (strIndex >= 0 || recommendChk || orgMent.Contains("다시 선택 하기") || orgMent.Equals("예") || orgMent.Equals("아니오"))
-                    //        //if (strIndex >= 0 || orgMent.Contains("다시 선택 하기") || RecommendAnswer[i].ANSWER_1.Equals(orgMent) || RecommendAnswer[i].ANSWER_2.Equals(orgMent) || RecommendAnswer[i].ANSWER_3.Equals(orgMent) || orgMent.Equals("예") || orgMent.Equals("아니오"))
-                    //        {
-                    //            HistoryLog("orgMent2 ::::::::::::::::::::::::::::::::::::::::::::: " + orgMent);
-                    //            await Conversation.SendAsync(activity, () => new RecommendDialog());
-                    //            recommendChk = true;
-
-                    //            //if (rotCnt == 4)
-                    //            //{
-                    //            //    rotCnt = 0;
-                    //            //    recommendChk = false;
-                    //            //}
-
-                    //            if (RecommendAnswer[i].ANSWER_1 == orgMent)
-                    //            {
-                    //                firstRecommend = orgMent;
-                    //            }
-                    //            if (RecommendAnswer[i].ANSWER_2 == orgMent)
-                    //            {
-                    //                secondRecommend = orgMent;
-                    //            }
-                    //            if (RecommendAnswer[i].ANSWER_3 == orgMent)
-                    //            {
-                    //                thirdRecommend = orgMent;
-                    //                recommendChk = false;
-                    //            }
-
-                    //            if (orgMent.Equals("아니오"))
-                    //            {
-                    //                //if (!string.IsNullOrEmpty(firstRecommend))
-                    //                //{
-                    //                //    firstRecommend = "기타";
-                    //                //}
-                    //                //else if (!string.IsNullOrEmpty(secondRecommend))
-                    //                //{
-                    //                //    secondRecommend = "기타";
-                    //                //}
-                    //                //else if (!string.IsNullOrEmpty(thirdRecommend))
-                    //                //{
-                    //                //    thirdRecommend = "기타";
-                    //                //}
-                    //                //Debug.WriteLine("RecommendRecommendRecommend1 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
-                    //                orgMent = orgMentBefore;
-
-                    //                orgKRMent = Regex.Replace(orgMentBefore, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
-                    //                Debug.WriteLine("orgMentorgMentorgMentorgMentorgMent111 : " + orgKRMent);
-                    //                recommendChk = false;
-                    //                break;
-                    //            } else
-                    //            {   
-                    //                //이전 대화 저장
-                    //                orgMentBefore = orgMent;
-                    //                //Debug.WriteLine("RecommendRecommendRecommend2 : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend);
-                    //                response = Request.CreateResponse(HttpStatusCode.OK);
-                    //                return response;
-                    //            }
-                    //        }
-                    //        //추천 메뉴 이외의 ANSWER
-                    //        else
-                    //        {
-                    //            recommendChk = false;
-                    //            //diffMent = true;
-                    //        }
-
-                    //    }
-                    //    //Debug.WriteLine("RecommendRecommendRecommend : " + firstRecommend + "|" + secondRecommend + "|" + thirdRecommend );
-
-                    //    //inserResult = db.insertHistory(activity.Conversation.Id, activity.Text, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "", activity.ChannelId, ((endTime - startTime).Milliseconds));
-                    //}
 
                     recommendChk = false;
                     Debug.WriteLine(orgMent + "orgMentorgMentorgMentorgMentorgMent22 : " + orgKRMent);
@@ -1868,11 +1774,7 @@ namespace Bot_Application1
 
                                         for (int td = 0; td < SelectTestDriveList.Count; td++)
                                         {
-                                            var urlImg = "https://openapi.naver.com/v1/map/staticmap.bin?clientId=OPCP0Yh0b2IC9r59XaTR&url=http://www.hyundai.com&crs=EPSG:4326&center=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + "&level=12&w=400&h=300&baselayer=default&markers=" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5;
-                                            String fileName = "c:/inetpub/wwwroot/map/" + SelectTestDriveList[td].dlgStr4 + "," + SelectTestDriveList[td].dlgStr5 + ".png";
-
-                                            System.Net.WebClient client = new System.Net.WebClient();
-                                            client.DownloadFile(urlImg, fileName);
+                                            APIExamMapGeocode.getCodeNaver(SelectTestDriveList[td].dlgStr4, SelectTestDriveList[td].dlgStr5);
 
                                             if (SelectTestDriveList[td].dlgStr2.Length > 40)
                                             {

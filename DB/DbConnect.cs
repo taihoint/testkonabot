@@ -2046,8 +2046,8 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "    WHERE   ANSWER_1 = CASE WHEN CHARINDEX('주말', @usage) > 0 OR CHARINDEX('레저', @usage) > 0 OR CHARINDEX('레져', @usage) > 0 THEN '장거리' ";
                 cmd.CommandText += "						ELSE '출퇴근' END ";
                 cmd.CommandText += "    AND     ANSWER_2 = @importance ";
-                cmd.CommandText += "    AND     ANSWER_3 = CASE WHEN CHARINDEX('여성', @genderAge) > 0 OR CHARINDEX('여자', @genderAge) > 0 THEN '여성' ";
-                cmd.CommandText += "                            WHEN CHARINDEX('남성', @genderAge) > 0 OR CHARINDEX('남자', @genderAge) > 0 THEN '남성' ";
+                cmd.CommandText += "    AND     ANSWER_3 = CASE WHEN CHARINDEX('여성', @genderAge) > 0 OR CHARINDEX('여자', @genderAge) > 0 OR CHARINDEX('여', @genderAge) > 0 OR CHARINDEX('female', @genderAge) > 0 OR CHARINDEX('woman', @genderAge) > 0 OR CHARINDEX('women', @genderAge) > 0 OR CHARINDEX('girl', @genderAge) > 0 THEN '여성' ";
+                cmd.CommandText += "                            WHEN CHARINDEX('남성', @genderAge) > 0 OR CHARINDEX('남자', @genderAge) > 0 OR CHARINDEX('남', @genderAge) > 0 OR CHARINDEX('male', @genderAge) > 0 OR CHARINDEX('man', @genderAge) > 0 OR CHARINDEX('men', @genderAge) > 0 OR CHARINDEX('boy', @genderAge) > 0 THEN '남성' ";
                 cmd.CommandText += "                            ELSE '기타' END ";
                 cmd.CommandText += "    UNION ALL ";
                 cmd.CommandText += "    SELECT  RECOMMEND_TITLE, ANSWER_1, ANSWER_2, ANSWER_3, ";
@@ -2121,6 +2121,39 @@ namespace Bot_Application1.DB
             return recommendList;
         }
 
+        public int SelectedRecommendCheck(int type, string kr_query, string eng_query)
+        {
+            SqlDataReader rdr = null;
+            int result = 0;
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText = "sp_selectrecommend";
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@type", type);
+                cmd.Parameters.AddWithValue("@kr_query", kr_query);
+                cmd.Parameters.AddWithValue("@eng_query", eng_query);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                try
+                {
+                    while (rdr.Read())
+                    {
+                        result = Convert.ToInt32(rdr["CNT"]);
+                    }
+                } catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                }
+            }
+            return result;
+        }
 
         public int SelectUserQueryErrorMessageCheck(string userID)
         {
