@@ -212,17 +212,45 @@
                                     CardImage img = new CardImage();
                                     img.Url = "";
                                     cardImages.Add(img);
-                                    LinkHeroCard card = new LinkHeroCard()
+
+                                    List<CardAction> cardButtons = new List<CardAction>();
+                                    CardAction[] plButton = new CardAction[1];
+                                    plButton[0] = new CardAction()
                                     {
-                                        Title = searchTitle,
-                                        Subtitle = null,
-                                        Text = searchText,
-                                        Images = cardImages,
-                                        Buttons = null,
-                                        Link = Regex.Replace(serarchList.items[i].link, "amp;", "")
+                                        Value = Regex.Replace(serarchList.items[i].link, "amp;", ""),
+                                        Type = "openUrl",
+                                        Title = "기사 바로가기"
                                     };
-                                    var attachment = card.ToAttachment();
-                                    reply.Attachments.Add(attachment);
+                                    cardButtons = new List<CardAction>(plButton);
+
+                                    if (context.Activity.ChannelId == "facebook")
+                                    {
+                                        LinkHeroCard card = new LinkHeroCard()
+                                        {
+                                            Title = searchTitle,
+                                            Subtitle = null,
+                                            Text = searchText,
+                                            Images = cardImages,
+                                            Buttons = cardButtons,
+                                            Link = null
+                                        };
+                                        var attachment = card.ToAttachment();
+                                        reply.Attachments.Add(attachment);
+                                    }
+                                    else
+                                    {
+                                        LinkHeroCard card = new LinkHeroCard()
+                                        {
+                                            Title = searchTitle,
+                                            Subtitle = null,
+                                            Text = searchText,
+                                            Images = cardImages,
+                                            Buttons = null,
+                                            Link = Regex.Replace(serarchList.items[i].link, "amp;", "")
+                                        };
+                                        var attachment = card.ToAttachment();
+                                        reply.Attachments.Add(attachment);
+                                    }
                                 }
                             }
                         }
