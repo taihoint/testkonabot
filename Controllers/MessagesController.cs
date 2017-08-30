@@ -270,7 +270,27 @@ namespace Bot_Application1
                 long unixTime = ((DateTimeOffset)startTime).ToUnixTimeSeconds();
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
                 orgMent = activity.Text;
-                
+
+                //페이스북 위치 값 저장
+                var facebooklocation = activity.Entities?.Where(t => t.Type == "Place").Select(t => t.GetAs<Place>()).FirstOrDefault();
+                if (facebooklocation != null)
+                {
+                    try
+                    {
+                        var geo = (facebooklocation.Geo as JObject)?.ToObject<GeoCoordinates>();
+                        if (geo != null)
+                        {
+                            HistoryLog("[activity.Text]2 ==>> activity.Text :: location [" + activity.Text + "]");
+                            HistoryLog("[logic start] ==>> userID :: location [" + geo.Longitude + " " + geo.Latitude + "]");
+                            orgMent = "current location:" + geo.Longitude + ":" + geo.Latitude;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        HistoryLog("[logic start] ==>> userID :: location error [" + activity.Conversation.Id + "]");
+                    }
+                }
+
                 string bannedAnswer = "";
 
                 bannedAnswer = db.SelectBannedWordAnswerMsg(orgMent);
@@ -1354,9 +1374,37 @@ namespace Bot_Application1
                                 //현재위치사용승인
                                 if (entitiesStr.Contains("current location"))
                                 {
-                                    if(activity.ChannelId == "facebook")
+                                    if(activity.ChannelId == "facebook" && facebooklocation == null)
                                     {
-                                        testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
+                                        //testDriveWhereStr = "test drive center region=seoul,current location=current location,query=Approve your current location";
+                                        /////////////////////////////////////////////////////////////////////////////////
+                                        //facebook location start
+                                        /////////////////////////////////////////////////////////////////////////////////
+                                        HistoryLog("[location test] conversation id :: [" + activity.Conversation.Id + "] start");
+
+                                        Activity reply_option = activity.CreateReply();
+
+                                        reply_option.ChannelData = new FacebookMessage
+                                        (
+                                            text: "나와 함께 당신의 위치를 공유하십시오.",
+                                            quickReplies: new List<FacebookQuickReply>
+                                            {
+                                            // if content_type is location, title and payload are not used
+                                            // see https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies#fields
+                                            // for more information.
+                                            new FacebookQuickReply(
+                                                contentType: FacebookQuickReply.ContentTypes.Location,
+                                                title: default(string),
+                                                payload: default(string)
+                                            )
+                                            }
+                                        );
+                                        var reply_facebook = await connector.Conversations.SendToConversationAsync(reply_option);
+                                        response = Request.CreateResponse(HttpStatusCode.OK);
+                                        return response;
+                                        /////////////////////////////////////////////////////////////////////////////////
+                                        //facebook location end
+                                        /////////////////////////////////////////////////////////////////////////////////
                                     }
                                     else
                                     {
