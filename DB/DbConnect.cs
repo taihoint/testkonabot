@@ -2043,7 +2043,7 @@ namespace Bot_Application1.DB
                 cmd.CommandText += "			LEFT(MAIN_COLOR_VIEW_6, CHARINDEX('/', MAIN_COLOR_VIEW_6) - 1) AS MAIN_COLOR_VIEW_NM6, ";
                 cmd.CommandText += "			LEFT(MAIN_COLOR_VIEW_7, CHARINDEX('/', MAIN_COLOR_VIEW_7) - 1) AS MAIN_COLOR_VIEW_NM7  ";
                 cmd.CommandText += "    FROM    TBL_RECOMMEND_TRIM ";
-                cmd.CommandText += "    WHERE   ANSWER_1 = CASE WHEN CHARINDEX('주말', @usage) > 0 OR CHARINDEX('레저', @usage) > 0 OR CHARINDEX('레져', @usage) > 0 THEN '장거리' ";
+                cmd.CommandText += "    WHERE   ANSWER_1 = CASE WHEN CHARINDEX('주말', @usage) > 0 OR CHARINDEX('레저', @usage) > 0 OR CHARINDEX('레져', @usage) > 0 OR CHARINDEX('장거리', @usage) > 0 THEN '장거리' ";
                 cmd.CommandText += "						ELSE '출퇴근' END ";
                 cmd.CommandText += "    AND     ANSWER_2 = @importance ";
                 cmd.CommandText += "    AND     ANSWER_3 = CASE WHEN CHARINDEX('여성', @genderAge) > 0 OR CHARINDEX('여자', @genderAge) > 0 OR CHARINDEX('여', @genderAge) > 0 OR CHARINDEX('female', @genderAge) > 0 OR CHARINDEX('woman', @genderAge) > 0 OR CHARINDEX('women', @genderAge) > 0 OR CHARINDEX('girl', @genderAge) > 0 THEN '여성' ";
