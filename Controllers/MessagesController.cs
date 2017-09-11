@@ -2977,14 +2977,18 @@ namespace Bot_Application1
                                 Debug.WriteLine("(LuisDialogID[k].dlgId ====" + (LuisDialogID[k].dlgId));
                                 HistoryLog("(LuisDialogID[k].dlgId ====" + (LuisDialogID[k].dlgId));
 
-
+                                /////////////////////////////////////////////////////////////////
+                                ///// 페이스북 카드 카운트 제한 시작
+                                /////////////////////////////////////////////////////////////////
                                 //List<CardList> card = new List<CardList>();
-                                
-                                //if(activity.ChannelId == "facebook")
+
+                                //if (activity.ChannelId == "facebook")
                                 //{
-                                //    if(db.SelectDialogCardCnt(LuisDialogID[k].dlgId) > pagePerCardCnt)
+
+
+                                //    if (db.SelectDialogCardCnt(LuisDialogID[k].dlgId) > pagePerCardCnt)
                                 //    {
-                                //        if(pageRotationCnt == 1)
+                                //        if (pageRotationCnt == 1)
                                 //        {
                                 //            card = db.SelectDialogCardFB(LuisDialogID[k].dlgId, pagePerCardCnt);
                                 //        }
@@ -2992,21 +2996,24 @@ namespace Bot_Application1
                                 //        {
                                 //            card = db.SelectDialogCardFB(LuisDialogID[k].dlgId, (pagePerCardCnt * pageRotationCnt));
                                 //        }
-                                        
+
                                 //        pageRotationCnt++;
                                 //    }
                                 //    else
                                 //    {
                                 //        card = db.SelectDialogCard(LuisDialogID[k].dlgId);
                                 //    }
-
-
-                                    
                                 //}
                                 //else
                                 //{
                                 //    card = db.SelectDialogCard(LuisDialogID[k].dlgId);
                                 //}
+
+                                /////////////////////////////////////////////////////////////////
+                                ///// 페이스북 카드 카운트 제한 끝
+                                /////////////////////////////////////////////////////////////////
+
+
 
                                 List<CardList> card = db.SelectDialogCard(LuisDialogID[k].dlgId);
 
