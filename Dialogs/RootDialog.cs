@@ -408,6 +408,21 @@
             else
             {
                 reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCheck);
+
+                //reply_err.Attachments = new List<Attachment>();
+                //reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+
+
+
+                //reply_err.Attachments.Add(
+                //MessagesController.GetHeroCard_sorry_noEvent(
+                //SorryMessageList.GetSorryMessage(sorryMessageCheck))
+                ////new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/")
+                ////new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL]))
+                ////new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL))
+
+                //);
+
             }
 
             //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);

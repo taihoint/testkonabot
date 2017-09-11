@@ -51,6 +51,9 @@ namespace Bot_Application1
 
         public static int rotCnt = 0;
 
+        public static int pagePerCardCnt = 9;
+        public static int pageRotationCnt = 1;
+
         public static Configuration rootWebConfig = WebConfigurationManager.OpenWebConfiguration("/testkonabot");
         const string redirectEventPageURLstr = "redirectPageURL";
         const string domainURLstr = "domainURL";
@@ -236,7 +239,7 @@ namespace Bot_Application1
             {
                 //TEST FACEBOOK
                 //activity.ChannelId = "facebook";
-                Debug.WriteLine("eventURL : " + eventURL);
+                //Debug.WriteLine("eventURL : " + eventURL);
                 HistoryLog("[logic start] ==>> userID :: [" + activity.Conversation.Id + "]");
 
                 JObject Luis = new JObject();
@@ -404,7 +407,7 @@ namespace Bot_Application1
                         trimNM = trimNM.Replace("오토 ", "");
                         //trimNM = trimNM.Replace("7단 ", "");
                         //trimNM = trimNM.Replace("DCT ", "");
-                        Debug.WriteLine("URL : " + domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg");
+                        //Debug.WriteLine("URL : " + domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd + ".jpg");
 
                         if (activity.ChannelId != "facebook")
                         {
@@ -427,7 +430,7 @@ namespace Bot_Application1
 
                             string exImgUrl = domainURL+"/assets/images/price/exterior/" + CarExColorList[td].trimColorCd.Replace(" ", "") + ".jpg";
 
-                            HistoryLog("URL : " + HttpUtility.UrlEncode(exImgUrl).Replace("+", "%20"));
+                            //HistoryLog("URL : " + HttpUtility.UrlEncode(exImgUrl).Replace("+", "%20"));
                             
                             reply_exColor.Attachments.Add(
                             GetHeroCard_info(
@@ -705,6 +708,7 @@ namespace Bot_Application1
                         "",
                         //new CardImage(url: "D:\\bob\\01.project\\05.현대자동차 ChatBot\\01.자료\\20170710\\가격 이미지\\가격 이미지\\trim\\" + color.Replace(" ", "") + ".jpg"),
                         new CardImage(url: domainURL+"/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
+                        //new CardAction(ActionTypes.ImBack, "외장색상", value: orgMent + " 트림 외장색상"),
                         new CardAction(ActionTypes.ImBack, "외장색상", value: orgMent + " 트림 외장색상"),
                         new CardAction(ActionTypes.ImBack, "내장색상", value: orgMent + " 트림 내장색상"),
                         new CardAction(ActionTypes.ImBack, "옵션보기", value: orgMent + " 트림 옵션보기"),
@@ -795,7 +799,19 @@ namespace Bot_Application1
                             {
                                 case 0:
                                     //strReplyMessage.Append($"Kona를 주로 어떤 용도로 사용하실 계획이세요?\n\n(예) 출퇴근, 장거리 이동)");
-                                    replyToConversation.Text = "Kona를 주로 어떤 용도로 사용하실 계획이세요?\n\n(예: 출퇴근, 주말레저 이동)";
+                                    //replyToConversation.Text = "Kona를 주로 어떤 용도로 사용하실 계획이세요?\n\n(예: 출퇴근, 주말레저 이동)";
+
+                                    replyToConversation.Attachments.Add(
+                                    GetHeroCard_recommend_1(
+                                        "Kona를 주로 어떤 용도를 사용하실 계획이세요?",
+                                        new CardAction(ActionTypes.ImBack, "출퇴근", value: "출퇴근"),
+                                        new CardAction(ActionTypes.ImBack, "주말레저", value: "주말레저"),
+                                        new CardAction(ActionTypes.ImBack, "세컨카", value: "세컨카"),
+                                        new CardAction(ActionTypes.ImBack, "기타 용도", value: "기타 용도"))
+                                    );
+
+
+
                                     userData.SetProperty<int>("recommendState", 1);
                                     break;
                                 case 1:
@@ -804,22 +820,32 @@ namespace Bot_Application1
                                     if (strIndex > 0)
                                     {
                                         //strReplyMessage.Append($"가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?");
-                                        replyToConversation.Text = "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?";
+                                        //replyToConversation.Text = "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?";
+
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_recommend_1(
+                                            "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?",
+                                            new CardAction(ActionTypes.ImBack, "가성비", value: "가성비"),
+                                            new CardAction(ActionTypes.ImBack, "안전성", value: "안전성"),
+                                            new CardAction(ActionTypes.ImBack, "고급사양", value: "고급사양"),
+                                            new CardAction(ActionTypes.ImBack, "기타", value: "기타"))
+                                        );
+
                                         userData.SetProperty<int>("recommendState", 2);
                                         userData.SetProperty<String>("usage", orgMent);
                                     }
-                                    else
-                                    {
-                                        //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                        replyToConversation.Attachments.Add(GetHeroCard_button(
-                                            "", "",
-                                            "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
-                                            new CardAction(ActionTypes.ImBack, "예", value: "예"),
-                                            new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
-                                            );
-                                        userData.SetProperty<int>("recommendState", 3);
-                                        userData.SetProperty<String>("usage", orgMent);
-                                    }
+                                    //else
+                                    //{
+                                    //    //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
+                                    //    replyToConversation.Attachments.Add(GetHeroCard_button(
+                                    //        "", "",
+                                    //        "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
+                                    //        new CardAction(ActionTypes.ImBack, "예", value: "예"),
+                                    //        new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
+                                    //        );
+                                    //    userData.SetProperty<int>("recommendState", 3);
+                                    //    userData.SetProperty<String>("usage", orgMent);
+                                    //}
                                     
                                     break;
                                 case 2:
@@ -828,29 +854,48 @@ namespace Bot_Application1
                                     if (strIndex > 0)
                                     {
                                         //strReplyMessage.Append($"Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?");
-                                        replyToConversation.Text = "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?";
+                                        //replyToConversation.Text = "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?";
+
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_recommend_2(
+                                            "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?",
+                                            new CardAction(ActionTypes.ImBack, "20~30대 여성", value: "20~30대 여성"),
+                                            new CardAction(ActionTypes.ImBack, "20~30대 남성", value: "20~30대 남성"),
+                                            new CardAction(ActionTypes.ImBack, "40~50대 여성", value: "40~50대 여성"),
+                                            new CardAction(ActionTypes.ImBack, "40~50대 남성", value: "40~50대 남성"),
+                                            new CardAction(ActionTypes.ImBack, "기타", value: "기타"))
+                                        );
+
                                         userData.SetProperty<int>("recommendState", 4);
                                         userData.SetProperty<String>("importance", orgMent);
                                     }
-                                    else
-                                    {
-                                        //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                        replyToConversation.Attachments.Add(GetHeroCard_button(
-                                            "", "",
-                                            "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
-                                            new CardAction(ActionTypes.ImBack, "예", value: "예"),
-                                            new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
-                                            );
-                                        userData.SetProperty<int>("recommendState", 5);
-                                        userData.SetProperty<String>("importance", orgMent);
-                                    }
+                                    //else
+                                    //{
+                                    //    //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
+                                    //    replyToConversation.Attachments.Add(GetHeroCard_button(
+                                    //        "", "",
+                                    //        "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
+                                    //        new CardAction(ActionTypes.ImBack, "예", value: "예"),
+                                    //        new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
+                                    //        );
+                                    //    userData.SetProperty<int>("recommendState", 5);
+                                    //    userData.SetProperty<String>("importance", orgMent);
+                                    //}
                                     
                                     break;
                                 case 3:
                                     if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
                                     {
                                         //strReplyMessage.Append($"가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?");
-                                        replyToConversation.Text = "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?";
+                                        //replyToConversation.Text = "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?";
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_recommend_1(
+                                            "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?",
+                                            new CardAction(ActionTypes.ImBack, "가성비", value: "가성비"),
+                                            new CardAction(ActionTypes.ImBack, "안전성", value: "안전성"),
+                                            new CardAction(ActionTypes.ImBack, "고급사양", value: "고급사양"),
+                                            new CardAction(ActionTypes.ImBack, "기타", value: "기타"))
+                                        );
                                         userData.SetProperty<int>("recommendState", 2);
                                     }
                                     else
@@ -871,23 +916,34 @@ namespace Bot_Application1
                                         userData.SetProperty<String>("genderAge", orgMent);
                                         recommendEnd = true;
                                     }
-                                    else
-                                    {
-                                        replyToConversation.Attachments.Add(GetHeroCard_button(
-                                            "", "",
-                                            "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
-                                            new CardAction(ActionTypes.ImBack, "예", value: "예"),
-                                            new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
-                                            );
-                                        userData.SetProperty<int>("recommendState", 6);
-                                        userData.SetProperty<String>("genderAge", orgMent);
-                                    }
+                                    //else
+                                    //{
+                                    //    replyToConversation.Attachments.Add(GetHeroCard_button(
+                                    //        "", "",
+                                    //        "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
+                                    //        new CardAction(ActionTypes.ImBack, "예", value: "예"),
+                                    //        new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
+                                    //        );
+                                    //    userData.SetProperty<int>("recommendState", 6);
+                                    //    userData.SetProperty<String>("genderAge", orgMent);
+                                    //}
                                     break;
                                 case 5:
                                     if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
                                     {
                                         //strReplyMessage.Append($"Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?");
-                                        replyToConversation.Text = "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?";
+                                        //replyToConversation.Text = "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?";
+
+                                        replyToConversation.Attachments.Add(
+                                        GetHeroCard_recommend_2(
+                                            "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?",
+                                            new CardAction(ActionTypes.ImBack, "20~30대 여성", value: "20~30대 여성"),
+                                            new CardAction(ActionTypes.ImBack, "20~30대 남성", value: "20~30대 남성"),
+                                            new CardAction(ActionTypes.ImBack, "40~50대 여성", value: "40~50대 여성"),
+                                            new CardAction(ActionTypes.ImBack, "40~50대 남성", value: "40~50대 남성"),
+                                            new CardAction(ActionTypes.ImBack, "기타", value: "기타"))
+                                        );
+
                                         userData.SetProperty<int>("recommendState", 4);
                                     }
                                     else
@@ -2562,6 +2618,7 @@ namespace Bot_Application1
                                                                 "",
                                                                 new CardImage(url: domainURL+"/assets/images/price/trim/" + color.Replace(" ", "") + ".jpg"),
                                                                 new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 트림 외장색상"), "", "")
+                                                                //new CardAction(ActionTypes.ImBack, "외장색상", value: trimNM.Replace(" 1.6", "") + " 외장색상"), "", "")
                                                             );
                                                         }
                                                         else if (entitiesStr.Contains("interior"))
@@ -2894,6 +2951,9 @@ namespace Bot_Application1
                             //other
                             else
                             {
+
+                                //activity.ChannelId = "facebook";
+
                                 if (dlg.Count > 0)
                                 {
                                     Debug.WriteLine("dlg[0].dlgMent : [" + dlg[0].dlgMent + "]");
@@ -2916,6 +2976,37 @@ namespace Bot_Application1
 
                                 Debug.WriteLine("(LuisDialogID[k].dlgId ====" + (LuisDialogID[k].dlgId));
                                 HistoryLog("(LuisDialogID[k].dlgId ====" + (LuisDialogID[k].dlgId));
+
+
+                                //List<CardList> card = new List<CardList>();
+                                
+                                //if(activity.ChannelId == "facebook")
+                                //{
+                                //    if(db.SelectDialogCardCnt(LuisDialogID[k].dlgId) > pagePerCardCnt)
+                                //    {
+                                //        if(pageRotationCnt == 1)
+                                //        {
+                                //            card = db.SelectDialogCardFB(LuisDialogID[k].dlgId, pagePerCardCnt);
+                                //        }
+                                //        else if (pageRotationCnt > 1)
+                                //        {
+                                //            card = db.SelectDialogCardFB(LuisDialogID[k].dlgId, (pagePerCardCnt * pageRotationCnt));
+                                //        }
+                                        
+                                //        pageRotationCnt++;
+                                //    }
+                                //    else
+                                //    {
+                                //        card = db.SelectDialogCard(LuisDialogID[k].dlgId);
+                                //    }
+
+
+                                    
+                                //}
+                                //else
+                                //{
+                                //    card = db.SelectDialogCard(LuisDialogID[k].dlgId);
+                                //}
 
                                 List<CardList> card = db.SelectDialogCard(LuisDialogID[k].dlgId);
 
@@ -2941,8 +3032,10 @@ namespace Bot_Application1
                                         }
                                         else
                                         {
-                                            btn = db.SelectBtn(card[i].dlgId, card[i].cardId,"N");
+                                            btn = db.SelectBtn(card[i].dlgId, card[i].cardId, "N");
                                         }
+
+                                        //List<ButtonList> btn = db.SelectBtn(card[i].dlgId, card[i].cardId, "N");
 
                                         List<ImagesList> img = db.SelectImage(card[i].dlgId, card[i].cardId);
                                         List<MediaList> media1 = db.SelectMedia(card[i].dlgId, card[i].cardId);
@@ -2972,7 +3065,7 @@ namespace Bot_Application1
                                         {
                                             if (media1[l].mediaUrl != null)
                                             {
-                                                Debug.WriteLine("mediaUrl : " +  media1[l].mediaUrl);
+                                                //Debug.WriteLine("mediaUrl : " +  media1[l].mediaUrl);
 
                                                 plMediaUrl1[l] = new MediaUrl()
                                                 {
@@ -2981,10 +3074,44 @@ namespace Bot_Application1
                                             }
                                         }
                                         mediaURL1 = new List<MediaUrl>(plMediaUrl1);
-                                        mediaURL_FB.AddRange(plMediaUrl1);
+                                        
+                                        
+                                        //mediaURL_FB.AddRange(plMediaUrl1);
+                                        
+                                        
                                         //button
                                         for (int m = 0; m < btn.Count; m++)
                                         {
+                                            //if(activity.ChannelId == "facebook" && mediaURL1.Count > 0)
+                                            //{
+                                            //    if (btn[m].btnTitle != null)
+                                            //    {
+                                            //        //Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
+                                            //        //HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
+
+                                            //        plButton[m] = new CardAction()
+                                            //        {
+                                            //            Value = card[i].cardValue,
+                                            //            Type = "openUrl",
+                                            //            Title = btn[m].btnTitle
+                                            //        };
+                                            //    }
+                                            //}
+                                            //else
+                                            //{
+                                            //    if (btn[m].btnTitle != null)
+                                            //    {
+                                            //        //Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
+                                            //        //HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
+
+                                            //        plButton[m] = new CardAction()
+                                            //        {
+                                            //            Value = btn[m].btnContext,
+                                            //            Type = btn[m].btnType,
+                                            //            Title = btn[m].btnTitle
+                                            //        };
+                                            //    }
+                                            //}
                                             if (btn[m].btnTitle != null)
                                             {
                                                 //Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
@@ -2999,6 +3126,25 @@ namespace Bot_Application1
                                             }
 
                                         }
+
+                                        if (activity.ChannelId == "facebook" && mediaURL1.Count > 0)
+                                        {
+
+                                            //Debug.WriteLine(" btn[m].btnContext : " + btn[m].btnContext);
+                                            //HistoryLog(" btn[m].btnContext : " + btn[m].btnContext);
+
+                                            plButton = new CardAction[1];
+
+                                                plButton[0] = new CardAction()
+                                                {
+                                                    Value = card[i].cardValue,
+                                                    Type = "openUrl",
+                                                    Title = "영상보기"
+                                                };
+                                            
+                                        }
+
+
                                         cardButtons = new List<CardAction>(plButton);
 
                                         //images
@@ -3041,17 +3187,29 @@ namespace Bot_Application1
                                             if (activity.ChannelId == "facebook" && mediaURL1.Count > 0)
                                             {
                                             
-                                                plVideoCard[i] = new VideoCard()
+                                                //plVideoCard[i] = new VideoCard()
+                                                //{
+                                                //    Title = card[i].cardTitle,
+                                                //    //Text = card[i].cardText,
+                                                //    //Subtitle = card[i].cardTitle,
+                                                //    //Image = plThumnail,
+                                                //    Media = mediaURL1
+                                                //    //Buttons = cardButtons
+                                                //};
+
+                                                plHeroCard[i] = new UserHeroCard()
                                                 {
                                                     Title = card[i].cardTitle,
                                                     //Text = card[i].cardText,
                                                     //Subtitle = card[i].cardTitle,
-                                                    //Image = plThumnail,
-                                                    Media = mediaURL1
-                                                    //Buttons = cardButtons
+                                                    Images = cardImages,
+                                                    //Media = mediaURL1
+                                                    Buttons = cardButtons
                                                 };
+
                                                 //HistoryLog("facebook video card - 1");
-                                                plAttachment[i] = plVideoCard[i].ToAttachment();
+                                                //plAttachment[i] = plVideoCard[i].ToAttachment();
+                                                plAttachment[i] = plHeroCard[i].ToAttachment();
                                                 //HistoryLog("facebook video card - 2 : " + plAttachment.Count());
                                                 replyToConversation.Attachments.Add(plAttachment[i]);
                                                 //HistoryLog("facebook video card - 3");
@@ -3183,7 +3341,7 @@ namespace Bot_Application1
                                         //HistoryLog("mediaURL_FB[i].ToString() : " + mediaURL_FB[i].Url.ToString());
                                         
                                         //replyToConversation.ChannelData = getFBFunctionMenu("고효주", "http://www.smartsend.co.kr/assets/videos/tOs7xECRdxY.mp4");
-                                        replyToConversation.ChannelData = getFBFunctionMenu("고효주", mediaURL_FB[i].Url.ToString());
+                                        replyToConversation.ChannelData = getFBFunctionMenu(mediaTitle_FB[i].ToString(), mediaURL_FB[i].Url.ToString());
                                         await connector.Conversations.SendToConversationAsync(replyToConversation);
 
                                         Activity reply_facebook = activity.CreateReply();
@@ -4031,6 +4189,43 @@ namespace Bot_Application1
             return heroCard.ToAttachment();
         }
 
+
+        internal static Attachment GetHeroCard_sorry_noEvent(string text)
+        {
+            var heroCard = new UserHeroCard
+            {
+
+                Text = text,
+
+            };
+            return heroCard.ToAttachment();
+        }
+
+        internal static Attachment GetHeroCard_recommend_1(string text, CardAction cardAction1, CardAction cardAction2, CardAction cardAction3, CardAction cardAction4)
+        {
+            var heroCard = new UserHeroCard
+            {
+
+                Text = text,
+                Buttons = new List<CardAction>() { cardAction1, cardAction2, cardAction3, cardAction4 },
+
+            };
+            return heroCard.ToAttachment();
+        }
+
+        internal static Attachment GetHeroCard_recommend_2(string text, CardAction cardAction1, CardAction cardAction2, CardAction cardAction3, CardAction cardAction4, CardAction cardAction5)
+        {
+            var heroCard = new UserHeroCard
+            {
+
+                Text = text,
+                Buttons = new List<CardAction>() { cardAction1, cardAction2, cardAction3, cardAction4, cardAction5 },
+
+            };
+            return heroCard.ToAttachment();
+        }
+
+
         public void HistoryLog(String strMsg)
         {
             try
@@ -4069,6 +4264,7 @@ namespace Bot_Application1
             Models.Messenger fbmsg = new Models.Messenger();
             fbmsg.ChannelData = new MessengerChannelData { notification_type = "NO_PUSH", attachment = new MessengerAttachment { payload = new MessengerPayload() } };
             fbmsg.ChannelData.attachment.type = "video";
+            //fbmsg.ChannelData.attachment.type = "web_url";
             fbmsg.ChannelData.attachment.payload.url = paramurl;
             List<MessengerElement> e = new List<MessengerElement>();
             List<MessengerButton> bs = new List<MessengerButton>();

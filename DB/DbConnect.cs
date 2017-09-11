@@ -196,6 +196,86 @@ namespace Bot_Application1.DB
             return dialogCard;
         }
 
+
+        public int SelectDialogCardCnt(int dlgID)
+        {
+            SqlDataReader rdr = null;
+            int cardCnt = 0;
+
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "SELECT COUNT(*) CNT FROM TBL_DLG_CARD WHERE DLG_ID = @dlgID AND USE_YN = 'Y' AND DLG_ID > 999";
+
+                cmd.Parameters.AddWithValue("@dlgID", dlgID);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    cardCnt = Convert.ToInt32(rdr["CNT"]);
+                }
+            }
+            return cardCnt;
+        }
+
+
+
+        public List<CardList> SelectDialogCardFB(int dlgID, int pageCnt)
+        {
+            SqlDataReader rdr = null;
+            List<CardList> dialogCard = new List<CardList>();
+
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText += " SELECT  ";
+                cmd.CommandText += " 	CARD_ID ,DLG_ID, CARD_TYPE, CARD_TITLE, CARD_SUBTITLE, CARD_TEXT, CARD_DIVISION, CARD_VALUE  ";
+                cmd.CommandText += "  FROM TBL_DLG_CARD  ";
+                cmd.CommandText += " WHERE DLG_ID = @dlgID ";
+                cmd.CommandText += "   AND USE_YN = 'Y'  ";
+                cmd.CommandText += "   AND DLG_ID > 999 ";
+                cmd.CommandText += " ORDER BY CARD_ID ";
+                cmd.CommandText += " OFFSET @pageCnt ROWS ";
+                cmd.CommandText += " FETCH NEXT 9 ROWS ONLY ";
+
+                cmd.Parameters.AddWithValue("@dlgID", dlgID);
+                cmd.Parameters.AddWithValue("@pageCnt", pageCnt);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    int cardId = Convert.ToInt32(rdr["CARD_ID"]);
+                    int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
+                    string cardType = rdr["CARD_TYPE"] as string;
+                    string cardText = rdr["CARD_TEXT"] as string;
+                    string cardTitle = rdr["CARD_TITLE"] as string;
+                    string cardSubTitle = rdr["CARD_SUBTITLE"] as string;
+                    string cardDivision = rdr["CARD_DIVISION"] as string;
+                    string cardValue = rdr["CARD_VALUE"] as string;
+
+                    CardList dlgCard = new CardList();
+                    dlgCard.cardId = cardId;
+                    dlgCard.dlgId = dlgId;
+                    dlgCard.cardType = cardType;
+                    dlgCard.cardText = cardText;
+                    dlgCard.cardTitle = cardTitle;
+                    dlgCard.cardSubTitle = cardSubTitle;
+                    dlgCard.cardDivision = cardDivision;
+                    dlgCard.cardValue = cardValue;
+
+                    dialogCard.Add(dlgCard);
+                }
+            }
+            return dialogCard;
+        }
+
+
         public List<ButtonList> SelectBtn(int dlgID, int cardID, string YN)
         {
             SqlDataReader rdr = null;
