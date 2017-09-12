@@ -489,7 +489,7 @@ namespace Bot_Application1.DB
                 cmd.CommandText += " INSERT INTO TBL_HISTORY_QUERY ";
                 cmd.CommandText += " (USER_NUMBER, CUSTOMER_COMMENT_KR, CUSTOMER_COMMENT_EN, CHATBOT_COMMENT_CODE, CHANNEL, RESPONSE_TIME, REG_DATE, ACTIVE_FLAG) ";
                 cmd.CommandText += " VALUES ";
-                cmd.CommandText += " (@userNumber, @customerCommentKR, @customerCommentEN, @chatbotCommentCode, @channel, @responseTime, CONVERT(VARCHAR, DATEADD(Hour, 9, GETDATE()), 101) + ' ' + CONVERT(VARCHAR, DATEADD(Hour, 9, GETDATE()), 24), 0) ";
+                cmd.CommandText += " (@userNumber, @customerCommentKR, @customerCommentEN, @chatbotCommentCode, @channel, @responseTime, CONVERT(VARCHAR,  GETDATE(), 101) + ' ' + CONVERT(VARCHAR,  GETDATE(), 24), 0) ";
 
                 cmd.Parameters.AddWithValue("@userNumber", userNumber);
                 cmd.Parameters.AddWithValue("@customerCommentKR", customerCommentKR);
@@ -2201,6 +2201,8 @@ namespace Bot_Application1.DB
             return recommendList;
         }
 
+
+
         public int SelectedRecommendCheck(int type, string kr_query, string eng_query)
         {
             SqlDataReader rdr = null;
@@ -2234,6 +2236,39 @@ namespace Bot_Application1.DB
             }
             return result;
         }
+
+
+        public int SelectedRecommendMentCheck(string kr_query)
+        {
+            SqlDataReader rdr = null;
+            int result = 0;
+            using (SqlConnection conn = new SqlConnection(connStr.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText = " select count(*) AS CNT from tbl_recommend where type!=1 and  kr_recommend = @kr_query ";
+
+                cmd.Parameters.AddWithValue("@kr_query", kr_query);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                try
+                {
+                    while (rdr.Read())
+                    {
+                        result = Convert.ToInt32(rdr["CNT"]);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                }
+            }
+            return result;
+        }
+
 
         public int SelectUserQueryErrorMessageCheck(string userID)
         {

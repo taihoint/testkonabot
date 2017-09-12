@@ -51,6 +51,8 @@ namespace Bot_Application1
 
         public static int rotCnt = 0;
 
+        public static string recommendBeforeOrgMent = "";
+
         public static int pagePerCardCnt = 9;
         public static int pageRotationCnt = 1;
 
@@ -789,6 +791,7 @@ namespace Bot_Application1
 
                         if (strIndex > 0 || recommendState > 0)
                         {
+                            
                             bool convRecommendPass = true;
                             bool recommendEnd = false;
                             StringBuilder strReplyMessage = new StringBuilder();
@@ -810,7 +813,7 @@ namespace Bot_Application1
                                         new CardAction(ActionTypes.ImBack, "기타 용도", value: "기타 용도"))
                                     );
 
-
+                                    
 
                                     userData.SetProperty<int>("recommendState", 1);
                                     break;
@@ -834,19 +837,27 @@ namespace Bot_Application1
                                         userData.SetProperty<int>("recommendState", 2);
                                         userData.SetProperty<String>("usage", orgMent);
                                     }
-                                    //else
-                                    //{
-                                    //    //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                    //    replyToConversation.Attachments.Add(GetHeroCard_button(
-                                    //        "", "",
-                                    //        "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
-                                    //        new CardAction(ActionTypes.ImBack, "예", value: "예"),
-                                    //        new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
-                                    //        );
-                                    //    userData.SetProperty<int>("recommendState", 3);
-                                    //    userData.SetProperty<String>("usage", orgMent);
-                                    //}
-                                    
+                                    else
+                                    {
+                                        Debug.WriteLine("######### : " + activity.Text);
+
+                                        int checkCnt = db.SelectedRecommendMentCheck(activity.Text);
+                                        if(checkCnt == 0)
+                                        {
+                                            recommendBeforeOrgMent = activity.Text;
+                                        }
+
+                                        //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
+                                        replyToConversation.Attachments.Add(GetHeroCard_button(
+                                            "", "",
+                                            "추천에서 벗어나시겠습니까?",
+                                            new CardAction(ActionTypes.ImBack, "예", value: "예"),
+                                            new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
+                                            );
+                                        userData.SetProperty<int>("recommendState", 3);
+                                        userData.SetProperty<String>("usage", orgMent);
+                                    }
+
                                     break;
                                 case 2:
                                     //조건2 추천 멘트 확인
@@ -869,25 +880,46 @@ namespace Bot_Application1
                                         userData.SetProperty<int>("recommendState", 4);
                                         userData.SetProperty<String>("importance", orgMent);
                                     }
-                                    //else
-                                    //{
-                                    //    //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
-                                    //    replyToConversation.Attachments.Add(GetHeroCard_button(
-                                    //        "", "",
-                                    //        "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
-                                    //        new CardAction(ActionTypes.ImBack, "예", value: "예"),
-                                    //        new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
-                                    //        );
-                                    //    userData.SetProperty<int>("recommendState", 5);
-                                    //    userData.SetProperty<String>("importance", orgMent);
-                                    //}
-                                    
+                                    else
+                                    {
+                                        Debug.WriteLine("######### : " + activity.Text);
+
+                                        int checkCnt = db.SelectedRecommendMentCheck(activity.Text);
+                                        if (checkCnt == 0)
+                                        {
+                                            recommendBeforeOrgMent = activity.Text;
+                                        }
+                                        //strReplyMessage.Append($"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?");
+                                        replyToConversation.Attachments.Add(GetHeroCard_button(
+                                            "", "",
+                                            //"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
+                                            "추천에서 벗어나시겠습니까 ?",
+                                            new CardAction(ActionTypes.ImBack, "예", value: "예"),
+                                            new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
+                                            );
+                                        userData.SetProperty<int>("recommendState", 5);
+                                        userData.SetProperty<String>("importance", orgMent);
+                                    }
+
                                     break;
                                 case 3:
                                     if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
                                     {
                                         //strReplyMessage.Append($"가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?");
                                         //replyToConversation.Text = "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?";
+                                        //replyToConversation.Attachments.Add(
+                                        //GetHeroCard_recommend_1(
+                                        //    "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?",
+                                        //    new CardAction(ActionTypes.ImBack, "가성비", value: "가성비"),
+                                        //    new CardAction(ActionTypes.ImBack, "안전성", value: "안전성"),
+                                        //    new CardAction(ActionTypes.ImBack, "고급사양", value: "고급사양"),
+                                        //    new CardAction(ActionTypes.ImBack, "기타", value: "기타"))
+                                        //);
+                                        userData.SetProperty<int>("recommendState", 0);
+                                    }
+                                    else
+                                    {
+
                                         replyToConversation.Attachments.Add(
                                         GetHeroCard_recommend_1(
                                             "가성비, 안전성, 고급사양 중 어떤 점을 중시하시나요?",
@@ -896,15 +928,12 @@ namespace Bot_Application1
                                             new CardAction(ActionTypes.ImBack, "고급사양", value: "고급사양"),
                                             new CardAction(ActionTypes.ImBack, "기타", value: "기타"))
                                         );
+
                                         userData.SetProperty<int>("recommendState", 2);
-                                    }
-                                    else
-                                    {
-                                        userData.SetProperty<int>("recommendState", 0);
-                                        userData.SetProperty<String>("usage", "");
-                                        userData.SetProperty<String>("importance", "");
-                                        userData.SetProperty<String>("genderAge", "");
-                                        convRecommendPass = false;
+                                        userData.SetProperty<String>("usage", orgMent);
+                                        //userData.SetProperty<String>("importance", "");
+                                        //userData.SetProperty<String>("genderAge", "");
+                                        convRecommendPass = true;
                                     }
                                     break;
                                 case 4:
@@ -916,17 +945,31 @@ namespace Bot_Application1
                                         userData.SetProperty<String>("genderAge", orgMent);
                                         recommendEnd = true;
                                     }
-                                    //else
-                                    //{
-                                    //    replyToConversation.Attachments.Add(GetHeroCard_button(
-                                    //        "", "",
-                                    //        "제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
-                                    //        new CardAction(ActionTypes.ImBack, "예", value: "예"),
-                                    //        new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
-                                    //        );
-                                    //    userData.SetProperty<int>("recommendState", 6);
-                                    //    userData.SetProperty<String>("genderAge", orgMent);
-                                    //}
+                                    else
+                                    {
+                                        Debug.WriteLine("######### : " + activity.Text);
+
+                                        int checkCnt = db.SelectedRecommendMentCheck(activity.Text);
+                                        if (checkCnt == 0)
+                                        {
+                                            recommendBeforeOrgMent = activity.Text;
+                                        }
+                                        replyToConversation.Attachments.Add(GetHeroCard_button(
+                                            "", "",
+                                            //"제가 잘 이해를 못했네요 입력하신 내용이 추천 관련된 내용인가요?",
+                                            "추천에서 벗어나시겠습니까 ?",
+                                            new CardAction(ActionTypes.ImBack, "예", value: "예"),
+                                            new CardAction(ActionTypes.ImBack, "아니오", value: "아니오"))
+                                            );
+                                        userData.SetProperty<int>("recommendState", 6);
+                                        userData.SetProperty<String>("genderAge", orgMent);
+
+                                        //orgMent = recommendBeforeOrgMent;
+                                        //orgKRMent = recommendBeforeOrgMent;
+                                        //convRecommendPass = false;
+                                        
+
+                                    }
                                     break;
                                 case 5:
                                     if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
@@ -934,6 +977,20 @@ namespace Bot_Application1
                                         //strReplyMessage.Append($"Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?");
                                         //replyToConversation.Text = "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?";
 
+                                        //replyToConversation.Attachments.Add(
+                                        //GetHeroCard_recommend_2(
+                                        //    "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?",
+                                        //    new CardAction(ActionTypes.ImBack, "20~30대 여성", value: "20~30대 여성"),
+                                        //    new CardAction(ActionTypes.ImBack, "20~30대 남성", value: "20~30대 남성"),
+                                        //    new CardAction(ActionTypes.ImBack, "40~50대 여성", value: "40~50대 여성"),
+                                        //    new CardAction(ActionTypes.ImBack, "40~50대 남성", value: "40~50대 남성"),
+                                        //    new CardAction(ActionTypes.ImBack, "기타", value: "기타"))
+                                        //);
+
+                                        userData.SetProperty<int>("recommendState", 0);
+                                    }
+                                    else
+                                    {
                                         replyToConversation.Attachments.Add(
                                         GetHeroCard_recommend_2(
                                             "Kona를 이용하실 분의 연령대와 성별이 어떻게 되세요?",
@@ -945,29 +1002,31 @@ namespace Bot_Application1
                                         );
 
                                         userData.SetProperty<int>("recommendState", 4);
-                                    }
-                                    else
-                                    {
-                                        userData.SetProperty<int>("recommendState", 0);
-                                        userData.SetProperty<String>("usage", "");
-                                        userData.SetProperty<String>("importance", "");
-                                        userData.SetProperty<String>("genderAge", "");
-                                        convRecommendPass = false;
+                                        //userData.SetProperty<String>("usage", "");
+                                        userData.SetProperty<String>("importance", orgMent);
+                                        //userData.SetProperty<String>("genderAge", "");
+                                        convRecommendPass = true;
                                     }
                                     break;
                                 case 6:
                                     if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
                                     {
-                                        recommendEnd = true;
+                                        //recommendEnd = true;
                                         userData.SetProperty<int>("recommendState", 0);
+                                        convRecommendPass = false;
+
+                                        orgMent = recommendBeforeOrgMent;
+                                        orgKRMent = recommendBeforeOrgMent;
+
                                     }
                                     else
                                     {
                                         userData.SetProperty<int>("recommendState", 0);
-                                        userData.SetProperty<String>("usage", "");
-                                        userData.SetProperty<String>("importance", "");
-                                        userData.SetProperty<String>("genderAge", "");
-                                        convRecommendPass = false;
+                                        //userData.SetProperty<String>("usage", "");
+                                        //userData.SetProperty<String>("importance", "");
+                                        userData.SetProperty<String>("genderAge", orgMent);
+                                        convRecommendPass = true;
+                                        recommendEnd = true;
                                     }
                                     break;
                                 default:
@@ -976,10 +1035,12 @@ namespace Bot_Application1
                             DateTime endTime = DateTime.Now;
                             if (strIndex == 0)
                             {
-                                if (orgKRMent.Contains("예") || orgKRMent.Contains("네") || orgKRMent.Contains("아니오"))
-                                {
-                                    inserResult = db.insertHistory(activity.Conversation.Id, orgKRMent, "", "recommend", activity.ChannelId, ((endTime - startTime).Milliseconds));
-                                } else
+                                //if (orgKRMent.Contains("예") || orgKRMent.Contains("네") || orgKRMent.Contains("아니오"))
+                                //if (orgKRMent.Contains("예") || orgKRMent.Contains("네"))
+                                //{
+                                //    inserResult = db.insertHistory(activity.Conversation.Id, recommendBeforeOrgMent, "", "recommend", activity.ChannelId, ((endTime - startTime).Milliseconds));
+                                //} else 
+                                if(orgKRMent.Contains("아니오"))
                                 {
                                     inserResult = db.insertHistory(activity.Conversation.Id, "기타", "", "recommend", activity.ChannelId, ((endTime - startTime).Milliseconds));
                                 }
@@ -1043,8 +1104,8 @@ namespace Bot_Application1
                                     main_color_view = main_color_view.TrimEnd('@');
                                     main_color_view_nm = main_color_view_nm.TrimEnd('@');
                                      
-                                    Debug.Write("main_color_view = " + main_color_view);
-                                    Debug.Write("main_color_view_nm = " + main_color_view_nm);
+                                    //Debug.Write("main_color_view = " + main_color_view);
+                                    //Debug.Write("main_color_view_nm = " + main_color_view_nm);
 
                                     replyToConversation.Attachments.Add(
                                     GetHeroCard_button(
@@ -1065,7 +1126,7 @@ namespace Bot_Application1
                                     main_color_view_nm
                                     ,
                                     "고객님께서 선택한 결과에 따라 차량을 추천해 드릴게요",
-                                    new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "나에게 맞는 모델을 추천해줘"),
+                                    new CardAction(ActionTypes.ImBack, "다시 선택 하기", value: "라이프스타일별 차량 추천"),
                                     new CardAction(ActionTypes.ImBack, "차량 추천 결과 보기", value: "차량 추천 결과 보기")
                                     )
                                     );
@@ -1085,10 +1146,18 @@ namespace Bot_Application1
                             sc.BotState.SetPrivateConversationData(activity.ChannelId, activity.Conversation.Id, activity.From.Id, userData);
 
                             //초기 메뉴로 보내기
-                            if (orgKRMent.Contains("아니오") || orgKRMent.Contains("아니") || orgKRMent.Contains("노노") || orgKRMent.ToLower().Contains("no"))
+                            //if (orgKRMent.Contains("아니오") || orgKRMent.Contains("아니") || orgKRMent.Contains("노노") || orgKRMent.ToLower().Contains("no"))
+                            //{
+                            //    orgMent = "앨리스";
+                            //    orgKRMent = "앨리스";
+                            //}
+                            //else 
+                            if (orgKRMent.Contains("예"))
                             {
-                                orgMent = "앨리스";
-                                orgKRMent = "앨리스";
+                                orgMent = recommendBeforeOrgMent;
+                                orgKRMent = recommendBeforeOrgMent;
+                                convRecommendPass = false;
+                                userData.SetProperty<int>("recommendState", 0);
                             }
                             else
                             {
