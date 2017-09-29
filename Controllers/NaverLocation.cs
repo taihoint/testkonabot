@@ -11,7 +11,6 @@ using Bot_Application1.Models;
 
 public class APIExamMapGeocode
 {
-    public static LatLon ll = new LatLon();
 
     public static void getCodeNaver(string v1, string v2)
     {

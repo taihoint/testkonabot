@@ -11,5 +11,6 @@ namespace Bot_Application1.Models
         public string dlgNm;
         public string dlgMent;
         public string dlgLang;
+        public int appId;
     }
 }

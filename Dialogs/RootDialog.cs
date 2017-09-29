@@ -37,7 +37,6 @@
 
         public static Configuration rootWebConfig = WebConfigurationManager.OpenWebConfiguration("/testkonabot");
         const string redirectEventPageURL = "redirectPageURL";
-        //ConnectionStringSettings eventURL = rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL];
         string eventURL = rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL].ToString();
 
         public RootDialog(string luis_intent, string entitiesStr, DateTime startTime, string orgKRMent, string orgENGMent)
@@ -85,46 +84,30 @@
                 messgaeText = message.Text;
                 if(messgaeText.Contains("현대자동차") != true|| messgaeText.Contains("현대 자동차") != true)
                 {
-                    //messgaeText = messgaeText;
                     messgaeText = "현대자동차 " + messgaeText;
                 }
-                //else
-                //{
-                //    messgaeText = "현대자동차 "+message.Text;
-                //}
             }
             else
             {
                 messgaeText = "코나 " + message.Text;
                 if (messgaeText.Contains("현대자동차") != true || messgaeText.Contains("현대 자동차") != true)
                 {
-                    //messgaeText = messgaeText;
                     messgaeText = "현대자동차 " + messgaeText;
                 }
-                //else
-                //{
-                //    messgaeText = "현대자동차 " + messgaeText;
-                //}
             }
 
             if (messgaeText.Contains("코나") == true && (messgaeText.Contains("현대자동차") == true || messgaeText.Contains("현대 자동차") == true))
-            //if (message.Text != "")
             {
-                //context.Call(new SearchDialog(), this.SearchDialogResumeAfter);
-                //string messgaeText = message.Text.Substring(3, message.Text.Length - 3);             
                 var reply = context.MakeMessage();
                 Debug.WriteLine("SERARCH MESSAGE : " + messgaeText);
                 if ((messgaeText != null) && messgaeText.Trim().Length > 0)
                 {
                     //Naver Search API
 
-                    //string url = string.Format("https://translation.googleapis.com/language/translate/v2/?key={0}&q={1}&source=ko&target=en&model=nmt", appId, input);
-                    //string url = string.Format("https://openapi.naver.com/v1/search/{1}.json?query={2}&display=10&start=1&sort=sim", , messgaeText);
-
-                    string url = "https://openapi.naver.com/v1/search/news.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; // JSON result 
-                    //string blogUrl = "https://openapi.naver.com/v1/search/blog.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; // JSON result 
-                    //string cafeUrl = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; // JSON result 
-                    //string url = "https://openapi.naver.com/v1/search/blog.xml?query=" + query; //XML result
+                    string url = "https://openapi.naver.com/v1/search/news.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; //news JSON result 
+                    //string blogUrl = "https://openapi.naver.com/v1/search/blog.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; //search JSON result 
+                    //string cafeUrl = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + messgaeText + "&display=10&start=1&sort=sim"; //cafe JSON result 
+                    //string url = "https://openapi.naver.com/v1/search/blog.xml?query=" + query; //blog XML result
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                     request.Headers.Add("X-Naver-Client-Id", "Y536Z1ZMNv93Oej6TrkF");
                     request.Headers.Add("X-Naver-Client-Secret", "cPHOFK6JYY");
@@ -185,11 +168,6 @@
                         }
                         else
                         {
-                            //string test = "[낭중지추]금호타이어, <b>현대</b>차 <b>코나</b>行 \n 초대장 :> 못받은 <: 사연";
-                            //Debug.WriteLine("SERARCH : " + Regex.Replace(test, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline));
-                            //Debug.WriteLine("SERARCH : " + Regex.Replace(test, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline));
-                            //Debug.WriteLine("SERARCH : " + Regex.Replace(test, @"[<][a-z|A-Z|/](.|)*?[>]", "", RegexOptions.Singleline).Replace("\n","").Replace("<:","").Replace(":>", ""));
-
                             reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
                             reply.Attachments = new List<Attachment>();
                             for (int i = 0; i < serarchList.display; i++)
@@ -262,20 +240,10 @@
                         {
 
                             await this.SendWelcomeMessageAsync(context);
-
-                            //var reply_err = context.MakeMessage();
-
-                            ////Activity reply_err = context.Activity.CreateReply();
-                            //reply_err.Recipient = context.Activity.From;
-                            //reply_err.Type = "message";
-                            ////reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
-                            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
-                            //await context.PostAsync(reply_err);
+                            
                         }
                         else
                         {
-
-                            
 
                             orgKRMent = Regex.Replace(message.Text, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
 
@@ -296,7 +264,8 @@
 
                             orgENGMent = orgENGMent.Replace("&#39;", "'");
 
-                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 1, 'S', "", "", "", "SEARCH");
+                            //int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 1, 'S', "", "", "", "SEARCH", MessagesController.userData.GetProperty<int>("appID"));
+                            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 1, 'S', "", "", "", "SEARCH", MessagesController.chatBotID);
                             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
                             DateTime endTime = DateTime.Now;
@@ -307,7 +276,8 @@
                             Debug.WriteLine("CHANNEL_ID : " + context.Activity.ChannelId);
                             Debug.WriteLine("프로그램 수행시간 : {0}/ms", ((endTime - startTime).Milliseconds));
 
-                            int inserResult = db.insertHistory(context.Activity.Conversation.Id, messgaeText.Replace("코나 ", ""), translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds));
+                            //int inserResult = db.insertHistory(context.Activity.Conversation.Id, messgaeText.Replace("코나 ", ""), translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds), MessagesController.userData.GetProperty<int>("appID"));
+                            int inserResult = db.insertHistory(context.Activity.Conversation.Id, messgaeText.Replace("코나 ", ""), translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds), MessagesController.chatBotID);
                             if (inserResult > 0)
                             {
                                 Debug.WriteLine("HISTORY RESULT SUCCESS");
@@ -361,7 +331,6 @@
 
         private async Task SendWelcomeMessageAsync(IDialogContext context)
         {
-            //await context.PostAsync("코나 추천을 시작합니다.");
             // Db
             DbConnect db = new DbConnect();
 
@@ -369,17 +338,10 @@
             HistoryLog("root before sorry count : " + MessagesController.sorryMessageCnt);
 
 
-            int sorryMessageCheck = db.SelectUserQueryErrorMessageCheck(context.Activity.Conversation.Id);
+            //int sorryMessageCheck = db.SelectUserQueryErrorMessageCheck(context.Activity.Conversation.Id, MessagesController.userData.GetProperty<int>("appID"));
+            int sorryMessageCheck = db.SelectUserQueryErrorMessageCheck(context.Activity.Conversation.Id, MessagesController.chatBotID);
 
             ++MessagesController.sorryMessageCnt;
-            //var reply_err = context.MakeMessage();
-
-            //Activity reply_err = context.Activity.CreateReply();
-            //reply_err.Recipient = context.Activity.From;
-            //reply_err.Type = "message";
-            ////reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt) + "[ '" +gubunVal+ "','" + entitiesStr + "' ]";
-            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
-            //await context.PostAsync(reply_err);
 
             var reply_err = context.MakeMessage();
             reply_err.Recipient = context.Activity.From;
@@ -387,56 +349,8 @@
 
             Debug.WriteLine("root after sorry count : " + MessagesController.sorryMessageCnt);
             HistoryLog("root after sorry count : " + MessagesController.sorryMessageCnt);
-
-            if (sorryMessageCheck == 1)
-            //if (MessagesController.sorryMessageCnt > 1)
-            {
-                reply_err.Attachments = new List<Attachment>();
-                reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
-                
-
-                reply_err.Attachments.Add(
-                MessagesController.GetHeroCard_sorry(
-                SorryMessageList.GetSorryMessage(sorryMessageCheck),
-                //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/")
-                //new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL]))
-                new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL))
-                
-                );
-            }
-            else
-            {
-                reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCheck);
-
-                //reply_err.Attachments = new List<Attachment>();
-                //reply_err.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
-
-
-                //reply_err.Attachments.Add(
-                //MessagesController.GetHeroCard_sorry_noEvent(
-                //SorryMessageList.GetSorryMessage(sorryMessageCheck))
-                ////new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: "https://www.facebook.com/hyundaimotorgroup/")
-                ////new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: rootWebConfig.ConnectionStrings.ConnectionStrings[redirectEventPageURL]))
-                ////new CardAction(ActionTypes.OpenUrl, "코나 챗봇 페이스북 바로가기", value: eventURL))
-
-                //);
-
-            }
-
-            //reply_err.Text = SorryMessageList.GetSorryMessage(++sorryMessageCnt);
+            reply_err.Text = SorryMessageList.GetSorryMessage(sorryMessageCheck);
             await context.PostAsync(reply_err);
-
-            //response = Request.CreateResponse(HttpStatusCode.OK);
-            //return response;
-
-
-
-
-            //Translator translateInfo = await getTranslate(messgaeText.Replace("코나 ", ""));
-
-
 
             orgKRMent = Regex.Replace(beforeMessgaeText, @"[^a-zA-Z0-9ㄱ-힣]", "", RegexOptions.Singleline);
 
@@ -453,12 +367,12 @@
 
             Translator translateInfo = await getTranslate(beforeMessgaeText);
 
-            //orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9가-힣-\s]", "", RegexOptions.Singleline);
             orgENGMent = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9ㄱ-힣-\s-&#39;]", "", RegexOptions.Singleline);
 
             orgENGMent = orgENGMent.Replace("&#39;", "'");
 
-            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 0, 'D', "", "", "", "SEARCH");
+            //int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 0, 'D', "", "", "", "SEARCH", MessagesController.userData.GetProperty<int>("appID"));
+            int dbResult = db.insertUserQuery(orgKRMent, orgENGMent, "", "", "", 0, 'D', "", "", "", "SEARCH", MessagesController.chatBotID);
             Debug.WriteLine("INSERT QUERY RESULT : " + dbResult.ToString());
 
 
@@ -470,7 +384,8 @@
             Debug.WriteLine("CHANNEL_ID : " + context.Activity.ChannelId);
             Debug.WriteLine("프로그램 수행시간 : {0}/ms", ((endTime - startTime).Milliseconds));
 
-            int inserResult = db.insertHistory(context.Activity.Conversation.Id, beforeMessgaeText, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds));
+            //int inserResult = db.insertHistory(context.Activity.Conversation.Id, beforeMessgaeText, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds), MessagesController.userData.GetProperty<int>("appID"));
+            int inserResult = db.insertHistory(context.Activity.Conversation.Id, beforeMessgaeText, translateInfo.data.translations[0].translatedText.Replace("&#39;", "'"), "SEARCH", context.Activity.ChannelId, ((endTime - startTime).Milliseconds), MessagesController.chatBotID);
             if (inserResult > 0)
             {
                 Debug.WriteLine("HISTORY RESULT SUCCESS");
@@ -479,12 +394,6 @@
             {
                 Debug.WriteLine("HISTORY RESULT FAIL");
             }
-
-            //response = Request.CreateResponse(HttpStatusCode.OK);
-            //return response;
-
-
-            //context.Call(new UsageDialog(), this.UsageDialogResumeAfter);            
         }
 
         public void HistoryLog(String strMsg)
@@ -519,63 +428,5 @@
                 Debug.WriteLine(e.Message);
             }
         }
-
-        //private async Task UsageDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
-        //{
-        //    try
-        //    {
-        //        this.usage = await result;
-
-        //        context.Call(new ImDialog(), this.ImDialogResumeAfter);
-        //    }
-        //    catch (TooManyAttemptsException)
-        //    {
-        //        /*await context.PostAsync("I'm sorry, I'm having issues understanding you. Let's try again.");
-
-        //        await this.SendWelcomeMessageAsync(context);*/
-        //    }
-        //}
-
-        //private async Task ImDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
-        //{
-        //    try
-        //    {
-        //        this.importance = await result;
-
-        //        context.Call(new GenderAgeDialog(usage, importance), this.GenderAgeDialogResumeAfter);
-        //    }
-        //    catch (TooManyAttemptsException)
-        //    {
-        //        /*await context.PostAsync("I'm sorry, I'm having issues understanding you. Let's try again.");*/
-        //    }
-
-        //}
-
-        //private async Task GenderAgeDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
-        //{
-        //    try
-        //    {
-        //        this.genderAge = await result;
-
-        //    }
-        //    catch (TooManyAttemptsException)
-        //    {
-        //        /*await context.PostAsync("I'm sorry, I'm having issues understanding you. Let's try again.");
-
-        //        await this.SendWelcomeMessageAsync(context);*/
-        //    }
-        //}
-        //private async Task SearchDialogResumeAfter(IDialogContext context, IAwaitable<string> result)
-        //{
-        //    try
-        //    {               
-
-        //    }
-        //    catch (TooManyAttemptsException)
-        //    {
-
-        //    }       
-        //}
-
     }
 }

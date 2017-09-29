@@ -8,6 +8,7 @@ namespace Bot_Application1.Models
     public class LuisList
     {
         public int dlgId;
+        public int appId;
         //public string intent;
         //public string entities;
     }
